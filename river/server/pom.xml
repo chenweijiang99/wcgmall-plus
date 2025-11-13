@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.river</groupId>
+        <artifactId>wcgmall-api</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>server</artifactId>
+    <description>
+        启动模块
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>admin</artifactId>
+            <version>${package.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>api</artifactId>
+            <version>${package.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>auth</artifactId>
+            <version>${package.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>common</artifactId>
+            <version>${package.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>file</artifactId>
+            <version>${package.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>quartz</artifactId>
+            <version>${package.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>generator</artifactId>
+            <version>${package.version}</version>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,36 @@
+package ${packageName}.service;
+
+import ${packageName}.entity.${className};
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import java.util.List;
+
+/**
+ * ${tableComment} 服务接口
+ */
+public interface ${className}Service extends IService<${className}> {
+    /**
+     * 查询${tableComment}分页列表
+     */
+    IPage<${className}> selectPage(${className} ${classname});
+
+    /**
+     * 查询${tableComment}列表
+     */
+    List<${className}> selectList(${className} ${classname});
+
+    /**
+     * 新增${tableComment}
+     */
+    boolean insert(${className} ${classname});
+
+    /**
+     * 修改${tableComment}
+     */
+    boolean update(${className} ${classname});
+
+    /**
+     * 批量删除${tableComment}
+     */
+    boolean deleteByIds(List<${primaryKey.javaType}> ids);
+}

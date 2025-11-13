@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.BlogMapper">
+
+
+    <select id="userGetNewBlogList" resultType="com.river.entity.Blog">
+        select *
+        from blog
+        where status = 1
+        order by create_time desc limit 6
+    </select>
+    <select id="userGetListPage" resultType="com.river.entity.Blog">
+        select b.* from blog as b
+        left join sys_user as u on b.user_id = u.id
+        <where>
+            b.status = 1
+            <choose>
+                <when test="blogPageDto.searchTitles != null and blogPageDto.searchTitles.length > 0">
+                    <foreach collection="blogPageDto.searchTitles" item="item">
+                        or b.title like concat('%',#{item},'%')
+                    </foreach>
+                </when>
+                <otherwise>
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="blogPageDto.authorNames != null and blogPageDto.authorNames.length > 0">
+                    <foreach collection="blogPageDto.authorNames" item="item">
+                        or u.nickname like concat('%',#{item},'%')
+                    </foreach>
+                </when>
+                <otherwise>
+                </otherwise>
+            </choose>
+
+        </where>
+        order by b.create_time desc
+
+    </select>
+    <select id="getHotBlogWithComment" resultType="com.river.entity.Blog">
+        SELECT
+            b.id as fid,
+            COUNT(c.fid) AS COUNT,
+        b.*
+        FROM blog as b
+            LEFT JOIN comments as c ON c.fid = b.id and c.module = 'blog'
+        WHERE b.status = 1
+        GROUP BY b.id
+        ORDER BY COUNT DESC
+            LIMIT 3
+
+    </select>
+</mapper>

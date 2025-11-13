@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.SysDictDataMapper">
+    <!-- 可以在这里添加自定义的复杂SQL查询 -->
+    <select id="selectDataByDictType" resultType="com.river.entity.SysDictData">
+        select sdd.*
+        from sys_dict_data sdd
+                 left join sys_dict sd on sdd.dict_id = sd.id
+        where sd.type = #{dictType}
+    </select>
+</mapper>

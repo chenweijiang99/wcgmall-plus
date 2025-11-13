@@ -1,0 +1,57 @@
+import request from '@/utils/request'
+
+/**
+ * 获取${tableComment}列表
+ */
+export function list${className}Api(params?: any) {
+    return request({
+        url: '/sys/${classname}/list',
+        method: 'get',
+        params
+    })
+}
+
+/**
+ * 获取${tableComment}详情
+ */
+export function detail${className}Api(id: any) {
+    return request({
+        url: '/sys/${classname}/' + id,
+        method: 'get'
+    })
+}
+
+/**
+ * 添加${tableComment}
+ */
+export function add${className}Api(data: any) {
+    return request({
+        url: '/sys/${classname}/add',
+        method: 'post',
+        data
+    })
+}
+
+/**
+ * 修改${tableComment}
+ */
+export function update${className}Api(data: any) {
+    return request({
+        url: `/sys/${classname}/update`,
+        method: 'put',
+        data
+    })
+}
+
+
+/**
+ * 删除${tableComment}
+ */
+export function delete${className}Api(ids: number[] | number) {
+    return request({
+        url: `/sys/${classname}/delete/` + ids,
+        method: 'delete'
+    })
+}
+
+

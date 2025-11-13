@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.SysMenuMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.river.entity.SysMenu">
+        <id column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="path" property="path"/>
+        <result column="component" property="component"/>
+        <result column="title" property="title"/>
+        <result column="sort" property="sort"/>
+        <result column="icon" property="icon"/>
+        <result column="type" property="type"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="redirect" property="redirect"/>
+        <result column="name" property="name"/>
+        <result column="hidden" property="hidden"/>
+        <result column="perm" property="perm"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, parent_id, path, component, title, sort, icon, type, 
+        created_time, update_time, redirect, name, hidden, perm
+    </sql>
+
+    <!-- 获取用户菜单列表 -->
+    <select id="selectMenusByUserId" resultMap="BaseResultMap">
+        SELECT DISTINCT m.*
+        FROM sys_menu m
+        LEFT JOIN sys_role_menu rm ON m.id = rm.menu_id
+        LEFT JOIN sys_user_role ur ON rm.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+        AND m.type = 'menu'
+        ORDER BY m.sort
+    </select>
+
+    <select id="getPermissionListByUserId" resultType="java.lang.String">
+        select
+            m.perm
+        from sys_menu m
+            left join sys_role_menu rm on m.id = rm.menu_id
+            left join sys_user_role ur on rm.role_id = ur.role_id
+        where ur.user_id = #{userId} and m.type = #{type}
+    </select>
+
+    <select id="getPermissionList" resultType="java.lang.String">
+        select perm from sys_menu where type = #{type}
+    </select>
+
+    <select id="getMenusByUserId" resultType="com.river.entity.SysMenu">
+        select m.* from sys_menu m
+            left join sys_role_menu rm on m.id = rm.menu_id
+            left join sys_user_role ur on rm.role_id = ur.role_id
+                   where ur.user_id = #{userId} and m.type != #{type}
+    </select>
+
+    <select id="selectIds" resultType="java.lang.Integer">
+        select id from sys_menu where parent_id = #{parentId}
+    </select>
+</mapper> 

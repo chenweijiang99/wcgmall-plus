@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.UserWishListMapper">
+    <!-- 可以在这里添加自定义的复杂SQL查询 -->
+    <resultMap id="userWishListVoMap" type="com.river.vo.userWishList.UserWishListVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="productPrice" column="product_price"/>
+        <result property="productImage" column="product_image"/>
+    </resultMap>
+
+    <select id="selectListByUserId" resultMap="userWishListVoMap">
+        select
+        uw.id,
+        uw.user_id,
+        uw.product_id,
+        p.name as product_name,
+        p.price as product_price,
+        p.image as product_image
+        from user_wish_list uw
+        left join product p on uw.product_id = p.id
+        where uw.user_id = #{userId}
+    </select>
+</mapper>

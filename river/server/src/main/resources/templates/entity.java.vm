@@ -1,0 +1,27 @@
+package ${packageName}.entity;
+
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import java.time.LocalDateTime;
+import java.io.Serializable;
+
+@Data
+@TableName("${tableName}")
+@Schema(description = "${tableComment}对象")
+public class ${className} implements Serializable {
+#foreach ($column in $columns)
+
+#if($column.isPk == "1")
+    @TableId(type = IdType.AUTO)
+    @Schema(description = "$column.columnComment")
+    private $column.javaType $column.javaField;
+#else
+    @Schema(description = "$column.columnComment")
+    private $column.javaType $column.javaField;
+#end
+#end
+}

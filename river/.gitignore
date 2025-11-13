@@ -1,0 +1,28 @@
+# Maven #
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse #
+.settings/
+.project
+.classpath
+
+# IntelliJ IDEA #
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code #
+.vscode/
+
+# Logs #
+logs/
+*.log
+
+# Temp #
+*.tmp
+*.temp
+
+server/src/main/resources/application-dev.yml
+server/src/main/resources/application-prod.yml

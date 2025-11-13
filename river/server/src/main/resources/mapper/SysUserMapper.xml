@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.SysUserMapper">
+
+    <resultMap type="com.river.vo.user.SysUserVo" id="SysUserPageResultVoMap">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="status" column="status" />
+        <result property="lastLoginTime" column="last_login_time" />
+        <result property="ip" column="ip" />
+        <result property="ipLocation" column="ip_location" />
+        <result property="nickname" column="nickname" />
+        <result property="avatar" column="avatar" />
+        <result property="mobile" column="mobile" />
+        <result property="email" column="email" />
+        <result property="sex" column="sex" />
+        <result property="loginType" column="login_type" />
+        <result property="createTime" column="create_time" />
+
+        <collection property="roleIds" ofType="int">
+            <result column="roleId"/>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, username, password, create_time, update_time, status,
+        ip, ip_location, os, last_login_time, browser,
+        nickname, avatar, mobile
+    </sql>
+
+    <!-- 根据用户名查询用户信息 -->
+    <select id="selectByUsername" resultType="com.river.entity.SysUser">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_user
+        where username = #{username}
+    </select>
+    <select id="selectByEmail" resultType="com.river.entity.SysUser">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_user
+        where email = #{email}
+    </select>
+    <select id="selectUserPage" resultMap="SysUserPageResultVoMap">
+        select
+            u.id,
+            u.username,
+            u.create_time,
+            u.status,
+            u.last_login_time,
+            u.ip,
+            u.ip_location,
+            u.nickname,
+            u.avatar,
+            u.mobile,
+            u.email,
+            u.sex,
+            u.login_type,
+            sur.role_id as roleId
+        from sys_user u
+            left join sys_user_role sur on u.id = sur.user_id
+        <where>
+            <if test="sysUser.nickname != null and sysUser.nickname != ''">
+                and u.nickname like concat('%', #{sysUser.nickname}, '%')
+            </if>
+            <if test="sysUser.status != null">
+                and u.status = #{sysUser.status}
+            </if>
+            <if test="sysUser.loginType != null and sysUser.loginType != ''">
+                and u.login_type = #{sysUser.loginType}
+            </if>
+        </where>
+    </select>
+
+</mapper>

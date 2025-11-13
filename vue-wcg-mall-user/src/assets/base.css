@@ -1,0 +1,7 @@
+@font-face {
+    font-family: 'Xiaomi';
+    src: url('@/assets/fonts/MiSans.ttf');
+}
+*{
+    font-family: 'Xiaomi';
+}

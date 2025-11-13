@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.GenTableMapper">
+    
+    <select id="selectGenTableList" parameterType="com.river.entity.GenTable" resultType="com.river.entity.GenTable">
+        select table_id, table_name, table_comment, create_time
+        from gen_table
+        <where>
+            <if test="tableName != null and tableName != ''">
+                AND table_name like concat('%', #{tableName}, '%')
+            </if>
+            <if test="offset != null">
+                limit #{offset}, #{pageSize}
+            </if>
+        </where>
+    </select>
+    
+    <select id="selectDbTableList" parameterType="com.river.entity.GenTable" resultType="com.river.entity.GenTable">
+        select table_name, table_comment, create_time, update_time
+        from information_schema.tables
+        where table_schema = (select database())
+        AND table_name NOT LIKE 'gen_%'
+        AND table_name NOT IN (
+            select table_name from gen_table where table_name is not null
+        )
+        <if test="tableName != null and tableName != ''">
+            AND lower(table_name) like concat('%', lower(#{tableName}), '%')
+        </if>
+        Order by create_time desc
+        <if test="offset != null">
+            limit #{offset}, #{pageSize}
+        </if>
+    </select>
+    
+    <select id="selectDbTableCount" parameterType="com.river.entity.GenTable" resultType="int">
+        select count(1)
+        from information_schema.tables
+        where table_schema = (select database())
+        AND table_name NOT LIKE 'gen_%'
+        AND table_name NOT IN (
+            select table_name from gen_table where table_name is not null
+        )
+        <if test="tableName != null and tableName != ''">
+            AND lower(table_name) like concat('%', lower(#{tableName}), '%')
+        </if>
+    </select>
+    
+    <select id="selectDbTableColumns" parameterType="String" resultType="com.river.entity.GenTableColumn">
+        select 
+            column_name,
+            (case when column_key = 'PRI' then column_key else '' end) as column_key,
+            data_type as column_type,
+            column_comment,
+            (case when is_nullable = 'NO' then '1' else '0' end) as is_required,
+            ordinal_position as sort
+        from information_schema.columns
+        where table_schema = (select database())
+        and table_name = #{tableName}
+        Order by ordinal_position
+    </select>
+    
+    <select id="selectGenTableById" parameterType="Long" resultType="com.river.entity.GenTable">
+        select * from gen_table where table_id = #{tableId}
+    </select>
+    
+    <select id="selectGenTableColumns" parameterType="Long" resultType="com.river.entity.GenTableColumn">
+        select * from gen_table_column where table_id = #{tableId} Order by sort
+    </select>
+    
+    <insert id="insertGenTable" parameterType="com.river.entity.GenTable" useGeneratedKeys="true" keyProperty="tableId">
+        insert into gen_table (
+            table_name, table_comment, create_time
+        ) values (
+            #{tableName}, #{tableComment}, now()
+        )
+    </insert>
+    
+    <delete id="deleteGenTableByIds" parameterType="Long">
+        delete from gen_table where table_id in
+        <foreach collection="array" item="tableId" open="(" separator="," close=")">
+            #{tableId}
+        </foreach>
+    </delete>
+    
+    <insert id="insertGenTableColumn" parameterType="com.river.entity.GenTableColumn">
+        insert into gen_table_column (
+            table_id, column_name, column_comment, column_type, java_type,
+            java_field, is_pk, is_required, is_insert, is_edit,
+            is_list, is_query, query_type, html_type, sort
+        ) values (
+            #{tableId}, #{columnName}, #{columnComment}, #{columnType}, #{javaType},
+            #{javaField}, #{isPk}, #{isRequired}, #{isInsert}, #{isEdit},
+            #{isList}, #{isQuery}, #{queryType}, #{htmlType}, #{sort}
+        )
+    </insert>
+    
+    <insert id="insertGenTableBatch">
+        insert into gen_table_column (
+            table_id, column_name, column_comment, column_type, java_type,
+            java_field, is_pk, is_required, is_insert, is_edit,
+            is_list, is_query, query_type, html_type, sort
+        ) values
+        <foreach collection="list" item="item" separator=",">
+        (
+            #{item.tableId}, #{item.columnName}, #{item.columnComment}, #{item.columnType}, #{item.javaType},
+            #{item.javaField}, #{item.isPk}, #{item.isRequired}, #{item.isInsert}, #{item.isEdit},
+            #{item.isList}, #{item.isQuery}, #{item.queryType}, #{item.htmlType}, #{item.sort}
+        )
+        </foreach>
+    </insert>
+    
+    <select id="selectGenTableByName" parameterType="String" resultType="com.river.entity.GenTable">
+        select * from gen_table where table_name = #{tableName}
+    </select>
+    
+    <delete id="deleteGenTableColumns">
+        delete from gen_table_column where column_id in
+        <foreach collection="list" item="columnId" open="(" separator="," close=")">
+            #{columnId}
+        </foreach>
+    </delete>
+    <delete id="deleteGenTableColumnsByTableIds">
+        delete from gen_table_column where table_id in
+        <foreach collection="array" item="tableId" open="(" separator="," close=")">
+            #{tableId}
+        </foreach>
+    </delete>
+
+    <update id="updateGenTableColumns" parameterType="java.util.List">
+        update gen_table_column
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="column_name = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.columnName}
+                </foreach>
+            </trim>
+            <trim prefix="column_comment = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.columnComment}
+                </foreach>
+            </trim>
+            <trim prefix="column_type = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.columnType}
+                </foreach>
+            </trim>
+            <trim prefix="java_type = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.javaType}
+                </foreach>
+            </trim>
+            <trim prefix="java_field = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.javaField}
+                </foreach>
+            </trim>
+            <trim prefix="is_pk = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.isPk}
+                </foreach>
+            </trim>
+            <trim prefix="is_required = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.isRequired}
+                </foreach>
+            </trim>
+            <trim prefix="is_insert = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.isInsert}
+                </foreach>
+            </trim>
+            <trim prefix="is_edit = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.isEdit}
+                </foreach>
+            </trim>
+            <trim prefix="is_list = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.isList}
+                </foreach>
+            </trim>
+            <trim prefix="is_query = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.isQuery}
+                </foreach>
+            </trim>
+            <trim prefix="query_type = case" suffix="end,">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.queryType}
+                </foreach>
+            </trim>
+            <trim prefix="html_type = case" suffix="end">
+                <foreach collection="list" item="item">
+                    when column_id = #{item.columnId} then #{item.htmlType}
+                </foreach>
+            </trim>
+        </trim>
+        where column_id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.columnId}
+        </foreach>
+    </update>
+    
+    <update id="updateGenTable" parameterType="com.river.entity.GenTable">
+        update gen_table
+        set table_comment = #{tableComment},
+            update_time = #{updateTime}
+        where table_id = #{tableId}
+    </update>
+</mapper> 

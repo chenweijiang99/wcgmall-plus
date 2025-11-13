@@ -1,0 +1,340 @@
+<template>
+  <div class="app-container">
+    <!-- 搜索表单 -->
+    <div class="search-wrapper">
+      <el-form :model="queryParams" ref="queryFormRef" inline>
+          #foreach($column in $columns)
+              #if($column.isQuery == "1")
+                <el-form-item label="${column.columnComment}" prop="${column.javaField}">
+                    #if($column.htmlType == "input")
+                      <el-input
+                          v-model="queryParams.${column.javaField}"
+                          placeholder="请输入${column.columnComment}"
+                          clearable
+                          @keyup.enter="handleQuery"
+                      />
+                    #elseif($column.htmlType == "select")
+                      <el-select v-model="queryParams.${column.javaField}" placeholder="请选择${column.columnComment}"
+                                 clearable>
+                        <el-option label="请选择字典生成" value=""/>
+                      </el-select>
+                    #elseif($column.htmlType == "datetime")
+                      <el-date-picker
+                          v-model="queryParams.${column.javaField}"
+                          type="date"
+                          placeholder="选择${column.columnComment}"
+                      />
+                    #end
+                </el-form-item>
+              #end
+          #end
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+    </div>
+    <el-card class="box-card">
+      <!-- 操作工具栏 -->
+      <template #header>
+        <ButtonGroup>
+          <el-button
+              type="primary"
+              plain
+              icon="Plus"
+              @click="handleAdd"
+          >新增
+          </el-button>
+          <el-button
+              type="danger"
+              plain
+              icon="Delete"
+              :disabled="selectedIds.length === 0"
+              @click="handleBatchDelete"
+          >批量删除
+          </el-button>
+        </ButtonGroup>
+      </template>
+
+      <!-- 数据表格 -->
+      <el-table
+          v-loading="loading"
+          :data="dataList"
+          @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="55" align="center"/>
+          #foreach($column in $columns)
+              #if($column.isList == "1")
+                <el-table-column label="${column.columnComment}" align="center" prop="${column.javaField}"/>
+              #end
+          #end
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+          <template #default="scope">
+            <el-button
+                type="primary"
+                link
+                icon="Edit"
+                @click="handleUpdate(scope.row)"
+            >修改
+            </el-button>
+            <el-button
+                type="danger"
+                link
+                icon="Delete"
+                @click="handleDelete(scope.row)"
+            >删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页工具栏 -->
+      <div class="pagination-container">
+        <el-pagination
+                background
+                v-model:current-page="queryParams.pageNum"
+                v-model:page-size="queryParams.pageSize"
+                :page-sizes="[10, 20, 30, 50]"
+                :total="total"
+                layout="total, sizes, prev, pager, next, jumper"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+        />
+      </div>
+
+      <!-- 添加或修改对话框 -->
+      <el-dialog
+          v-model="open"
+          :title="title"
+          width="500px"
+          append-to-body
+      >
+        <el-form
+            ref="formRef"
+            :model="form"
+            :rules="rules"
+            label-width="80px"
+        >
+            #foreach($column in $columns)
+                #if($column.isEdit == "1" && $column.isPk != "1")
+                  <el-form-item label="${column.columnComment}" prop="${column.javaField}">
+                      #if($column.htmlType == "input")
+                        <el-input v-model="form.${column.javaField}" placeholder="请输入${column.columnComment}"/>
+                      #elseif($column.htmlType == "select")
+                        <el-select v-model="form.${column.javaField}" placeholder="请选择${column.columnComment}">
+                          <el-option label="请选择字典生成" value=""/>
+                        </el-select>
+                      #elseif($column.htmlType == "datetime")
+                        <el-date-picker
+                            v-model="form.${column.javaField}"
+                            type="date"
+                            value-format="YYYY-MM-DD"
+                            placeholder="请选择${column.columnComment}"
+                        />
+                      #end
+                  </el-form-item>
+                #end
+            #end
+        </el-form>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button type="primary" @click="submitForm">确 定</el-button>
+            <el-button @click="cancel">取 消</el-button>
+          </div>
+        </template>
+      </el-dialog>
+    </el-card>
+  </div>
+</template>
+
+<script setup lang="ts">
+  import {ElMessage, ElMessageBox} from 'element-plus'
+  import {
+    list${className}Api,
+    detail${className}Api,
+    delete${className}Api,
+    add${className}Api,
+    update${className}Api
+  } from '@/api/${classname}'
+  import ButtonGroup from "@/components/ButtonGroup/index.vue";
+
+  // 遮罩层
+  const loading = ref(false)
+  // 选中数组
+  const selectedIds = ref<any[]>([])
+  // 总条数
+  const total = ref(0)
+  // 表格数据
+  const dataList = ref([])
+  // 弹出层标题
+  const title = ref('')
+  // 是否显示弹出层
+  const open = ref(false)
+  // 查询参数
+  const queryParams = reactive({
+    pageNum: 1,
+    pageSize: 10,
+    #foreach ($column in $columns)
+    #if($column.isQuery == "1")
+    $column.javaField: undefined,
+    #end
+    #end
+  })
+
+  // 表单参数
+  const form = reactive<any>({})
+  // 表单校验
+  const rules = reactive({
+#foreach ($column in $columns)
+  #if($column.isRequired == "1")
+      $column.javaField: [
+      {required: true, message: "$column.columnComment不能为空", trigger: "blur"}
+    ]#if($foreach.count != $columns.size()),#end
+  #end
+#end
+  })
+
+  const queryFormRef = ref()
+  const formRef = ref()
+
+  /** 查询列表 */
+  const getList = async () => {
+    loading.value = true
+    try{
+      const {data} = await list${className}Api(queryParams)
+      dataList.value = data.records
+      total.value = data.total
+    }catch (error) {
+    }
+    loading.value = false
+  }
+
+  /** 取消按钮 */
+  const cancel = () => {
+    open.value = false
+    reset()
+  }
+
+  /** 表单重置 */
+  const reset = () => {
+    Object.assign(form,{
+    #foreach ($column in $columns)
+        #if($column.isEdit == "1")
+        $column.javaField: undefined#if($foreach.count != $columns.size()),#end
+        #end
+    #end
+    });
+    formRef.value?.resetFields()
+  }
+
+  /** 搜索按钮操作 */
+  const handleQuery = async () => {
+    queryParams.pageNum = 1
+    await getList()
+  }
+
+  /** 重置按钮操作 */
+  const resetQuery = async () => {
+    queryFormRef.value?.resetFields()
+    await handleQuery()
+  }
+
+  /** 多选框选中数据 */
+  const handleSelectionChange = (selection: { id: any }[]) => {
+    selectedIds.value = selection.map(item => item.${primaryKey.javaField})
+  }
+
+  /** 新增按钮操作 */
+  const handleAdd = () => {
+    reset()
+    open.value = true
+    title.value = "添加${tableComment}"
+  }
+
+  /** 修改按钮操作 */
+  const handleUpdate =  (row : any) => {
+    reset()
+     detail${className}Api(row.${primaryKey.javaField}).then(response => {
+      Object.assign(form, response.data)
+      open.value = true
+      title.value = "修改${tableComment}"
+    })
+  }
+
+  /** 提交按钮 */
+  const submitForm = async () => {
+    await formRef.value?.validate(async (valid : any) => {
+      if (valid) {
+        try{
+          if (form.${primaryKey.javaField} !== undefined) {
+            await update${className}Api(form)
+            ElMessage.success("修改成功")
+
+          } else {
+            await add${className}Api(form)
+            ElMessage.success("新增成功")
+          }
+          open.value = false
+          getList()
+        }catch (error) {
+        }
+      }
+    })
+  }
+
+  /** 批量删除按钮操作 */
+  const handleBatchDelete = async () => {
+    if (!selectedIds.value.length) {
+      return
+    }
+    ElMessageBox.confirm('是否确认删除"' + selectedIds.value.length + '"条数据项?', "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning"
+    }).then(async () => {
+      try{
+        await delete${className}Api(selectedIds.value)
+        ElMessage.success("删除成功")
+        getList()
+      }catch (error) {
+        ElMessage.error("删除失败");
+        console.error("删除失败:", error);
+      }
+    })
+  }
+
+  /** 删除按钮操作 */
+  const handleDelete = async (row : any) =>  {
+    ElMessageBox.confirm('是否确认删除编号为"' + row.${primaryKey.javaField} + '"的数据项?', "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning"
+    }).then(async () => {
+      try{
+       await delete${className}Api(row.${primaryKey.javaField})
+        ElMessage.success("删除成功")
+        getList()
+      }catch (error) {
+        ElMessage.error("删除失败");
+        console.error("删除失败:", error);
+      }
+    })
+  }
+
+
+  // 添加分页方法
+  const handleSizeChange = (val : any) => {
+    queryParams.pageSize = val
+    getList()
+  }
+
+  const handleCurrentChange = (val : any) => {
+    queryParams.pageNum = val
+    getList()
+  }
+
+  onMounted(() => {
+    getList()
+  })
+</script>

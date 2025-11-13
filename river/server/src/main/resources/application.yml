@@ -1,0 +1,121 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  profiles:
+    active: dev
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/river?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: # 请填写你的数据库用户名
+    password: # 请填写你的数据库密码
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+#Sa-Token 配置 (文档: https://sa-token.cc)
+sa-token:
+  # token 名称（同时也是 cookie 名称）
+  token-name: Authorization
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
+  timeout: 604800
+  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+  active-timeout: -1
+  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
+  is-share: false
+  # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
+  token-style: uuid
+  # 是否输出操作日志
+  is-log: true
+#mybatis-plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: com.river.**.entity
+  # 原生配置
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#knife4j配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: '管理端'
+      paths-to-match: '/sys/**'
+      packages-to-scan: com.river.controller
+    - group: '用户端'
+      paths-to-match: '/user/**'
+      packages-to-scan: com.river.controller
+    - group: '授权中心'
+      paths-to-match: '/auth/**'
+      packages-to-scan: com.river.controller
+    - group: '文件中心'
+      paths-to-match: '/file/**'
+      packages-to-scan: com.river.controller
+
+
+#邮件配置
+mail:
+  smtp:
+    host: # 请填写你的SMTP服务器地址
+    port: # 请填写你的SMTP服务器端口
+    email: # 请填写你的SMTP服务器邮箱
+    password: # 请填写你的SMTP服务器密码
+#验证码配置
+captcha:
+  place: local
+  local-path: D:/river-files/captcha/
+  remote-path: https://v2.api-m.com/api/wallpaper?return=302
+  allow-deviation: 5
+  expire: 60
+  canvas-width: 320
+  canvas-height: 155
+  block-height: 55
+  block-width: 65
+  block-radius: 9
+#随机头像配置
+random-avatar:
+  avatar-list:
+    - https://api.dicebear.com/9.x/pixel-art/svg?seed=Raccoon
+    - https://api.dicebear.com/9.x/pixel-art/svg?seed=Kitty
+    - https://api.dicebear.com/9.x/pixel-art/svg?seed=Puppy
+    - https://api.dicebear.com/9.x/pixel-art/svg?seed=Bunny
+    - https://api.dicebear.com/9.x/pixel-art/svg?seed=Fox
+    - https://api.dicebear.com/9.x/pixel-art/svg?seed=Dog
+    - https://api.dicebear.com/9.x/pixel-art/svg?seed=Cat
+
+#第三方登录配置信息
+qq:
+  app-id:
+  app-secret:
+  redirect-url:
+weibo:
+  app-id:
+  app-secret:
+  redirect-url:
+
+gitee:
+  app-id:
+  app-secret:
+  redirect-url:
+
+github:
+  app-id:
+  app-secret:
+  redirect-url:

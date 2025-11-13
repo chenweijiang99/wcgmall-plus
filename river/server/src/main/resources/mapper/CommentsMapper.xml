@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.CommentsMapper">
+    <!-- 可以在这里添加自定义的复杂SQL查询 -->
+    <resultMap id="CommentsWithUserResultMap" type="com.river.entity.Comments">
+        <id column="id" property="id"/>
+        <result column="pid" property="pid"/>
+        <result column="fid" property="fid"/>
+        <result column="module" property="module"/>
+        <result column="root_id" property="rootId"/>
+        <result column="user_id" property="userId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="comment" property="comment"/>
+        <!-- 映射用户名字段 -->
+        <result column="username" property="username"/>
+    </resultMap>
+    <resultMap id="CommentsVoResultMap" type="com.river.vo.comments.CommentsVo">
+        <id column="id" property="id"/>
+        <result column="pid" property="pid"/>
+        <result column="fid" property="fid"/>
+        <result column="module" property="module"/>
+        <result column="root_id" property="rootId"/>
+        <result column="user_id" property="userId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="comment" property="comment"/>
+        <result column="username" property="username"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="parent_username" property="parentUserName"/>
+    </resultMap>
+    <insert id="addComments" parameterType="com.river.entity.Comments" useGeneratedKeys="true" keyProperty="id">
+        insert into comments
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="pid != null">pid,</if>
+            <if test="fid != null">fid,</if>
+            <if test="module != null">module,</if>
+            <if test="rootId != null">root_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="comment != null">comment,</if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="pid != null">#{pid},</if>
+            <if test="fid != null">#{fid},</if>
+            <if test="module != null">#{module},</if>
+            <if test="rootId != null">#{rootId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="comment != null">#{comment},</if>
+        </trim>
+
+    </insert>
+
+    <select id="selectCommentsWithUser" resultMap="CommentsWithUserResultMap">
+        select c.*, u.nickname as username
+        from comments c
+        left join sys_user u on c.user_id = u.id
+        <where>
+            <if test="comments.module != null and comments.module != ''">
+                AND c.module = #{comments.module}
+            </if>
+            <if test="comments.comment != null and comments.comment != ''">
+                AND c.comment LIKE CONCAT('%', #{comments.comment}, '%')
+            </if>
+        </where>
+        ORDER BY c.create_time desc
+    </select>
+    <select id="selectRoot" resultType="com.river.vo.comments.CommentsVo">
+        select c.*, u.username as username, u.avatar as userAvatar
+        from comments c
+                 left join sys_user u on c.user_id = u.id
+        where c.fid = #{fid}
+          and c.module = #{module}
+          and c.pid is null
+        order by c.id desc
+
+    </select>
+    <select id="selectByRootId" resultType="com.river.vo.comments.CommentsVo">
+        select comments.*, u.username as username, u.avatar as userAvatar, u2.username as parentUserName
+        from comments
+                 left join sys_user u on comments.user_id = u.id
+                 left join comments c2
+                           on comments.pid = c2.id
+                 left join sys_user u2
+                           on c2.user_id = u2.id
+        where comments.root_id = #{rootId}
+          and comments.pid is not null
+        order by comments.id desc
+
+    </select>
+</mapper>

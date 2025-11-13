@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.OfficialCollectionMapper">
+
+
+
+    <resultMap id="BaseResultMap" type="com.river.entity.OfficialCollection">
+        <id column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="product_name" property="productName" />
+        <result column="product_image" property="productImage" />
+
+    </resultMap>
+
+    <select id="list" resultMap="BaseResultMap">
+        select oc.id, oc.product_id, p.name as product_name, p.image as product_image
+        from official_collection oc
+        left join product p on oc.product_id = p.id
+    </select>
+</mapper>

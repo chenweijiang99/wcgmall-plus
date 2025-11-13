@@ -1,0 +1,74 @@
+package ${packageName}.service.impl;
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import ${packageName}.mapper.${className}Mapper;
+import ${packageName}.entity.${className};
+import ${packageName}.service.${className}Service;
+import ${packageName}.utils.PageUtil;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * ${tableComment} 服务实现类
+ */
+@Service
+@RequiredArgsConstructor
+public class ${className}ServiceImpl extends ServiceImpl<${className}Mapper, ${className}> implements ${className}Service {
+
+    /**
+     * 查询${tableComment}分页列表
+     */
+    @Override
+    public IPage<${className}> selectPage(${className} ${classname}) {
+        LambdaQueryWrapper<${className}> wrapper = new LambdaQueryWrapper<>();
+        // 构建查询条件
+#foreach($column in $columns)
+#if($column.isQuery == "1")
+        wrapper.eq(${classname}.get${column.javaField.substring(0,1).toUpperCase()}${column.javaField.substring(1)}() != null, ${className}::get${column.javaField.substring(0,1).toUpperCase()}${column.javaField.substring(1)}, ${classname}.get${column.javaField.substring(0,1).toUpperCase()}${column.javaField.substring(1)}());
+#end
+#end
+        return page(PageUtil.getPage(), wrapper);
+    }
+
+    /**
+     * 查询${tableComment}列表
+     */
+    @Override
+    public List<${className}> selectList(${className} ${classname}) {
+        LambdaQueryWrapper<${className}> wrapper = new LambdaQueryWrapper<>();
+        // 构建查询条件
+#foreach($column in $columns)
+#if($column.isQuery == "1")
+        wrapper.eq(${classname}.get${column.javaField.substring(0,1).toUpperCase()}${column.javaField.substring(1)}() != null, ${className}::get${column.javaField.substring(0,1).toUpperCase()}${column.javaField.substring(1)}, ${classname}.get${column.javaField.substring(0,1).toUpperCase()}${column.javaField.substring(1)}());
+#end
+#end
+        return list(wrapper);
+    }
+
+    /**
+     * 新增${tableComment}
+     */
+    @Override
+    public boolean insert(${className} ${classname}) {
+        return save(${classname});
+    }
+
+    /**
+     * 修改${tableComment}
+     */
+    @Override
+    public boolean update(${className} ${classname}) {
+        return updateById(${classname});
+    }
+
+    /**
+     * 批量删除${tableComment}
+     */
+    @Override
+    public boolean deleteByIds(List<${primaryKey.javaType}> ids) {
+        return removeByIds(ids);
+    }
+}

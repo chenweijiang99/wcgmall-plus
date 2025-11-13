@@ -1,0 +1,420 @@
+
+/* 搜索区域样式 */
+
+.search-wrapper {
+  padding: 18px 20px 0;
+  margin-bottom: 16px;
+  background-color: var(--el-bg-color);
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+
+  .el-form {
+    --el-form-inline-content-width: auto;
+
+    .el-form-item {
+      margin-bottom: 18px;
+      margin-right: 16px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      .el-input {
+        width: 240px;
+      }
+
+      .el-select {
+        width: 240px;
+      }
+
+      .el-date-editor {
+        width: 240px;
+      }
+    }
+
+    .el-form-item__content {
+      .el-button {
+        margin-left: 0;
+        margin-right: 10px;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+/* 卡片区域样式 */
+.box-card {
+  margin-bottom: 16px;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--el-text-color-primary);
+    }
+  }
+}
+
+/* 分页容器样式 */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding: 10px 0;
+}
+
+.card-header {
+  .left-button-group {
+    display: flex;
+    align-items: center;
+
+    // 相邻按钮的间距
+    .el-button+.el-button {
+      margin-left: 8px;
+    }
+  }
+}
+
+
+// 修改卡片头部高度
+.el-card {
+  &.el-card--header {
+    padding: 12px 15px !important; // 减小内边距
+  }
+
+  .el-card__header {
+    padding: 12px 15px !important; // 减小内边距
+    min-height: 40px !important; // 设置最小高度
+    line-height: 20px !important; // 调整行高
+
+    // 如果header中有flex布局的div（常用于左右布局）
+    .card-header {
+      min-height: 20px !important;
+    }
+  }
+}
+
+// 如果有特定场景需要保持原有高度，可以添加类名排除
+.el-card.keep-header-height {
+  .el-card__header {
+    padding: var(--el-card-padding) !important;
+  }
+}
+
+/* 全局滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px; // 降低滚动条宽度
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 暗黑模式下的滚动条样式 */
+html.dark {
+  ::-webkit-scrollbar-track {
+    background: #2b2b2b;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5a5a5a;
+  }
+
+  // 深色模式下的一些全局变量覆盖
+  --el-bg-color: #141414;
+  --el-bg-color-overlay: #1d1e1f;
+  --el-text-color-primary: #E5EAF3;
+  --el-border-color: #363637;
+
+  .el-card {
+    --el-card-bg-color: var(--el-bg-color-overlay);
+  }
+
+  .el-table {
+    --el-table-bg-color: var(--el-bg-color-overlay);
+    --el-table-tr-bg-color: var(--el-bg-color-overlay);
+    --el-table-hover-bg-color: #262727;
+  }
+}
+
+// 页面切换动画
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.none-enter-active,
+.none-leave-active {
+  transition: none;
+}
+
+.none-enter-from,
+.none-leave-to {
+  opacity: 1;
+}
+
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+  :deep(.el-menu-item.is-active) {
+    background: rgba(64, 158, 255, 0.15) !important;
+  }
+
+  :deep(.el-menu--popup) {
+    background-color: #1a2234 !important;
+    border-color: rgba(255, 255, 255, 0.03);
+  }
+
+  :deep(.el-sub-menu .el-menu)::before {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+
+/* 滚动条样式 */
+:deep(.el-scrollbar__bar) {
+  width: 4px !important;
+}
+
+:deep(.el-scrollbar__thumb) {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+:deep(.el-scrollbar__thumb:hover) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.main-container {
+  background-color: #f0f2f5;
+  padding: 16px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.none-enter-active,
+.none-leave-active {
+  transition: none;
+}
+
+.none-enter-from,
+.none-leave-to {
+  opacity: 1;
+}
+
+/* 根据大小调整布局尺寸 */
+:deep([data-size="large"]) {
+  --el-header-height: 64px;
+  --el-aside-width: 260px;
+  --el-menu-item-height: 56px;
+  --el-font-size-base: 16px;
+
+  /* 内容区域文字大小 */
+  .main-container {
+    font-size: 16px;
+  }
+
+  /* 表格文字大小 */
+  .el-table {
+    font-size: 15px;
+  }
+
+  /* 表单文字大小 */
+  .el-form {
+    font-size: 15px;
+  }
+
+  /* 按钮文字大小 */
+  .el-button {
+    font-size: 15px;
+  }
+
+  /* 卡片标题文字大小 */
+  .el-card__header {
+    font-size: 18px;
+  }
+}
+
+:deep([data-size="small"]) {
+  --el-header-height: 48px;
+  --el-aside-width: 200px;
+  --el-menu-item-height: 40px;
+  --el-font-size-base: 13px;
+
+  /* 内容区文字大小 */
+  .main-container {
+    font-size: 13px;
+  }
+
+  /* 表格文字大小 */
+  .el-table {
+    font-size: 12px;
+  }
+
+  /* 表单文字大小 */
+  .el-form {
+    font-size: 12px;
+  }
+
+  /* 按钮文字大小 */
+  .el-button {
+    font-size: 12px;
+  }
+
+  /* 卡片标题文字大小 */
+  .el-card__header {
+    font-size: 14px;
+  }
+}
+
+/* 默认尺寸 */
+:deep([data-size="default"]) {
+  --el-header-height: 56px;
+  --el-aside-width: 220px !important;
+  --el-menu-item-height: 50px;
+  --el-font-size-base: 14px;
+
+  /* 内容区域文字大小 */
+  .main-container {
+    font-size: 14px;
+  }
+
+  /* 表格文字大小 */
+  .el-table {
+    font-size: 14px;
+  }
+
+  /* 表单文字大小 */
+  .el-form {
+    font-size: 14px;
+  }
+
+  /* 按钮文字大小 */
+  .el-button {
+    font-size: 14px;
+  }
+
+  /* 卡片标题文字大小 */
+  .el-card__header {
+    font-size: 16px;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+}
+
+.setting-icon {
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s;
+  color: #606266;
+}
+
+.setting-icon:hover {
+  background-color: v-bind('`${settingsStore.themeColor}1a`');
+  color: v-bind('settingsStore.themeColor');
+}
+
+.drawer-content {
+  padding: 20px;
+}
+
+// 添加全局样式，修改遮罩层级
+:deep(.search-dialog-modal) {
+  z-index: 1000 !important; // 降低遮罩层级，让水印显示在上层
+}
+
+// 添加灰色模式样式
+html.grey-mode {
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+  -moz-filter: grayscale(100%);
+  -ms-filter: grayscale(100%);
+  -o-filter: grayscale(100%);
+  filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
+  filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
+  -webkit-filter: grayscale(1);
+  transition: filter 0.3s ease;
+}
+
+@font-face {
+  font-family: 'Handwriting';
+  src: url('@/assets/font/2.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}

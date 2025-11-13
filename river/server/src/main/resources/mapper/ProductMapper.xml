@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.ProductMapper">
+    <!-- 可以在这里添加自定义的复杂SQL查询 -->
+    <select id="userGetNewProductList" resultType="com.river.entity.Product">
+        select * from product where status = 1 order by create_time desc limit 6
+    </select>
+    <select id="getDetailById" resultType="com.river.vo.product.ProductDetailVo">
+        select p.*,
+        pc.name as categoryName,
+        pb.name as brandName
+        from product p
+        left join product_category pc on p.category_id = pc.id
+        left join product_brand pb on p.brand_id = pb.id
+        where p.id = #{id}
+    </select>
+<select id="selectPage1" resultType="com.river.entity.Product">
+    SELECT p.*
+    FROM product p
+    LEFT JOIN product_category pc ON p.category_id = pc.id
+    LEFT JOIN product_brand pb ON p.brand_id = pb.id
+    WHERE p.status = 1
+    <!-- 搜索名称条件 -->
+    <if test="productPageDTO.searchNames != null and productPageDTO.searchNames.length > 0">
+        AND (
+        <foreach collection="productPageDTO.searchNames" item="item" separator=" OR ">
+            p.name LIKE CONCAT('%', #{item}, '%')
+        </foreach>
+        )
+    </if>
+
+    <!-- 分类筛选条件 - 修复null值处理 -->
+    <choose>
+        <when test="productPageDTO.category != null and productPageDTO.category.length > 0">
+            AND p.category_id IN
+            <foreach collection="productPageDTO.category" item="catId" open="(" separator="," close=")">
+                #{catId}
+            </foreach>
+        </when>
+        <otherwise>
+            <!-- 当category为null或空时，不添加分类筛选条件 -->
+        </otherwise>
+    </choose>
+
+    <!-- 品牌筛选条件 -->
+    <choose>
+        <when test="productPageDTO.brand != null and productPageDTO.brand.length > 0">
+            AND p.brand_id IN
+            <foreach collection="productPageDTO.brand" item="brandId" open="(" separator="," close=")">
+                #{brandId}
+            </foreach>
+        </when>
+        <otherwise>
+            <!-- 当brand为null或空时，不添加品牌筛选条件 -->
+        </otherwise>
+    </choose>
+
+    <!-- 价格范围筛选 -->
+    <if test="productPageDTO.minPrice != null and productPageDTO.maxPrice != null">
+        <choose>
+            <when test="productPageDTO.maxPrice > 0">
+                AND p.price BETWEEN #{productPageDTO.minPrice} AND #{productPageDTO.maxPrice}
+            </when>
+            <otherwise>
+                AND p.price >= #{productPageDTO.minPrice}
+            </otherwise>
+        </choose>
+    </if>
+
+    ORDER BY p.id
+</select>
+
+
+
+</mapper>
