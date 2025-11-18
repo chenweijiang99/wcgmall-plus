@@ -105,7 +105,7 @@ const login = async () => {
       message:  "登录成功",
       plain: true,
     });
-    tokenStore.setToken(result.data);
+    tokenStore.setToken(result.data.token);
     emitter.emit("refresh");
     emitter.emit("login");
     router.push("/index");
