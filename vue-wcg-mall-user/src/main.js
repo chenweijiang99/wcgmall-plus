@@ -18,12 +18,17 @@ import "bootstrap-icons/font/bootstrap-icons.css"
 import "animate.css"
 import 'cropperjs/dist/cropper.css';
 import BaiduMap from 'vue-baidu-map-3x'
+import "@/assets/main.css";
 
 
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
   }
+import SvgIcon from '@/components/SvgIcon/inde.vue'
+import '@/icons/index.js'
+app.component('svg-icon', SvgIcon)
+
 const pinia = createPinia()
 const persist = createPersistedState()
 

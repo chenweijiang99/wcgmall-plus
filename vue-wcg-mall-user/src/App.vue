@@ -6,6 +6,9 @@
  <router-view/>
 </template>
 
-<style scoped>
+<style>
 
+html, body {
+  font-family: 'Xiaomi', sans-serif;
+}
 </style>
