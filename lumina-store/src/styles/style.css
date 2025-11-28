@@ -1,0 +1,192 @@
+@import "tailwindcss";
+@font-face {
+  font-family: 'Handwriting';
+  src: url('@/assets/font/2.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 
+  Tailwind CSS v4 默认使用系统偏好 (media) 进行暗黑模式切换。
+  为了支持通过 class (如 html.dark) 手动切换，必须显式定义 dark 变体。
+  这将覆盖默认行为，使 dark: 前缀的工具类在父元素有 .dark 类时生效。
+*/
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* 自定义字体 */
+  --font-sans: 'Handwriting', 'sans-serif';
+
+  /* 自定义颜色 */
+  --color-primary: #000000;
+  --color-primary-dark: #ffffff;
+  --color-accent: #007AFF;
+
+  /* 自定义动画 */
+  --animate-fade-in: fadeIn 0.5s ease-out;
+  --animate-slide-in-right: slideInRight 0.3s ease-out;
+  --animate-fade-in-up: fadeInUp 0.8s ease-out;
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes slideInRight {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* 
+  Element Plus 全局主题覆盖 
+  通过 CSS 变量实现 "Lumina" 风格（浅色模式全黑，深色模式全白）
+*/
+:root {
+  /* 将 Primary 主色设为黑色 */
+  --el-color-primary: #000000;
+  --el-color-primary-light-3: #333333;
+  --el-color-primary-light-5: #666666;
+  --el-color-primary-light-7: #999999;
+  --el-color-primary-light-9: #cccccc;
+  --el-color-primary-dark-2: #333333;
+}
+
+/* 暗黑模式变量覆盖 */
+.dark {
+  /* 将 Primary 主色设为白色 */
+  --el-color-primary: #ffffff;
+  --el-color-primary-light-3: #e5e5e5;
+  --el-color-primary-light-5: #cccccc;
+  --el-color-primary-light-7: #aaaaaa;
+  --el-color-primary-light-9: #444444;
+  --el-color-primary-dark-2: #e5e5e5;
+  
+  /* 基础组件背景色适配 */
+  --el-bg-color: #000000;
+  --el-bg-color-overlay: #18181b; /* zinc-900 */
+  --el-text-color-primary: #ffffff;
+  --el-text-color-regular: #d1d5db; /* gray-300 */
+  --el-border-color: #27272a; /* zinc-800 */
+  --el-fill-color-blank: #000000;
+}
+
+/* 
+  专门针对 Element Plus 按钮的深度定制 
+  确保 Primary 按钮在不同模式下的文字颜色对比度正确
+*/
+
+/* 浅色模式下：Primary 按钮黑底白字（默认行为正确，无需大幅修改，只需确保 hover 态） */
+.el-button--primary {
+  --el-button-border-color: var(--el-color-primary);
+  --el-button-hover-bg-color: #333333;
+  --el-button-hover-border-color: #333333;
+}
+
+/* 暗黑模式下：Primary 按钮白底黑字 */
+.dark .el-button--primary {
+  --el-button-text-color: #000000;
+  --el-button-bg-color: #ffffff;
+  --el-button-border-color: #ffffff;
+  --el-button-hover-text-color: #000000;
+  --el-button-hover-bg-color: #e4e4e7; /* zinc-200 */
+  --el-button-hover-border-color: #e4e4e7;
+  --el-button-active-bg-color: #d4d4d8; /* zinc-300 */
+  --el-button-active-border-color: #d4d4d8;
+  --el-button-disabled-text-color: #a1a1aa;
+  --el-button-disabled-bg-color: #27272a;
+  --el-button-disabled-border-color: #27272a;
+}
+
+/* 
+  Element Plus 组件通用暗黑适配 
+*/
+.dark .el-dialog, 
+.dark .el-bg-white,
+.dark .el-drawer,
+.dark .el-card {
+  background-color: #18181b; /* zinc-900 */
+  color: #fff;
+  border-color: #27272a;
+}
+
+.dark .el-input__wrapper {
+  background-color: #27272a; /* zinc-800 */
+  box-shadow: 0 0 0 1px #3f3f46 inset; /* zinc-700 */
+}
+
+.dark .el-input__inner {
+  color: white;
+}
+
+/* 下拉菜单和弹出框暗黑适配 */
+.dark .el-popper.is-light,
+.dark .el-dropdown-menu {
+  background-color: #18181b;
+  border-color: #3f3f46;
+}
+
+.dark .el-dropdown-menu__item {
+  color: #e4e4e7;
+}
+
+.dark .el-dropdown-menu__item:hover,
+.dark .el-dropdown-menu__item:focus {
+  background-color: #27272a;
+  color: #fff;
+}
+
+.dark .el-popper__arrow::before {
+  background-color: #18181b !important;
+  border-color: #3f3f46 !important;
+}
+
+/* 修复 Checkbox 在暗黑模式下的样式 */
+.dark .el-checkbox__inner {
+  background-color: transparent;
+  border-color: #52525b;
+}
+.dark .el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: #fff;
+  border-color: #fff;
+}
+.dark .el-checkbox__input.is-checked .el-checkbox__inner::after {
+  border-color: #000;
+}
+.dark .el-checkbox__label {
+  color: #d4d4d8;
+}
+.dark .el-checkbox__input.is-checked + .el-checkbox__label {
+  color: #fff;
+}
+
+/* 全局滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 页面过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
