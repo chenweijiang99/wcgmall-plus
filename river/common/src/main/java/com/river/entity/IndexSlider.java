@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
@@ -18,6 +19,18 @@ public class IndexSlider implements Serializable {
 
     @Schema(description = "轮播图URL")
     private String url;
+
+    @Schema(description = "轮播图标题")
+    private String title;
+
+    @Schema(description = "轮播图副标题")
+    private String subtitle;
+
+    @Schema(description = "轮播图调用操作")
+    private String cta;
+
+    @Schema(description = "轮播图链接")
+    private String link;
 
     @Schema(description = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

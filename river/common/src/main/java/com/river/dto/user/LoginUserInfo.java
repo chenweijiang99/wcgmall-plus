@@ -25,6 +25,12 @@ public class LoginUserInfo implements Serializable {
     @Schema(description = "性别")
     private Integer sex;
 
+    @Schema(description = "手机号")
+    private String mobile;
+
+    @Schema(description = "邮箱")
+    private String email;
+
     @Schema(description = "个性签名")
     private String signature;
 

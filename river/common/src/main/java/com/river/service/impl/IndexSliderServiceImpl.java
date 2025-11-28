@@ -94,9 +94,9 @@ public class IndexSliderServiceImpl extends ServiceImpl<IndexSliderMapper, Index
 
     @Override
     public List<IndexSlider> getAll() {
-        if(redisUtil.hasKey(RedisConstants.INDEX_SLIDER_LIST)){
-           return (List<IndexSlider>) redisUtil.get(RedisConstants.INDEX_SLIDER_LIST);
-        }
+//        if(redisUtil.hasKey(RedisConstants.INDEX_SLIDER_LIST)){
+//           return (List<IndexSlider>) redisUtil.get(RedisConstants.INDEX_SLIDER_LIST);
+//        }
         return list();
     }
 }
