@@ -110,6 +110,9 @@ export interface Blog {
   contentMd: string;
   image: string;
   createTime: string;
+  userAvatar: string;
+  status: number;
+  signature: string;
 }
 
 export interface Cart {

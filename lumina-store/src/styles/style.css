@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @font-face {
   font-family: 'Handwriting';
   src: url('@/assets/font/2.woff2') format('woff2');
@@ -7,9 +8,8 @@
 }
 
 /* 
-  Tailwind CSS v4 默认使用系统偏好 (media) 进行暗黑模式切换。
-  为了支持通过 class (如 html.dark) 手动切换，必须显式定义 dark 变体。
-  这将覆盖默认行为，使 dark: 前缀的工具类在父元素有 .dark 类时生效。
+  Tailwind CSS v4 暗黑模式变体定义
+  允许通过 html.dark 或 body.dark 切换
 */
 @variant dark (&:where(.dark, .dark *));
 
@@ -41,12 +41,11 @@
   }
 }
 
-/* 
-  Element Plus 全局主题覆盖 
-  通过 CSS 变量实现 "Lumina" 风格（浅色模式全黑，深色模式全白）
-*/
+/* =========================================
+   Element Plus & Global 变量覆盖
+   ========================================= */
 :root {
-  /* 将 Primary 主色设为黑色 */
+  /* 浅色模式: 主色为黑 */
   --el-color-primary: #000000;
   --el-color-primary-light-3: #333333;
   --el-color-primary-light-5: #666666;
@@ -57,7 +56,7 @@
 
 /* 暗黑模式变量覆盖 */
 .dark {
-  /* 将 Primary 主色设为白色 */
+  /* 深色模式: 主色为白 */
   --el-color-primary: #ffffff;
   --el-color-primary-light-3: #e5e5e5;
   --el-color-primary-light-5: #cccccc;
@@ -65,28 +64,41 @@
   --el-color-primary-light-9: #444444;
   --el-color-primary-dark-2: #e5e5e5;
   
-  /* 基础组件背景色适配 */
+  /* 基础背景色适配 (使用 Zinc 色系) */
   --el-bg-color: #000000;
   --el-bg-color-overlay: #18181b; /* zinc-900 */
   --el-text-color-primary: #ffffff;
-  --el-text-color-regular: #d1d5db; /* gray-300 */
+  --el-text-color-regular: #d4d4d8; /* zinc-300 */
+  --el-text-color-secondary: #a1a1aa; /* zinc-400 */
   --el-border-color: #27272a; /* zinc-800 */
+  --el-border-color-light: #3f3f46; /* zinc-700 */
   --el-fill-color-blank: #000000;
+
+  /* =========================================
+     MdEditor V3 暗黑模式适配变量
+     ========================================= */
+  --md-color: #e4e4e7;              /* 文本颜色 */
+  --md-bk-color: #18181b;           /* 编辑器背景 (zinc-900) */
+  --md-bk-color-outstand: #27272a;  /* 工具栏背景 (zinc-800) */
+  --md-bk-hover: #3f3f46;           /* 悬停背景 (zinc-700) */
+  --md-border-color: #3f3f46;       /* 边框颜色 */
+  --md-code-bk-color: #27272a;      /* 代码块背景 */
+  --md-scrollbar-bg: #3f3f46;       /* 滚动条轨道 */
+  --md-scrollbar-thumb: #71717a;    /* 滚动条滑块 */
+  --md-theme-color: #ffffff;        /* 光标和选中颜色跟随主色 */
 }
 
-/* 
-  专门针对 Element Plus 按钮的深度定制 
-  确保 Primary 按钮在不同模式下的文字颜色对比度正确
-*/
+/* =========================================
+   Element Plus 组件深度定制
+   ========================================= */
 
-/* 浅色模式下：Primary 按钮黑底白字（默认行为正确，无需大幅修改，只需确保 hover 态） */
+/* Primary 按钮适配 */
 .el-button--primary {
   --el-button-border-color: var(--el-color-primary);
   --el-button-hover-bg-color: #333333;
   --el-button-hover-border-color: #333333;
 }
 
-/* 暗黑模式下：Primary 按钮白底黑字 */
 .dark .el-button--primary {
   --el-button-text-color: #000000;
   --el-button-bg-color: #ffffff;
@@ -96,14 +108,12 @@
   --el-button-hover-border-color: #e4e4e7;
   --el-button-active-bg-color: #d4d4d8; /* zinc-300 */
   --el-button-active-border-color: #d4d4d8;
-  --el-button-disabled-text-color: #a1a1aa;
+  --el-button-disabled-text-color: #71717a;
   --el-button-disabled-bg-color: #27272a;
   --el-button-disabled-border-color: #27272a;
 }
 
-/* 
-  Element Plus 组件通用暗黑适配 
-*/
+/* 弹窗、卡片、抽屉适配 */
 .dark .el-dialog, 
 .dark .el-bg-white,
 .dark .el-drawer,
@@ -113,28 +123,45 @@
   border-color: #27272a;
 }
 
-.dark .el-input__wrapper {
+/* 输入框适配 */
+.dark .el-input__wrapper,
+.dark .el-textarea__inner {
   background-color: #27272a; /* zinc-800 */
   box-shadow: 0 0 0 1px #3f3f46 inset; /* zinc-700 */
 }
 
-.dark .el-input__inner {
+.dark .el-input__inner,
+.dark .el-textarea__inner {
   color: white;
 }
 
-/* 下拉菜单和弹出框暗黑适配 */
+/* 修复 Input hover/focus 状态 */
+.dark .el-input__wrapper:hover,
+.dark .el-textarea__inner:hover {
+  box-shadow: 0 0 0 1px #71717a inset; /* zinc-500 */
+}
+.dark .el-input__wrapper.is-focus,
+.dark .el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px #ffffff inset; /* focus 时白边 */
+}
+
+/* 下拉菜单 (Dropdown/Select) 适配 */
 .dark .el-popper.is-light,
-.dark .el-dropdown-menu {
+.dark .el-dropdown-menu,
+.dark .el-select-dropdown {
   background-color: #18181b;
   border-color: #3f3f46;
 }
 
-.dark .el-dropdown-menu__item {
+.dark .el-dropdown-menu__item,
+.dark .el-select-dropdown__item {
   color: #e4e4e7;
 }
 
 .dark .el-dropdown-menu__item:hover,
-.dark .el-dropdown-menu__item:focus {
+.dark .el-dropdown-menu__item:focus,
+.dark .el-select-dropdown__item.hover,
+.dark .el-select-dropdown__item.selected {
   background-color: #27272a;
   color: #fff;
 }
@@ -144,7 +171,7 @@
   border-color: #3f3f46 !important;
 }
 
-/* 修复 Checkbox 在暗黑模式下的样式 */
+/* Checkbox 适配 */
 .dark .el-checkbox__inner {
   background-color: transparent;
   border-color: #52525b;
@@ -163,9 +190,32 @@
   color: #fff;
 }
 
-/* 全局滚动条样式 */
+/* 
+  MdEditor V3 特殊样式覆盖 
+  确保编辑器边框和圆角与 Element Plus 一致
+*/
+.md-editor {
+  border-radius: 8px; /* 匹配 Element Plus 默认圆角 */
+}
+.dark .md-editor {
+  --md-bk-color: #18181b;
+}
+/* 修复深色模式下 MdEditor 工具栏下拉菜单的背景 */
+.dark .md-editor-dropdown {
+  background-color: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #e4e4e7 !important;
+}
+.dark .md-editor-menu-item:hover {
+  background-color: #27272a !important;
+}
+
+/* 
+  全局滚动条样式 
+*/
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -175,10 +225,13 @@
   border-radius: 4px;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: #3f3f46; /* zinc-700 */
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #52525b; /* zinc-600 */
 }
 
 /* 页面过渡动画 */

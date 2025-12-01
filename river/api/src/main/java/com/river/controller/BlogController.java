@@ -1,5 +1,6 @@
 package com.river.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.river.annotation.OperationLogger;
 import com.river.common.Result;
@@ -39,6 +40,11 @@ public class BlogController {
     public Result<List<Blog>> userBlog(){
         return Result.success(blogService.userGetListByUserId());
     }
+    @GetMapping("/blogDetail/{id}")
+    @Operation(summary = "获取博客详情")
+    public Result<Blog> blogDetail(@PathVariable Long id){
+        return Result.success(blogService.userGetDetail(id));
+    }
 
     @PostMapping("/add")
     @Operation(summary = "添加博客")
@@ -52,9 +58,9 @@ public class BlogController {
         return Result.success(blogService.update(blog));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/delete/{id}")
     @Operation(summary = "删除博客")
-    public Result<Object> deleteBlog(Long id){
+    public Result<Object> deleteBlog(@PathVariable Long id){
         return Result.success(blogService.userDeleteBlog(id));
     }
 }

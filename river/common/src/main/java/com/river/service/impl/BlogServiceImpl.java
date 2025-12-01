@@ -95,9 +95,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
 
     @Override
     public List<Blog> userGetListByUserId() {
-        LambdaQueryWrapper<Blog> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Blog::getUserId, StpUtil.getLoginIdAsLong());
-        return baseMapper.selectList(wrapper);
+
+        return baseMapper.userGetListByUserId(StpUtil.getLoginIdAsLong());
     }
 
     @Override
@@ -110,5 +109,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
             throw new ServiceException("您没有权限删除该博客");
         }
         return baseMapper.deleteById(id) > 0;
+    }
+
+    @Override
+    public Blog userGetDetail(Long id) {
+        return baseMapper.userGetDetail(id);
     }
 }

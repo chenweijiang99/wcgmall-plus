@@ -22,3 +22,9 @@ const isAuthPage = computed(() => !!route.meta.hideLayout);
     <Footer v-if="!isAuthPage" />
   </div>
 </template>
+
+<style scoped>
+*{
+    font-family: 'Handwriting', 'sans-serif';;
+}
+</style>
