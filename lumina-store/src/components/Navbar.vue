@@ -8,6 +8,7 @@ import { emitter } from '@/event/emitter';
 import { getCartApi } from '@/api/cart';
 import { getFavoritesApi } from '@/api/favorites';
 import {Cart,Favorites} from '@/types';
+import { s } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -21,12 +22,12 @@ const isActive = (path: string) => route.path === path ? 'text-black dark:text-w
 
 const getCart = async () => {
   const data = await getCartApi();
-   Object.assign(shoppingCart.value, { ...data.data });
+  shoppingCart.value = data.data;
 };
 
 const getFavorites = async () => {
   const data = await getFavoritesApi();
-   Object.assign(favorites.value, { ...data.data });
+  favorites.value = data.data;
 };
 
 

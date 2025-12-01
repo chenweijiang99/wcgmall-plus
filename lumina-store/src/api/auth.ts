@@ -2,7 +2,7 @@
  * 认证接口
  */
 import request from '@/utils/request'
-
+import { ApiResponse, User, Captcha, SysConfig } from '@/types';
 interface LoginParams {
   username: string
   password: string
@@ -13,55 +13,32 @@ interface LoginParams {
 
 // 登录接口
 export function loginApi(data: LoginParams) {
-  return request({
-    url: '/auth/login',
-    method: 'post',
-    data
-  })
+  return request.post<any, ApiResponse<User>>(`/auth/login`, data);
 }
 
 export function logoutApi() {
-  return request({
-    url: '/auth/logout',
-    method: 'post',
-  })
+  return request.post<any, ApiResponse<any>>(`/auth/logout`);
 }
 
 // 获取用户信息
 export function getUserInfoApi() {
-  return request({
-    url: "/auth/info",
-    method: "get",
-    params: {
-      source: "user"
-    }
-  })
+  return request.get<any, ApiResponse<User>>('/auth/info', { params: { source: "user" } });
 }
 
 // 更新用户信息
 export function updateUserApi(data: any) {
-  return request({
-    url: '/user/user/update',
-    method: 'put',
-    data
-  })
+  return request.put<any, ApiResponse<boolean>>(`/user/user/update`, data);
 }
 
 
 // 获取验证码
 export function getCaptchaApi() {
-  return request({
-    url: '/auth/getCaptcha',
-    method: 'get'
-  })
+  return request.get<any, ApiResponse<Captcha>>('/auth/getCaptcha');
 }
 
 // 获取验证码开关
 export function getCaptchaSwitchApi() {
-  return request({
-    url: '/sys/config/getConfigByKey/slider_verify_switch',
-    method: 'get'
-  })
+  return request.get<any, ApiResponse<SysConfig>>('/sys/config/getConfigByKey/slider_verify_switch');
 }
 
 // 获取第三方登录地址
@@ -74,13 +51,7 @@ export function getAuthRenderApi(type: string) {
 
 // 获取邮箱验证码
 export function getEmailCodeApi(email: string) {
-  return request({
-    url: '/auth/getEmailCode',
-    method: 'get',
-    params: {
-      email
-    }
-  })
+  return request.get<any, ApiResponse<boolean>>('/auth/getEmailCode', { params: { email: email } });
 }
 
 

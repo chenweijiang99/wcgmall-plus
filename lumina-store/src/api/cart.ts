@@ -1,10 +1,7 @@
 import request from '@/utils/request'
-
+import { ApiResponse,Cart} from '@/types';
 export function getCartApi() {
-  return request({
-    url: '/user/shoppingCart',
-    method: 'get',
-  })
+   return request.get<any, ApiResponse<Cart[]>>('/user/shoppingCart');
 }
 
 export function addShoppingCartApi(productId: number) {
@@ -17,7 +14,7 @@ export function addShoppingCartApi(productId: number) {
 
 export function deleteShoppingCartApi(productId: number) {
   return request({
-    url: '/user/shoppingCart',
+    url: '/user/shoppingCart/delete',
     method: 'delete',
     params: { productId }
   })

@@ -141,3 +141,27 @@ export interface Order {
   status: 'Processing' | 'Shipped' | 'Delivered';
   shippingAddress: string;
 }
+
+export interface Captcha {
+  nonceStr: string;
+  value: string;
+  canvasSrc: string;
+  canvasWidth: number;
+  canvasHeight: number;
+  blockSrc: string;
+  blockWidth: number;
+  blockHeight: number;
+  blockRadius: number;
+  blockX: number;
+  blockY: number;
+}
+
+export interface SysConfig {
+  id: number;
+  configName: string;
+  configKey: string;
+  configValue: string;
+  configType: string;
+  remark: string;
+
+}
