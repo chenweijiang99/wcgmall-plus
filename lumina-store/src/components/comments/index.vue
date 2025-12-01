@@ -1,74 +1,256 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import { Send } from 'lucide-vue-next';
-import { useUserStore } from "@/stores/modules/user";
-import { Comment } from '@/types';
-
-const store = useUserStore();
-const comments = ref<Comment[]>([]);
-
-const emit = defineEmits<{
-  (e: 'add-comment', text: string): void
-}>();
-
-const text = ref('');
-
-const handleSubmit = () => {
-  if (text.value.trim()) {
-    emit('add-comment', text.value);
-    text.value = '';
-  }
-};
-</script>
-
 <template>
-  <div class="mt-12 border-t border-gray-200 dark:border-zinc-800 pt-8">
-    <h3 class="text-2xl font-bold mb-6">评论({{ comments.length }})</h3>
-    
-    <!-- 评论列表 -->
-    <div class="space-y-6 mb-8">
-      <div v-if="comments.length === 0" class="text-gray-500 italic">
-        成为第一个分享你想法的人
+  <div style="padding: 20px 0">
+    <div style="margin-bottom: 20px">
+      <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px">
+        评论 {{ data.commentCount }}
       </div>
-      <div v-else v-for="comment in comments" :key="comment.id" class="flex gap-4">
-        <img :src="comment.userAvatar" :alt="comment.userName" class="w-10 h-10 rounded-full object-cover bg-gray-200" />
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="font-semibold">{{ comment.userName }}</span>
-            <span class="text-xs text-gray-400">{{ comment.date }}</span>
-          </div>
-          <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ comment.content }}</p>
-        </div>
+      <el-input
+        style="margin-bottom: 5px"
+        type="textarea"
+        :rows="5"
+        v-model="data.form.comment"
+        placeholder="请输入评论"
+      ></el-input>
+      <div style="text-align: right">
+        <el-button color="#444343" @click="addComment(null)" round size="large"
+          >评论</el-button
+        >
       </div>
     </div>
 
-    <!-- 输入框 -->
-    <div v-if="store.user" class="relative flex gap-4 items-start">
-      <img :src="store.user.avatar" alt="You" class="w-10 h-10 rounded-full hidden sm:block" />
-      <div class="flex-1">
-        <el-input
-          v-model="text"
-          placeholder="写下你的想法"
-          size="large"
-          class="w-full"
-          @keyup.enter="handleSubmit"
+    <div>
+      <div v-for="item in data.commentList" :key="item.id">
+        <div
+          style="
+            display: flex;
+            align-items: flex-start;
+            grid-gap: 20px;
+            margin-bottom: 10px;
+          "
         >
-          <template #suffix>
-            <el-button 
-              type="primary" 
-              link 
-              @click="handleSubmit" 
-              :disabled="!text.trim()"
-              class="!p-0"
+          <img
+            :src="item.userAvatar"
+            alt=""
+            style="width: 50px; height: 50px; border-radius: 50%"
+          />
+          <div style="flex: 1; width: 0">
+            <div style="margin-bottom: 10px; color: #666">
+              {{ item.username }}
+            </div>
+            <div style="margin-bottom: 10px; text-align: justify">
+              {{ item.comment }}
+            </div>
+            <div style="margin-bottom: 10px; color: #666; font-size: 13px">
+              <span>{{ item.createTime }}</span>
+              <span
+                style="margin: 0 20px; cursor: pointer"
+                @click="handleReply(item)"
+                :class="{ 'active-btn': item.showReply }"
+                >回复</span
+              >
+              <span
+                style="cursor: pointer"
+                v-if="item.userId === data.user.id"
+                @click="del(item.id)"
+                >删除</span
+              >
+            </div>
+            <div v-if="item.showReply">
+              <el-input
+                type="textarea"
+                v-model="item.replyContent"
+                placeholder="请输入评论"
+              ></el-input>
+              <div style="margin-top: 5px; text-align: right">
+                <el-button type="primary" @click="addComment(item)">保存</el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 二级评论开始 -->
+        <div style="padding-left: 70px" v-if="item.children?.length">
+          <div v-for="subItem in item.children" :key="subItem.id">
+            <div
+              style="
+                display: flex;
+                align-items: flex-start;
+                grid-gap: 20px;
+                margin-bottom: 10px;
+              "
             >
-              <Send :size="18" />
-            </el-button>
-          </template>
-        </el-input>
+              <img
+                :src="subItem.userAvatar"
+                alt=""
+                style="width: 50px; height: 50px; border-radius: 50%"
+              />
+              <div style="flex: 1; width: 0">
+                <div style="margin-bottom: 10px; color: #666">
+                  {{ subItem.username }}
+                  <span v-if="subItem.parentUserName !== item.username"
+                    >回复 @{{ subItem.parentUserName }}</span
+                  >
+                </div>
+                <div style="margin-bottom: 10px; text-align: justify">
+                  {{ subItem.comment }}
+                </div>
+                <div style="margin-bottom: 10px; color: #666; font-size: 13px">
+                  <span>{{ subItem.createTime }}</span>
+                  <span
+                    style="margin: 0 20px; cursor: pointer"
+                    @click="handleReply(subItem)"
+                    :class="{ 'active-btn': subItem.showReply }"
+                    >回复</span
+                  >
+                  <span
+                    style="cursor: pointer"
+                    v-if="subItem.userId === data.user.id"
+                    @click="del(subItem.id)"
+                    >删除</span
+                  >
+                </div>
+                <div v-if="subItem.showReply">
+                  <el-input
+                    type="textarea"
+                    v-model="subItem.replyContent"
+                    placeholder="请输入评论"
+                  ></el-input>
+                  <div style="margin-top: 5px; text-align: right">
+                    <el-button type="primary" @click="addComment(subItem)"
+                      >保存</el-button
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 二级评论结束 -->
       </div>
-    </div>
-    <div v-else class="p-4 bg-gray-50 dark:bg-zinc-900 rounded-xl text-center text-sm text-gray-500">
-      请登录发表评论
+
+      <div style="padding: 20px 0" v-if="data.total">
+        <el-pagination
+          size="small"
+          @current-change="load"
+          background
+          layout="prev, pager, next"
+          :page-size="data.pageSize"
+          v-model:current-page="data.pageNum"
+          :total="data.total"
+        />
+      </div>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { onMounted, reactive } from "vue";
+import { useRoute } from "vue-router";
+import { ElMessage, ElMessageBox } from "element-plus";
+import {
+  addCommentsApi,
+  getCountApi,
+  deleteCommentsApi,
+  selectTreeApi,
+} from "@/api/comments.js";
+import { CommentView } from "@/types";
+import { useUserStore } from "@/stores/modules/user";
+const userStore = useUserStore();
+const route = useRoute();
+const data = reactive({
+  user: userStore.user,
+  fid: route.params.id,
+  commentCount: 0,
+  form: {} as any,
+  commentList: [] as CommentView[],
+  pageNum: 1,
+  pageSize: 8,
+  total: 0,
+});
+
+const props = defineProps({
+  module: String,
+});
+
+const handleReply = (comment: any) => {
+  comment.showReply = !comment.showReply;
+};
+
+const del = (id: any) => {
+  ElMessageBox.confirm("删除后数据无法恢复，您确定删除吗？", "删除确认", {
+    type: "warning",
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+  })
+    .then(async (res) => {
+      await deleteCommentsApi(id);
+      ElMessage({
+        showClose: true,
+        type: "success",
+        message: "删除成功",
+        plain: true,
+      });
+      load();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
+const load = async () => {
+  let result = await selectTreeApi({
+    pageNum: data.pageNum,
+    pageSize: data.pageSize,
+    fid: data.fid,
+    module: props.module,
+  });
+  if (result.code === 200) {
+    data.commentList = result.data?.records;
+    data.total = result.data?.total;
+  }
+
+  let result2 = await getCountApi(data.fid, props.module);
+  if (result2.code === 200) {
+    data.commentCount = result2.data;
+  }
+};
+// load();
+
+const addComment = async (parentComment : any) => {
+  if (parentComment) {
+    data.form.pid = parentComment.id;
+    data.form.comment = parentComment.replyContent;
+  }
+  if (!data.form.comment) {
+    ElMessage({
+      showClose: true,
+      type: "error",
+      message: "评论不能为空",
+      plain: true,
+    });
+    return;
+  }
+  data.form.fid = data.fid;
+  data.form.module = props.module;
+  let result = await addCommentsApi(data.form);
+  if (result.code === 200) {
+    ElMessage({
+      showClose: true,
+      type: "success",
+      message: "发表评论成功",
+      plain: true,
+    });
+    data.form = {};
+    load();
+  }
+};
+
+onMounted(() => {
+  load();
+});
+</script>
+
+<style scoped>
+.active-btn {
+  color: #1890ff;
+}
+</style>

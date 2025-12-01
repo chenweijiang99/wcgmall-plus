@@ -5,7 +5,7 @@ import { getProductDetailApi, addToWishListApi } from "@/api/product";
 import { selectTreeApi, addCommentsApi } from "@/api/comments";
 import { addShoppingCartApi } from "@/api/cart";
 import { useUserStore } from "@/stores/modules/user";
-import { Product, Comment, ProductView } from "@/types";
+import { Product, ProductView } from "@/types";
 import {
   Heart,
   ShoppingBag,
@@ -88,12 +88,10 @@ const fetchProduct = async () => {
           ...data,
           detailImages: parsedDetailImages,
           descriptionImage: parsedDescImages,
-          comments: [],
         };
 
         // 初始化主图
         if (product.value) activeImage.value = product.value.image;
-        loadComments(id);
       }
     } catch (error) {
       console.error(error);
@@ -113,34 +111,6 @@ const toggleFavorite = async (id: number) => {
   ElMessage.success("添加到收藏成功");
   emitter.emit("refresh");
 };
-const handleAddComment = async (text: string) => {
-  if (!product.value || !store.user) {
-    ElMessage.warning("请登录");
-    return;
-  }
-  const res = await addCommentsApi({
-    fid: Number(product.value.id),
-    module: "product",
-    comment: text,
-    pid: 0, // 根评论
-  });
-  ElMessage.success("评论成功");
-  loadComments(product.value.id);
-};
-const loadComments = async (fid: Number) => {
-  const res = await selectTreeApi({ fid: Number(fid), module: "product" });
-  if (product.value) {
-    product.value.comments = res.data.map((c: any) => ({
-      id: c.id.toString(),
-      userId: c.userId.toString(),
-      userName: c.username,
-      userAvatar: c.userAvatar || "",
-      content: c.comment,
-      date: c.createTime,
-    }));
-  }
-};
-
 watch(() => route.params.id, fetchProduct, { immediate: true });
 
 // 库存状态辅助函数
@@ -334,6 +304,7 @@ const getInventoryStatus = (inventory: number) => {
       </div>
     </div>
 
-    <Comments :comments="product.comments" @add-comment="handleAddComment" />
+     <Comments :module="'product'" />
   </div>
+  
 </template>
