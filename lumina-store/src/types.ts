@@ -109,6 +109,7 @@ export interface Blog {
   content: string;
   contentMd: string;
   image: string;
+  aiDescribe: string;
   createTime: string;
   userAvatar: string;
   status: number;

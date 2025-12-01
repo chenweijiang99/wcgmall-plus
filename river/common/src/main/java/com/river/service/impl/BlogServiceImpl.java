@@ -3,9 +3,12 @@ package com.river.service.impl;
 import java.util.List;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.river.dto.BlogPageDto;
 import com.river.exception.ServiceException;
+import com.river.utils.AiUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import com.river.mapper.BlogMapper;
 import com.river.entity.Blog;
@@ -22,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements BlogService {
+
+    private final AiUtil aiUtil;
 
     /**
      * 查询分页列表
@@ -55,7 +60,16 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
     @Override
     public boolean insert(Blog blog) {
         blog.setUserId(StpUtil.getLoginIdAsLong());
-        return save(blog);
+        baseMapper.insert(blog);
+
+        ThreadUtil.execAsync(() -> {
+            String res = aiUtil.send(blog.getContent() + "请提供一段简短的介绍描述该文章的内容");
+            if (StringUtils.isNotBlank(res)) {
+                blog.setAiDescribe(res);
+                baseMapper.updateById(blog);
+            }
+        });
+        return true;
     }
 
     /**

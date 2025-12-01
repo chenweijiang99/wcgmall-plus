@@ -100,6 +100,13 @@ random-avatar:
     - https://api.dicebear.com/9.x/pixel-art/svg?seed=Dog
     - https://api.dicebear.com/9.x/pixel-art/svg?seed=Cat
 
+#==============================豆包推理AI配置=======================================
+ai:
+  # API Key
+  apiKey: afc59328-3eb7-4414-a800-38cde2292bca
+  baseUrl: https://ark.cn-beijing.volces.com/api/v3
+  # 推理接入点ID
+  model: ep-20250811101710-glvvc
 #第三方登录配置信息
 qq:
   app-id:

@@ -44,6 +44,9 @@ public class Blog implements Serializable {
     @Schema(description = "博客图片")
     private String image;
 
+    @Schema(description = "ai描述")
+    private String aiDescribe;
+
     @Schema(description = "0:下架 1：上架")
     private Integer status;
 

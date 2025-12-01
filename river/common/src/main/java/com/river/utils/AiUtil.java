@@ -1,9 +1,10 @@
-package com.mojian.utils;
-
+package com.river.utils;
 import com.volcengine.ark.runtime.model.completion.chat.ChatCompletionRequest;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessage;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessageRole;
 import com.volcengine.ark.runtime.service.ArkService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,7 @@ public class AiUtil {
 
     //这里可以初始化AI的角色
     public final List<ChatMessage> messages = new ArrayList<>(Collections.singletonList(ChatMessage.builder()
-            .role(ChatMessageRole.SYSTEM).content("你是小韦，是一个AI助手，可以帮助用户生成文本，代码等").build()));
+            .role(ChatMessageRole.SYSTEM).content("你是小韦，是一个万能的AI助手").build()));
 
 
     private void initService(){

@@ -58,15 +58,15 @@ const scrollToComments = () => {
   document.getElementById('comments-section')?.scrollIntoView({ behavior: 'smooth' });
 };
 
-// 点赞 (示例逻辑)
+// 点赞 
 const handleLike = () => {
-  ElMessage.success('Thanks for liking!');
+  ElMessage.success('感谢点赞，还未实现!');
 };
 
-// 分享 (示例逻辑)
+// 分享 
 const handleShare = () => {
   navigator.clipboard.writeText(window.location.href);
-  ElMessage.success('Link copied to clipboard');
+  ElMessage.success('链接已复制');
 };
 
 </script>
@@ -76,7 +76,7 @@ const handleShare = () => {
     <!-- Loading State -->
     <div v-if="loading" class="pt-32 h-[60vh] flex flex-col items-center justify-center text-gray-400">
       <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-white mb-4"></div>
-      Loading story...
+      加载中...
     </div>
 
     <!-- Content -->
@@ -139,12 +139,13 @@ const handleShare = () => {
 
         <!-- Center: Markdown Content -->
         <div class="col-span-1 lg:col-span-8">
-           <!-- 摘要 -->
-           <!-- <div v-if="post.excerpt" class="bg-gray-50 dark:bg-zinc-900 p-6 rounded-2xl mb-8 border-l-4 border-black dark:border-white">
-              <p class="text-lg text-gray-600 dark:text-gray-300 italic font-serif">
-                {{ post.excerpt }}
+           <!-- ai摘要 -->
+           <div v-if="post.aiDescribe" class="bg-gray-50 dark:bg-zinc-900 p-6 rounded-2xl mb-8 border-l-4 border-black dark:border-white">
+             <h3 class="font-bold text-xl mb-2">AI摘要</h3>
+              <p class="text-lg text-gray-600 dark:text-gray-300 italic">
+                {{ post.aiDescribe }}
               </p>
-           </div> -->
+           </div>
 
            <!-- Markdown 渲染 -->
            <div class="prose prose-lg dark:prose-invert max-w-none prose-img:rounded-2xl prose-headings:scroll-mt-24">

@@ -20,6 +20,7 @@ const isAuthPage = computed(() => !!route.meta.hideLayout);
       </router-view>
     </main>
     <Footer v-if="!isAuthPage" />
+    <el-backtop :right="100" :bottom="100" />
   </div>
 </template>
 

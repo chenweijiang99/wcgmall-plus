@@ -2,7 +2,7 @@
 import { ref, reactive, computed } from "vue";
 import router from "@/router";
 import { useUserStore } from "@/stores/modules/user";
-import { ElMessage } from "element-plus";
+import { ElMessage,ElNotification } from "element-plus";
 import { User, Lock, Mail, ArrowLeft } from "lucide-vue-next";
 import type { FormInstance } from "element-plus";
 import type { FormItemRule } from "element-plus";
@@ -193,7 +193,11 @@ const login = () => {
     .then(() => {
       sliderVerifyRef?.value?.verifySuccessEvent();
       router.push("/");
-      ElMessage.success("登录成功");
+      // ElMessage.success("登录成功");
+      ElNotification.success({
+        title: "登录成功",
+        message: "欢迎回来",
+      });
       // emitter.emit('refresh');
     })
     .catch(() => {
