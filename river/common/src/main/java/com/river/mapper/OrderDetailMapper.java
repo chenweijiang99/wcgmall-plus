@@ -1,13 +1,13 @@
 package com.river.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.river.entity.ProductOrder;
+import com.river.entity.OrderDetail;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
  *  Mapper接口
  */
 @Mapper
-public interface ProductOrderDetailMapper extends BaseMapper<ProductOrderDetail> {
+public interface OrderDetailMapper extends BaseMapper<OrderDetail> {
 
 }

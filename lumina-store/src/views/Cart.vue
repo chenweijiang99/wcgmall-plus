@@ -12,18 +12,27 @@ import {
   deleteShoppingCartApi,
 } from "@/api/cart";
 
-import { useUserStore } from "@/stores/modules/user";
+import { useCartStore } from "@/stores/modules/cart";
 import { Cart } from "@/types";
 import { emitter } from "@/event/emitter";
-const userStore = useUserStore();
+
+const cartStore = useCartStore();
 const router = useRouter();
 const cart = ref<Cart[]>([]);
+const selectedItemIds = ref<any[]>([]); // 存储选中的 item ID
+// 全选状态计算
+const isAllSelected = computed({
+  get: () => cart.value.length > 0 && selectedItemIds.value.length === cart.value.length,
+  set: (val) => {
+    selectedItemIds.value = val ? cart.value.map((item) => item.id) : [];
+  },
+});
 
-// 计算总价
+// 计算选中总价
 const total = computed(() => {
-  return cart.value.reduce((acc, item) => {
-    return acc + item.productPrice * item.number;
-  }, 0);
+  return cart.value
+    .filter((item) => selectedItemIds.value.includes(item.id))
+    .reduce((acc, item) => acc + item.productPrice * item.number, 0);
 });
 
 // 获取购物车列表的方法（封装以便复用）
@@ -42,8 +51,6 @@ const initCart = async () => {
  * @param delta 变化量 (1 或 -1)
  */
 const updateQuantity = async (item: Cart, delta: number) => {
-  // 注意：这里优先使用 productId，如果你的接口返回中 id 就是 productId，则使用 id
-  // @ts-ignore: 忽略类型检查，防止 Cart 类型未定义 productId
   const pId = item.productId || item.id;
 
   try {
@@ -102,7 +109,24 @@ const removeFromCart = async (item: Cart) => {
     }
   }
 };
+// 去结算
+const handleCheckout = () => {
+  if (selectedItemIds.value.length === 0) {
+    ElMessage.warning("请至少选择一件商品");
+    return;
+  }
 
+  // 筛选出完整的选中对象
+  const selectedItems = cart.value.filter((item) =>
+    selectedItemIds.value.includes(item.id)
+  );
+
+  // 存入 Store
+  cartStore.setSelectedItems(selectedItems);
+
+  // 跳转
+  router.push("/checkout");
+};
 // 页面加载时获取数据
 onMounted(() => {
   initCart();
@@ -126,13 +150,28 @@ onMounted(() => {
 
   <div v-else class="pt-24 pb-20 max-w-4xl mx-auto px-4 sm:px-6">
     <h1 class="text-3xl font-bold mb-12">购物车</h1>
-
+    <!-- 全选按钮 -->
+    <div class="mb-4 flex items-center">
+      <el-checkbox v-model="isAllSelected" size="large"
+        >全选 ({{ cart.length }})</el-checkbox
+      >
+    </div>
     <div class="space-y-8 mb-12">
       <div
         v-for="item in cart"
         :key="item.id"
         class="flex flex-col sm:flex-row items-center gap-6 p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800"
       >
+        <div class="self-start sm:self-center">
+          <el-checkbox
+            v-model="selectedItemIds"
+            :label="item.id"
+            size="large"
+            class="!mr-0"
+          >
+            &nbsp;
+          </el-checkbox>
+        </div>
         <div
           class="w-24 h-24 bg-gray-50 dark:bg-black rounded-xl flex items-center justify-center p-2"
         >
@@ -185,7 +224,8 @@ onMounted(() => {
       <div class="flex justify-end">
         <el-button
           type="primary"
-          @click="router.push('/checkout')"
+          @click="handleCheckout"
+          :disabled="selectedItemIds.length === 0"
           class="!rounded-full !px-8 !text-base !font-bold"
         >
           结算 <ArrowRight :size="20" />

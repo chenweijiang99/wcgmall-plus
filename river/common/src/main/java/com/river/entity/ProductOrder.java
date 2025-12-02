@@ -3,6 +3,7 @@ package com.river.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @Data
 @TableName("product_order")
 @Schema(description = "对象")
+@Builder
 public class ProductOrder implements Serializable {
 
     @TableId(type = IdType.AUTO)
@@ -40,7 +42,7 @@ public class ProductOrder implements Serializable {
     private String email;
 
     @Schema(description = "支付方式")
-    private Integer payMethod;
+    private String payMethod;
 
     @Schema(description = "支付状态 0未支付 1已支付 2退款")
     private Integer payStatus;

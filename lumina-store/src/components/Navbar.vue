@@ -70,7 +70,7 @@ onUnmounted(() => {
           <RouterLink to="/" :class="`text-sm font-medium transition-colors ${isActive('/')}`">首页</RouterLink>
           <RouterLink to="/shop" :class="`text-sm font-medium transition-colors ${isActive('/shop')}`">商品</RouterLink>
           <RouterLink to="/blog" :class="`text-sm font-medium transition-colors ${isActive('/blog')}`">博客</RouterLink>
-          <!-- <RouterLink to="/profile" :class="`text-sm font-medium transition-colors ${isActive('/profile')}`">账户</RouterLink> -->
+          <RouterLink to="/cart" :class="`text-sm font-medium transition-colors ${isActive('/cart')}`">购物车</RouterLink>
         </div>
 
         <!-- Icons -->
@@ -171,6 +171,7 @@ onUnmounted(() => {
         <RouterLink to="/" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900">首页</RouterLink>
         <RouterLink to="/shop" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900">商品</RouterLink>
         <RouterLink to="/blog" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900">博客</RouterLink>
+        <RouterLink to="/cart" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900">购物车</RouterLink>
         <RouterLink to="/profile" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-900">账户</RouterLink>
       </div>
     </div>

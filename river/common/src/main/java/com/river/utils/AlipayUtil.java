@@ -14,13 +14,10 @@ import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.river.config.alipay.AlipayProperties;
-import com.river.entity.ReservationOrder;
+import com.river.entity.ProductOrder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * 支付宝支付工具类
@@ -56,7 +53,7 @@ public class AlipayUtil {
         return alipayClient;
     }
 
-    public String pay(ReservationOrder  order) throws AlipayApiException{
+    public String pay(ProductOrder order) throws AlipayApiException{
         log.info("调用支付宝支付接口：{}",alipayProperties.toString());
         AlipayClient alipayClient = getAlipayClient();
         AlipayTradePagePayRequest alipayTradePagePayRequest = new AlipayTradePagePayRequest();
@@ -64,11 +61,11 @@ public class AlipayUtil {
 //        alipayTradePagePayRequest.setNotifyUrl(alipayProperties.getNotifyUrl());
         JSONObject bizContent = new JSONObject();
         //商户订单号，商家自定义，保持唯一性
-        bizContent.put("out_trade_no",order.getOrderNo());
+        bizContent.put("out_trade_no",order.getOrderNumber());
         //支付金额，最小值0.01元
-        bizContent.put("total_amount",order.getTotalAmount());
+        bizContent.put("total_amount",order.getAmount());
         //订单标题，不可使用特殊符号
-        bizContent.put("subject", order.getOrderNo());
+        bizContent.put("subject", order.getOrderNumber());
         //电脑网站支付场景固定传值FAST_INSTANT_TRADE_PAY
         bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
         //二维码模式，固定传值4，扫码支付模式一（付款码）
@@ -79,7 +76,7 @@ public class AlipayUtil {
     }
 
 
-    public boolean refund(ReservationOrder  order) throws AlipayApiException{
+    public boolean refund(ProductOrder  order) throws AlipayApiException{
         // 1. 获取Client，通用SDK提供的Client，负责调用支付宝的API
         AlipayClient alipayClient = getAlipayClient();
 
@@ -87,8 +84,8 @@ public class AlipayUtil {
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
         request.setNotifyUrl(alipayProperties.getNotifyUrl());
         cn.hutool.json.JSONObject bizContent = new cn.hutool.json.JSONObject();
-        bizContent.set("out_trade_no", order.getOrderNo());  // 订单编号  必须是不重复的退款订单号
-        bizContent.set("refund_amount", order.getTotalAmount()); // 订单的总金额
+        bizContent.set("out_trade_no", order.getOrderNumber());  // 订单编号  必须是不重复的退款订单号
+        bizContent.set("refund_amount", order.getAmount()); // 订单的总金额
         bizContent.set("out_request_no", IdUtil.fastSimpleUUID());   // 随机数
         request.setBizContent(bizContent.toString());
         try {
@@ -106,14 +103,14 @@ public class AlipayUtil {
      * @return 查询结果
      * @throws AlipayApiException 支付宝API异常
      */
-    public String queryTrade(ReservationOrder order) throws AlipayApiException {
+    public String queryTrade(ProductOrder order) throws AlipayApiException {
         // 1. 获取Client，通用SDK提供的Client，负责调用支付宝的API
         AlipayClient alipayClient = getAlipayClient();
 
         // 2. 创建 Request并设置Request参数
         AlipayTradeQueryRequest request = new com.alipay.api.request.AlipayTradeQueryRequest();
         JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", order.getOrderNo());  // 商户订单号
+        bizContent.put("out_trade_no", order.getOrderNumber());  // 商户订单号
         request.setBizContent(bizContent.toJSONString());
 
         // 3. 执行查询请求，添加重试机制
@@ -156,29 +153,5 @@ public class AlipayUtil {
         AlipayTradeQueryResponse response = alipayClient.execute(request);
         return response.getBody();
     }
-
-    /**
-     * 支付宝退款查询接口
-     * @param order 订单信息
-     * @param outRequestNo 退款请求号
-     * @return 查询结果
-     * @throws AlipayApiException 支付宝API异常
-     */
-    public String queryRefund(ReservationOrder order, String outRequestNo) throws AlipayApiException {
-        // 1. 获取Client，通用SDK提供的Client，负责调用支付宝的API
-        AlipayClient alipayClient = getAlipayClient();
-
-        // 2. 创建 Request并设置Request参数
-        AlipayTradeFastpayRefundQueryRequest request = new com.alipay.api.request.AlipayTradeFastpayRefundQueryRequest();
-        JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", order.getOrderNo());      // 商户订单号
-        bizContent.put("out_request_no", outRequestNo);          // 退款请求号
-        request.setBizContent(bizContent.toJSONString());
-
-        // 3. 执行查询请求
-        AlipayTradeFastpayRefundQueryResponse response = alipayClient.execute(request);
-        return response.getBody();
-    }
-
 
 }

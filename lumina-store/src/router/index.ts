@@ -9,6 +9,7 @@ import BlogDetail from '@/views/BlogDetail.vue';
 import CreateBlog from '@/views/CreateBlog.vue';
 import Profile from '@/views/Profile.vue';
 import Login from '@/views/Login.vue';
+import PayClose from '@/views/PayClose.vue';
 
 // 定义路由表
 const routes: RouteRecordRaw[] = [
@@ -22,6 +23,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/create-blog', component: CreateBlog },
   { path: '/profile', component: Profile },
   { path: '/login',name: 'Login', component: Login, meta: { hideLayout: true }  },
+  { path: '/payClose',name: 'PayClose', component: PayClose, meta: { hideLayout: true }  },
 ];
 
 // 创建路由实例

@@ -3,10 +3,12 @@ package com.river.quartz;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.river.entity.ReservationOrder;
-import com.river.entity.Room;
-import com.river.service.ReservationOrderService;
-import com.river.service.RoomService;
+import com.river.entity.OrderDetail;
+import com.river.entity.Product;
+import com.river.entity.ProductOrder;
+import com.river.mapper.OrderDetailMapper;
+import com.river.service.ProductOrderService;
+import com.river.service.ProductService;
 import com.river.utils.AlipayUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class UnpaidOrderExpireQuartz {
-    private final ReservationOrderService reservationOrderService;
-    private final RoomService roomService;
-
+    private final ProductOrderService productOrderService;
+    private final OrderDetailMapper orderDetailMapper;
+    private final ProductService productService;
     private final AlipayUtil alipayUtil;
 
     /**
@@ -33,11 +35,11 @@ public class UnpaidOrderExpireQuartz {
         try {
             // 获取5分钟内创建的未支付订单（创建时间在5分钟内，且支付状态为未支付）
             LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
-            List<ReservationOrder> recentUnpaidOrders = reservationOrderService.list(
-                    new LambdaQueryWrapper<ReservationOrder>()
-                            .eq(ReservationOrder::getOrderStatus, 0) // 订单状态为待支付
-                            .eq(ReservationOrder::getPayStatus, 0)   // 支付状态为未支付
-                            .ge(ReservationOrder::getCreateTime, threshold) // 创建时间在5分钟内
+            List<ProductOrder> recentUnpaidOrders = productOrderService.list(
+                    new LambdaQueryWrapper<ProductOrder>()
+                            .eq(ProductOrder::getStatus, 1) // 订单状态为待支付
+                            .eq(ProductOrder::getPayStatus, 0)   // 支付状态为未支付
+                            .ge(ProductOrder::getCreateTime, threshold) // 创建时间在5分钟内
             );
 
             if (recentUnpaidOrders.isEmpty()) {
@@ -48,11 +50,11 @@ public class UnpaidOrderExpireQuartz {
             log.info("开始检查{}个近期未支付订单的支付状态", recentUnpaidOrders.size());
 
             // 检查每个订单的支付状态
-            for (ReservationOrder order : recentUnpaidOrders) {
+            for (ProductOrder order : recentUnpaidOrders) {
                 try {
                     checkAndUpdateOrderPaymentStatus(order);
                 } catch (Exception e) {
-                    log.error("检查订单{}支付状态时发生异常", order.getOrderNo(), e);
+                    log.error("检查订单{}支付状态时发生异常", order.getOrderNumber(), e);
                 }
             }
         } catch (Exception e) {
@@ -64,13 +66,13 @@ public class UnpaidOrderExpireQuartz {
      * 检查并更新单个订单的支付状态
      * @param order 订单对象
      */
-    private void checkAndUpdateOrderPaymentStatus(ReservationOrder order) {
+    private void checkAndUpdateOrderPaymentStatus(ProductOrder order) {
         try {
             // 调用支付宝查询接口
             String result = alipayUtil.queryTrade(order);
 
             if (result == null || result.isEmpty()) {
-                log.info("订单{}支付状态查询返回空结果", order.getOrderNo());
+                log.info("订单{}支付状态查询返回空结果", order.getOrderNumber());
                 return;
             }
 
@@ -78,7 +80,7 @@ public class UnpaidOrderExpireQuartz {
             JSONObject alipayTradeQueryResponse = jsonObject.getJSONObject("alipay_trade_query_response");
 
             if (alipayTradeQueryResponse == null) {
-                log.info("订单{}支付状态查询响应为空", order.getOrderNo());
+                log.info("订单{}支付状态查询响应为空", order.getOrderNumber());
                 return;
             }
 
@@ -86,24 +88,22 @@ public class UnpaidOrderExpireQuartz {
             if ("TRADE_SUCCESS".equals(tradeStatus)) {
                 // 更新订单状态为已支付
                 order.setPayStatus(1);
-                order.setOrderStatus(1);
-                order.setPayTime(LocalDateTime.now());
-                order.setPayAmount(alipayTradeQueryResponse.getBigDecimal("total_amount"));
-                order.setPayTransactionId(alipayTradeQueryResponse.getString("trade_no"));
+                order.setStatus(2);
+                order.setCheckoutTime(LocalDateTime.now());
                 order.setPayMethod("支付宝");
 
-                reservationOrderService.update(order);
-                log.info("订单{}支付成功，状态已更新", order.getOrderNo());
+                productOrderService.update(order);
+                log.info("订单{}支付成功，状态已更新", order.getOrderNumber());
             } else if ("TRADE_CLOSED".equals(tradeStatus)) {
                 // 交易关闭，可能是用户取消了支付
-                log.info("订单{}支付已关闭", order.getOrderNo());
+                log.info("订单{}支付已关闭", order.getOrderNumber());
             } else {
-                log.info("订单{}当前支付状态: {}", order.getOrderNo(), tradeStatus);
+                log.info("订单{}当前支付状态: {}", order.getOrderNumber(), tradeStatus);
             }
         } catch (AlipayApiException e) {
-            log.error("调用支付宝查询接口失败，订单号: {}", order.getOrderNo(), e);
+            log.error("调用支付宝查询接口失败，订单号: {}", order.getOrderNumber(), e);
         } catch (Exception e) {
-            log.error("处理订单{}支付状态时发生异常", order.getOrderNo(), e);
+            log.error("处理订单{}支付状态时发生异常", order.getOrderNumber(), e);
         }
     }
 
@@ -111,29 +111,30 @@ public class UnpaidOrderExpireQuartz {
     public void expireUnpaidOrders() {
         // 获取5分钟前的订单，即创建时间在5分钟前的订单
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
-         List<ReservationOrder> unpaidOrders = reservationOrderService.list(new LambdaQueryWrapper<ReservationOrder>()
-                        .eq(ReservationOrder::getOrderStatus, 0)
-                        .eq(ReservationOrder::getPayStatus, 0)
-                        .le(ReservationOrder::getCreateTime, threshold));
+         List<ProductOrder> unpaidOrders = productOrderService.list(new LambdaQueryWrapper<ProductOrder>()
+                        .eq(ProductOrder::getStatus, 1)
+                        .eq(ProductOrder::getPayStatus, 0)
+                        .le(ProductOrder::getCreateTime, threshold));
          if(unpaidOrders.isEmpty()){
              log.info("无超时未支付订单");
             return;
         }
         unpaidOrders.forEach(order -> {
                     try {
-                        order.setOrderStatus(5);
-                        order.setCancelTime(LocalDateTime.now());
-                        reservationOrderService.update(order);
-                        if (order.getRoomId() != null) {
-                            Room room = roomService.getById(order.getRoomId());
-                            if (room != null) {
-                                room.setStatus(1);
-                                roomService.updateById(room);
-                            }
-                        }
-                        log.info("订单{}已超时取消", order.getOrderNo());
+                        order.setStatus(5);
+                        productOrderService.update(order);
+                        // 返回库存
+                        List<OrderDetail> orderDetails = orderDetailMapper.selectList(new LambdaQueryWrapper<OrderDetail>()
+                                .eq(OrderDetail::getOrderNumber, order.getOrderNumber()));
+                        orderDetails.forEach(detail -> {
+                            Product product = productService.getById(detail.getProductId());
+                            product.setInventory(product.getInventory() + detail.getProductNumber());
+                            productService.updateById(product);
+                        });
+                        orderDetailMapper.deleteBatchIds(orderDetails);
+                        log.info("订单{}已超时取消", order.getOrderNumber());
                     } catch (Exception e) {
-                        log.error("订单超时取消失败: {}", order.getOrderNo(), e);
+                        log.error("订单超时取消失败: {}", order.getOrderNumber(), e);
                     }
                 });
     }

@@ -1,10 +1,15 @@
 package com.river.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import com.river.entity.ProductOrder;
+import cn.dev33.satoken.stp.StpUtil;
+import com.river.dto.OrderSubmitDTO;
+import com.river.entity.*;
+import com.river.exception.ServiceException;
+import com.river.mapper.*;
 import org.springframework.stereotype.Service;
-import com.river.mapper.ProductOrderMapper;
 import com.river.service.ProductOrderService;
 import com.river.utils.PageUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -18,6 +23,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, ProductOrder> implements ProductOrderService {
+    private final AddressBookMapper addressBookMapper;
+    private final ShoppingCartMapper shoppingCartMapper;
+    private final ProductMapper productMapper;
+    private final OrderDetailMapper orderDetailMapper;
+    private final SysUserMapper sysUserMapper;
 
     /**
      * 查询分页列表
@@ -91,5 +101,73 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     @Override
     public boolean deleteByIds(List<Long> ids) {
         return removeByIds(ids);
+    }
+
+    @Override
+    public String submitOrder(OrderSubmitDTO submitDTO) {
+        String orderNo = System.currentTimeMillis()+ StpUtil.getLoginIdAsString();
+        SysUser sysUser = sysUserMapper.selectById(StpUtil.getLoginIdAsLong());
+        if (sysUser == null) {
+            throw new ServiceException("用户不存在");
+        }
+
+        // 核心逻辑：
+        // 校验地址是否存在
+        AddressBook addressBook = addressBookMapper.selectById(submitDTO.getAddressId());
+        if (addressBook == null) {
+            throw new ServiceException("地址不存在");
+        }
+        // 校验购物车商品是否存在
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectBatchIds(submitDTO.getCartItemIds());
+        if (shoppingCartList.isEmpty()) {
+            throw new ServiceException("购物车商品不存在");
+        }
+        // 校验商品库存是否充足,并计算总计,添加订单详情,减库存
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        for (ShoppingCart shoppingCart : shoppingCartList) {
+            if(shoppingCart.getProductId() == null){
+                throw new ServiceException("商品ID不存在");
+            }
+            if (shoppingCart.getUserId() != StpUtil.getLoginIdAsLong() || shoppingCart.getUserId() == null) {
+                throw new ServiceException("用户不存在");
+            }
+            Product product = productMapper.selectById(shoppingCart.getProductId());
+            if (product == null) {
+                throw new ServiceException("商品不存在");
+            }
+            if (product.getInventory() < shoppingCart.getNumber()) {
+                throw new ServiceException("商品库存不足");
+            }
+            // 计算总计金额
+            totalPrice = totalPrice.add(product.getPrice().multiply(new BigDecimal(shoppingCart.getNumber())));
+            // 将购物车数据添加到订单详情
+            OrderDetail orderDetail = OrderDetail.builder()
+                    .orderNumber(orderNo)
+                    .productId(product.getId())
+                    .productNumber(shoppingCart.getNumber())
+                    .build();
+            orderDetailMapper.insert(orderDetail);
+            product.setInventory(product.getInventory() - shoppingCart.getNumber());
+            productMapper.updateById(product);
+        }
+
+        // 生成订单，保存数据库
+        ProductOrder productOrder = ProductOrder.builder()
+                .orderNumber(orderNo)
+                .userId(Long.parseLong(StpUtil.getLoginIdAsString()))
+                .consignee(addressBook.getConsignee())
+                .consigneeAddress(addressBook.getConsigneeAddress())
+                .consigneePhone(addressBook.getConsigneePhone())
+                .email(sysUser.getEmail())
+                .status(1)
+                .amount(totalPrice)
+                .orderTime(LocalDateTime.now())
+                .payStatus(0)
+                .build();
+        save(productOrder);
+
+        // 清空购物车中对应的商品
+        shoppingCartMapper.deleteBatchIds(submitDTO.getCartItemIds());
+        return orderNo;
     }
 }
