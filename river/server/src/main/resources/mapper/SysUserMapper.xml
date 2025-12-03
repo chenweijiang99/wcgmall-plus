@@ -73,4 +73,20 @@
         </where>
     </select>
 
+    <!-- 查询最近7天用户增长趋势 -->
+    <select id="selectUserGrowth" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(create_time, '%Y-%m-%d') as date,
+            COUNT(*) as count
+        FROM sys_user
+        WHERE create_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 查询今日新增用户数量 -->
+    <select id="selectTodayNewUsers" resultType="java.lang.Long">
+        SELECT COUNT(*) as todayNewUsers FROM sys_user WHERE DATE(create_time) = CURDATE()
+    </select>
+
 </mapper>

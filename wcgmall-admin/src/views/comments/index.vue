@@ -199,18 +199,15 @@ const cancel = () => {
 
 /** 表单重置 */
 const reset = () => {
-  Object.assign(form, {
-    id: undefined,
-    pid: undefined,
-    fid: undefined,
-    module: undefined,
-    rootId: undefined,
-    userId: undefined,
-    createTime: undefined,
-    updateTime: undefined,
-    comment: undefined,
-  });
-  formRef.value?.resetFields();
+  form.id = undefined;
+  form.pid = undefined;
+  form.fid = undefined;
+  form.module = undefined;
+  form.rootId = undefined;
+  form.userId = undefined;
+  form.createTime = undefined;
+  form.updateTime = undefined;
+  form.comment = undefined;
 };
 
 /** 搜索按钮操作 */

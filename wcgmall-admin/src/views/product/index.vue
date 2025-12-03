@@ -412,21 +412,18 @@ const cancel = () => {
 
 /** 表单重置 */
 const reset = () => {
-  // 重置表单数据
-  Object.assign(form, {
-    id: undefined,
-    name: "",
-    categoryId: undefined,
-    brandId: undefined,
-    price: undefined,
-    inventory: undefined,
-    image: "",
-    detailImages: [],
-    description: "",
-    descriptionImage: [],
-    label: undefined,
-  });
-  formRef.value?.resetFields();
+  form.id = undefined;
+  form.name = "";
+  form.categoryId = undefined;
+  form.brandId = undefined;
+  form.price = undefined;
+  form.inventory = undefined;
+  form.image = "";
+  form.detailImages = [];
+  form.description = "";
+  form.descriptionImage = [];
+  form.label = undefined;
+  form.status = undefined;
 };
 
 /** 搜索按钮操作 */

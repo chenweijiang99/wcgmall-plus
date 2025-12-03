@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.ProductOrderMapper">
+
+    <!-- 查询最近7天订单趋势 -->
+    <select id="selectOrderGrowth" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(create_time, '%Y-%m-%d') as date,
+            COUNT(*) as count,
+            SUM(amount) as amount
+        FROM product_order
+        WHERE create_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <!-- 查询最新订单 -->
+    <select id="selectLatestOrders" resultType="java.util.Map">
+        SELECT
+            po.id,
+            po.order_number as orderNumber,
+            su.username as userName,
+            po.amount as amount,
+            po.status,
+            DATE_FORMAT(po.create_time, '%Y-%m-%d %H:%i:%s') as createTime
+        FROM product_order po
+        LEFT JOIN sys_user su ON po.user_id = su.id
+        ORDER BY po.create_time DESC
+        LIMIT #{limit}
+    </select>
+    <!-- 查询总销售额 -->
+    <select id="selectTotalSales" resultType="java.lang.Double">
+        SELECT SUM(amount) as totalSales FROM product_order WHERE status = 1
+    </select>
+    <!-- 查询待付款订单数量 -->
+    <select id="selectPendingPayments" resultType="java.lang.Long">
+        SELECT COUNT(*) as pendingPayments FROM product_order WHERE status = 0
+    </select>
+
+</mapper>

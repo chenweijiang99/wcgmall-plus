@@ -42,14 +42,14 @@
             <el-icon><User /></el-icon>
             <span>账号登录</span>
           </div>
-          <div
+          <!-- <div
             class="tab-item"
             :class="{ active: currentTab === 'register' }"
             @click="switchTab('register')"
           >
             <el-icon><CirclePlus /></el-icon>
             <span>账号注册</span>
-          </div>
+          </div> -->
           <div
             class="tab-item"
             :class="{ active: currentTab === 'forgot' }"

@@ -10,7 +10,7 @@ defineProps({
   },
 });
 
-const logoUrl = new URL("@/assets/River-logo.png", import.meta.url).href;
+const logoUrl = new URL("@/assets/logo-header.jpg", import.meta.url).href;
 </script>
 
 <style scoped>

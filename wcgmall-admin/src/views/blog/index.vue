@@ -313,17 +313,13 @@ const cancel = () => {
 
 /** 表单重置 */
 const reset = () => {
-  Object.assign(form, {
-    id: undefined,
-    createTime: undefined,
-    updateTime: undefined,
-    userId: undefined,
-    title: undefined,
-    content: undefined,
-    image: undefined,
-    status: undefined,
-  });
-  formRef.value?.resetFields();
+  form.id = undefined;
+  form.title = undefined;
+  form.image = undefined;
+  form.author = undefined;
+  form.contentMd = undefined;
+  form.content = undefined;
+  form.status = undefined;
 };
 
 /** 搜索按钮操作 */

@@ -1,25 +1,18 @@
 <template>
   <div class="dashboard-container">
     <!-- 数据卡片 -->
-    <el-row :gutter="20">
+    <el-row :gutter="20" class="mb-20">
       <el-col :span="6" v-for="(item, index) in statistics" :key="item.title">
-        <el-card 
-          shadow="hover" 
-          :body-style="{ padding: '20px' }"
-          class="data-card"
-          :style="{ animationDelay: `${index * 0.1}s` }"
-        >
+        <el-card shadow="hover" :body-style="{ padding: '20px' }" class="data-card"
+          :style="{ animationDelay: `${index * 0.1}s` }">
           <div class="card-content">
             <div class="icon-wrapper" :class="item.type">
-              <el-icon><component :is="item.icon" /></el-icon>
+              <el-icon>
+                <component :is="item.icon" />
+              </el-icon>
             </div>
             <div class="data-wrapper">
-              <count-to
-                :start-val="0"
-                :end-val="item.value"
-                :duration="2000"
-                class="card-value"
-              />
+              <count-to :start-val="0" :end-val="item.value" :duration="2000" class="card-value" />
               <div class="card-title">{{ item.title }}</div>
             </div>
           </div>
@@ -27,123 +20,449 @@
       </el-col>
     </el-row>
 
-    <!-- 作者信息卡片 -->
-    <el-row :gutter="20" style="margin-top: 20px;">
-      <el-col :span="24">
-        <el-card 
-          shadow="hover" 
-          :body-style="{ padding: '24px' }"
-          class="author-card"
-        >
-          <div class="author-content">
-            <div class="author-avatar">
-              <img :src="authorInfo.avatar" alt="作者头像" />
+    <!-- 图表区域 -->
+    <el-row :gutter="20" class="mb-20">
+      <!-- 用户增长趋势 -->
+      <el-col :span="12">
+        <el-card shadow="hover" class="chart-card">
+          <template #header>
+            <div class="card-header">
+              <span>用户增长趋势</span>
             </div>
-            <div class="author-details">
-              <h3 class="author-name">{{ authorInfo.name }}</h3>
-              <p class="author-title">{{ authorInfo.title }}</p>
-              <p class="author-description">{{ authorInfo.description }}</p>
-              <div class="author-contact">
-                <el-tag v-for="contact in authorInfo.contacts" :key="contact.type" :type="contact.type" size="small" style="margin-right: 8px; margin-top: 8px;">
-                  {{ contact.label }}: {{ contact.value }}
-                </el-tag>
-              </div>
+          </template>
+          <div ref="userGrowthChartRef" class="chart"></div>
+        </el-card>
+      </el-col>
+      <!-- 订单趋势 -->
+      <el-col :span="12">
+        <el-card shadow="hover" class="chart-card">
+          <template #header>
+            <div class="card-header">
+              <span>订单趋势</span>
+            </div>
+          </template>
+          <div ref="orderGrowthChartRef" class="chart"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20" class="mb-20">
+      <!-- 商品分类分布 -->
+      <el-col :span="12">
+        <el-card shadow="hover" class="chart-card">
+          <template #header>
+            <div class="card-header">
+              <span>商品分类分布</span>
+            </div>
+          </template>
+          <div ref="categoryChartRef" class="chart"></div>
+        </el-card>
+      </el-col>
+      <!-- 数据总览 -->
+      <el-col :span="12">
+        <el-card shadow="hover" class="chart-card">
+          <template #header>
+            <div class="card-header">
+              <span>数据总览</span>
+            </div>
+          </template>
+          <div class="overview-content">
+            <div class="overview-item" v-for="(item, index) in overviewData" :key="item.label">
+              <div class="overview-label">{{ item.label }}</div>
+              <div class="overview-value">{{ item.value }}</div>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
-    </div>
+
+    <!-- 表格区域 -->
+    <el-row :gutter="20">
+      <!-- 最新订单 -->
+      <el-col :span="12">
+        <el-card shadow="hover" class="table-card">
+          <template #header>
+            <div class="card-header">
+              <span>最新订单</span>
+              
+              <!-- <el-button type="primary" size="small">查看全部</el-button> -->
+            </div>
+          </template>
+          <el-table :data="latestOrders" stripe style="width: 100%" size="small">
+            <el-table-column prop="id" label="订单号" width="180"></el-table-column>
+            <el-table-column prop="userName" label="用户名" width="120"></el-table-column>
+            <el-table-column prop="amount" label="金额" width="100">
+              <template #default="scope">
+                <span>¥{{ scope.row.amount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="scope">
+                <el-tag :type="getStatusColor(scope.row.status)">{{ getStatusText(scope.row.status) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+          </el-table>
+        </el-card>
+      </el-col>
+      <!-- 最新商品 -->
+      <el-col :span="12">
+        <el-card shadow="hover" class="table-card">
+          <template #header>
+            <div class="card-header">
+              <span>最新商品</span>
+              <!-- <el-button type="primary" size="small">查看全部</el-button> -->
+            </div>
+          </template>
+          <el-table :data="latestProducts" stripe style="width: 100%" size="small">
+            <el-table-column prop="name" label="商品名称" width="180"></el-table-column>
+            <el-table-column prop="price" label="价格" width="100">
+              <template #default="scope">
+                <span>¥{{ scope.row.price }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="inventory" label="库存" width="100"></el-table-column>
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
+                  {{ scope.row.status === 1 ? '上架' : '下架' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+          </el-table>
+        </el-card>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import type { EChartsOption } from 'echarts'
-import { 
-  CaretTop, 
+import type { EChartsOption, ECharts } from 'echarts'
+import {
+  CaretTop,
   CaretBottom,
   Document,
   Collection,
   ChatLineRound,
-  View
+  View,
+  ShoppingCart,
+  Menu,
+  Goods,
+  PieChart,
+  Star,
+  Comment,
+  Bell,
+  UserFilled,
+  User
 } from '@element-plus/icons-vue'
 import CountTo from '@/views/dashboard/components/CountTo.vue'
-import ContributionGraph from './components/ContributionGraph.vue'
 import { getDashboardDataApi } from '@/api/system'
+import { onMounted, onUnmounted, ref, markRaw } from 'vue'
 
+// 图表引用
+const userGrowthChartRef = ref<HTMLElement>()
+const orderGrowthChartRef = ref<HTMLElement>()
+const categoryChartRef = ref<HTMLElement>()
+
+// 图表实例
+let userGrowthChart: ECharts | null = null
+let orderGrowthChart: ECharts | null = null
+let categoryChart: ECharts | null = null
+
+// 图标定义
 const icons = {
+  User: markRaw(User),
+  UserFilled: markRaw(UserFilled),
+  Goods: markRaw(Goods),
+  Category: markRaw(PieChart),
+  Star: markRaw(Star),
+  Order: markRaw(Bell),
   Document: markRaw(Document),
-  Collection: markRaw(Collection),
-  ChatLineRound: markRaw(ChatLineRound),
-  View: markRaw(View),
-  CaretTop: markRaw(CaretTop),
-  CaretBottom: markRaw(CaretBottom)
+  Comment: markRaw(Comment),
+  ShoppingCart: markRaw(ShoppingCart),
+  Menu: markRaw(Menu)
 }
 
+// 数据卡片配置
 const statistics = ref([
-  { 
-    title: '用户总数', 
-    value: 0, 
-    type: 'success',
-    icon: icons.Collection
-  },
-  { 
-    title: '角色总数', 
-    value: 0, 
-    type: 'warning',
-    icon: icons.ChatLineRound
-  },
+  { title: '用户总数', value: 0, type: 'success', icon: icons.User },
+  { title: '角色总数', value: 0, type: 'danger', icon: icons.UserFilled },
+  { title: '商品总数', value: 0, type: 'primary', icon: icons.Goods },
+  { title: '商品分类', value: 0, type: 'danger', icon: icons.Category },
+  { title: '商品品牌', value: 0, type: 'success', icon: icons.Star },
+  { title: '订单总数', value: 0, type: 'warning', icon: icons.Order },
+  { title: '博客总数', value: 0, type: 'info', icon: icons.Document },
+  { title: '评论总数', value: 0, type: 'primary', icon: icons.Comment },
 ])
 
-const contributionData = ref([])
+// 数据概览
+const overviewData = ref([
+  { label: '总销售额', value: 0, type: 'primary' },
+  { label: '待付款订单', value: 0, type: 'warning' },
+  { label: '今日新增用户', value: 0, type: 'success' },
+  { label: '上架商品', value: 0, type: 'info' }
+])
 
-// 作者信息
-defineOptions({
-  name: 'Dashboard'
-})
+// 最新订单
+const latestOrders = ref<Array<any>>([])
 
-const authorInfo = ref({
-  name: 'River',
-  title: '全栈开发工程师',
-  description: '致力于构建高效、美观的Web应用，拥有丰富的前后端开发经验。这个系统是个人学习和实践的项目，希望能够帮助到更多开发者。',
-  avatar: 'https://picsum.photos/id/1/200/200', // 使用占位图片
-  contacts: [
-    { type: 'primary', label: 'GitHub', value: 'github.com/example' },
-    { type: 'success', label: '邮箱', value: 'example@mail.com' },
-    { type: 'warning', label: '博客', value: 'blog.example.com' }
-  ]
-})
+// 最新商品
+const latestProducts = ref<Array<any>>([])
 
-// 图表相关
-const lineChartRef = ref<HTMLElement>()
-const pieChartRef = ref<HTMLElement>()
-const lineChart = shallowRef<echarts.ECharts | null>(null)
-const pieChart = shallowRef<echarts.ECharts | null>(null)
+// 后端返回数据
+const dashboardData = ref<any>(null)
 
+// 订单状态颜色
+// 订单状态 0待付款 1已付款 2待发货 3已发货 4已完成 5已取消 6已退款
+const getStatusColor = (status: number) => {
+  const colorMap: Record<number, string> = {
+    0: 'warning',
+    1: 'success',
+    2: 'info',
+    3: 'primary',
+    4: 'success',
+    5: 'danger',
+    6: 'default'
+
+  }
+  return colorMap[status] || 'default'
+}
+const getStatusText = (status: number) => {
+  const textMap: Record<number, string> = {
+    0: '待付款',
+    1: '已付款',
+    2: '待发货',
+    3: '已发货',
+    4: '已完成',
+    5: '已取消',
+    6: '已退款'
+
+  }
+  return textMap[status] || '未知'
+}
+
+// 初始化用户增长图表
+const initUserGrowthChart = () => {
+  if (!userGrowthChartRef.value) return
+
+  userGrowthChart = echarts.init(userGrowthChartRef.value)
+  const option: EChartsOption = {
+    tooltip: {
+      trigger: 'axis',
+      formatter: '{b}: {c}人'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: dashboardData.value?.userGrowth?.map((item: any) => item.date) || []
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [{
+      name: '新增用户',
+      type: 'line',
+      smooth: true,
+      data: dashboardData.value?.userGrowth?.map((item: any) => item.count) || [],
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(82, 196, 26, 0.5)' },
+          { offset: 1, color: 'rgba(82, 196, 26, 0.1)' }
+        ])
+      },
+      itemStyle: {
+        color: '#52c41a'
+      }
+    }]
+  }
+  userGrowthChart.setOption(option)
+}
+
+// 初始化订单趋势图表
+const initOrderGrowthChart = () => {
+  if (!orderGrowthChartRef.value) return
+
+  orderGrowthChart = echarts.init(orderGrowthChartRef.value)
+  const option: EChartsOption = {
+    tooltip: {
+      trigger: 'axis',
+      formatter: '{b}<br/>订单数: {c0}笔<br/>金额: ¥{c1}'
+    },
+    legend: {
+      data: ['订单数', '订单金额'],
+      top: 0
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: dashboardData.value?.orderGrowth?.map((item: any) => item.date) || []
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '订单数',
+        position: 'left'
+      },
+      {
+        type: 'value',
+        name: '订单金额',
+        position: 'right'
+      }
+    ],
+    series: [
+      {
+        name: '订单数',
+        type: 'line',
+        smooth: true,
+        data: dashboardData.value?.orderGrowth?.map((item: any) => item.count) || [],
+        itemStyle: {
+          color: '#1890ff'
+        }
+      },
+      {
+        name: '订单金额',
+        type: 'line',
+        smooth: true,
+        yAxisIndex: 1,
+        data: dashboardData.value?.orderGrowth?.map((item: any) => item.amount) || [],
+        itemStyle: {
+          color: '#faad14'
+        }
+      }
+    ]
+  }
+  orderGrowthChart.setOption(option)
+}
+
+// 初始化商品分类分布图表
+const initCategoryChart = () => {
+  if (!categoryChartRef.value) return
+
+  categoryChart = echarts.init(categoryChartRef.value)
+  const option: EChartsOption = {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)'
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left',
+      top: 'center'
+    },
+    series: [
+      {
+        name: '商品分类',
+        type: 'pie',
+        radius: ['40%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: false,
+          position: 'center'
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 20,
+            fontWeight: 'bold'
+          }
+        },
+        labelLine: {
+          show: false
+        },
+        data: dashboardData.value?.categoryDistribution || []
+      }
+    ]
+  }
+  categoryChart.setOption(option)
+}
 
 // 处理窗口大小变化
 const handleResize = () => {
-  lineChart.value?.resize()
-  pieChart.value?.resize()
+  userGrowthChart?.resize()
+  orderGrowthChart?.resize()
+  categoryChart?.resize()
 }
 
+// 初始化图表
+const initCharts = () => {
+  initUserGrowthChart()
+  initOrderGrowthChart()
+  initCategoryChart()
+}
+
+// 加载数据
+const loadData = async () => {
+  try {
+    const res = await getDashboardDataApi()
+    const data = res.data
+    dashboardData.value = data
+
+    // 更新数据卡片
+    statistics.value[0].value = data.userCount || 0
+    statistics.value[1].value = data.roleCount || 0
+    statistics.value[2].value = data.productCount || 0
+    statistics.value[3].value = data.categoryCount || 0
+    statistics.value[4].value = data.brandCount || 0
+    statistics.value[5].value = data.orderCount || 0
+    statistics.value[6].value = data.blogCount || 0
+    statistics.value[7].value = data.commentCount || 0
+
+    overviewData.value[0].value = data.totalSales || 0
+    overviewData.value[1].value = data.pendingOrders || 0
+    overviewData.value[2].value = data.todayNewUsers || 0
+    overviewData.value[3].value = data.activeProducts || 0
+
+    // 更新表格数据
+    latestOrders.value = data.latestOrders || []
+    latestProducts.value = data.latestProducts || []
+
+    // 初始化图表
+    initCharts()
+  } catch (error) {
+    console.error('获取仪表盘数据失败:', error)
+  }
+}
 
 onMounted(() => {
-  getDashboardDataApi().then(res => {
-    statistics.value[0].value = res.data.userCount
-    statistics.value[1].value = res.data.roleCount
-  })
+  loadData()
   window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
-  lineChart.value?.dispose()
-  pieChart.value?.dispose()
+  userGrowthChart?.dispose()
+  orderGrowthChart?.dispose()
+  categoryChart?.dispose()
 })
 </script>
 
 <style scoped>
+.dashboard-container {
+  padding: 20px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
 
 /* 数据卡片样式 */
 .data-card {
@@ -200,6 +519,10 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #13c2c2, #36cfc9);
 }
 
+.icon-wrapper.danger {
+  background: linear-gradient(135deg, #f5222d, #ff4d4f);
+}
+
 .data-wrapper {
   flex: 1;
 }
@@ -218,9 +541,17 @@ onUnmounted(() => {
   margin-bottom: 12px;
 }
 
-/* 图表区域样式 */
-.chart-row {
-  margin-top: 20px;
+/* 图表样式 */
+.chart-card {
+  height: auto;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .chart {
@@ -228,117 +559,84 @@ onUnmounted(() => {
   width: 100%;
 }
 
-.chart-card {
+/* 表格样式 */
+.table-card {
   height: auto;
-  margin-bottom: 20px;
+}
+
+/* 概览内容 */
+.overview-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.overview-item {
+  text-align: center;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.overview-item:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.overview-label {
+  font-size: 14px;
+  color: #909399;
+  margin-bottom: 8px;
+}
+
+.overview-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #303133;
 }
 
 /* 暗色主题适配 */
 @media (prefers-color-scheme: dark) {
-  .card-value {
+
+  .card-value,
+  .overview-value,
+  .card-header span {
     color: #e6e6e6;
   }
 
-  .chart-placeholder {
+  .overview-item {
     background: #1a1a1a;
-    color: #909399;
   }
 
-  .author-name {
-    color: #e6e6e6;
+  .overview-item:hover {
+    background: #2a2a2a;
   }
-
-  .author-title,
-  .author-description {
-    color: #909399;
-  }
-}
-
-/* 作者信息卡片样式 */
-.author-card {
-  animation: slideUp 0.5s ease-out forwards;
-  opacity: 0;
-  transform: translateY(20px);
-  animation-delay: 0.4s;
-}
-
-.author-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-}
-
-.author-avatar {
-  width: 100px;
-  height: 100px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.author-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.author-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.author-details {
-  flex: 1;
-}
-
-.author-name {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 8px;
-  margin-top: 4px;
-}
-
-.author-title {
-  font-size: 16px;
-  color: #606266;
-  margin-bottom: 12px;
-}
-
-.author-description {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #606266;
-  margin-bottom: 16px;
-  word-break: break-word;
-}
-
-.author-contact {
-  display: flex;
-  flex-wrap: wrap;
 }
 
 /* 响应式布局 */
+@media screen and (max-width: 1200px) {
+  .overview-content {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media screen and (max-width: 768px) {
-  .author-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  .dashboard-container {
+    padding: 10px;
   }
-  
-  .author-avatar {
-    width: 80px;
-    height: 80px;
+
+  .chart {
+    height: 250px;
   }
-  
-  .author-name {
+
+  .card-value {
+    font-size: 22px;
+  }
+
+  .overview-value {
     font-size: 20px;
-  }
-  
-  .author-contact {
-    justify-content: center;
   }
 }
 </style>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.river.mapper.ProductCategoryMapper">
+
+    <!-- 查询商品分类分布 -->
+    <select id="selectCategoryDistribution" resultType="java.util.Map">
+        SELECT
+            pc.name,
+            COUNT(p.id) as value
+        FROM product_category pc
+        LEFT JOIN product p ON pc.id = p.category_id
+        GROUP BY pc.id, pc.name
+        ORDER BY value DESC
+    </select>
+
+</mapper>

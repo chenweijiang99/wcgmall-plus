@@ -47,23 +47,14 @@
       <template #header>
         <ButtonGroup>
           <el-button type="primary" plain icon="Plus" @click="handleAdd">新增 </el-button>
-          <el-button
-            type="danger"
-            plain
-            icon="Delete"
-            :disabled="selectedIds.length === 0"
-            @click="handleBatchDelete"
-            >批量删除
+          <el-button type="danger" plain icon="Delete" :disabled="selectedIds.length === 0"
+            @click="handleBatchDelete">批量删除
           </el-button>
         </ButtonGroup>
       </template>
 
       <!-- 数据表格 -->
-      <el-table
-        v-loading="loading"
-        :data="dataList"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table v-loading="loading" :data="dataList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <!-- <el-table-column label="主键ID" align="center" prop="id"/> -->
         <el-table-column label="轮播图" align="center" prop="url">
@@ -71,19 +62,17 @@
             <el-image :src="scope.row.url" style="width: 50%"></el-image>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" align="center" prop="createTime" />
-        <el-table-column label="更新时间" align="center" prop="updateTime" />
-        <el-table-column
-          label="操作"
-          align="center"
-          class-name="small-padding fixed-width"
-        >
+        <el-table-column label="标题" align="center" prop="title" />
+        <el-table-column label="副标题" align="center" prop="subtitle" />
+        <el-table-column label="按钮内容" align="center" prop="cta" />
+        <el-table-column label="按钮链接" align="center" prop="link" />
+        <!-- <el-table-column label="创建时间" align="center" prop="createTime" />
+        <el-table-column label="更新时间" align="center" prop="updateTime" /> -->
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
           <template #default="scope">
-            <el-button type="primary" link icon="Edit" @click="handleUpdate(scope.row)"
-              >修改
+            <el-button type="primary" link icon="Edit" @click="handleUpdate(scope.row)">修改
             </el-button>
-            <el-button type="danger" link icon="Delete" @click="handleDelete(scope.row)"
-              >删除
+            <el-button type="danger" link icon="Delete" @click="handleDelete(scope.row)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -94,23 +83,28 @@
 
       <!-- 分页工具栏 -->
       <div class="pagination-container">
-        <el-pagination
-          background
-          v-model:current-page="queryParams.pageNum"
-          v-model:page-size="queryParams.pageSize"
-          :page-sizes="[10, 20, 30, 50]"
-          :total="total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination background v-model:current-page="queryParams.pageNum" v-model:page-size="queryParams.pageSize"
+          :page-sizes="[10, 20, 30, 50]" :total="total" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
 
       <!-- 添加或修改对话框 -->
       <el-dialog v-model="open" :title="title" width="500px" append-to-body>
         <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
           <el-form-item label="轮播图" prop="url">
-              <UploadImage v-model="form.url" :limit="1" :source="'indexSlider-image'" />
+            <UploadImage v-model="form.url" :limit="1" :source="'indexSlider-image'" />
+          </el-form-item>
+          <el-form-item label="标题" prop="title">
+            <el-input v-model="form.title" placeholder="请输入标题" />
+          </el-form-item>
+          <el-form-item label="副标题" prop="subtitle">
+            <el-input v-model="form.subtitle" placeholder="请输入副标题" />
+          </el-form-item>
+          <el-form-item label="按钮内容" prop="cta">
+            <el-input v-model="form.cta" placeholder="请输入按钮内容" />
+          </el-form-item>
+          <el-form-item label="按钮链接" prop="link">
+            <el-input v-model="form.link" placeholder="请输入按钮链接" />
           </el-form-item>
           <!-- <el-form-item label="创建时间" prop="createTime">
             <el-input v-model="form.createTime" placeholder="请输入创建时间" />
@@ -167,7 +161,11 @@ const queryParams = reactive({
 const form = reactive<any>({});
 // 表单校验
 const rules = reactive({
-  id: [{ required: true, message: "主键ID不能为空", trigger: "blur" }],
+  url: [{ required: true, message: "轮播图不能为空", trigger: "blur" }],
+  title: [{ required: true, message: "标题不能为空", trigger: "blur" }],
+  subtitle: [{ required: true, message: "副标题不能为空", trigger: "blur" }],
+  cta: [{ required: true, message: "按钮内容不能为空", trigger: "blur" }],
+  link: [{ required: true, message: "按钮链接不能为空", trigger: "blur" }],
 });
 
 const queryFormRef = ref();
@@ -180,7 +178,7 @@ const getList = async () => {
     const { data } = await listIndexSliderApi(queryParams);
     dataList.value = data.records;
     total.value = data.total;
-  } catch (error) {}
+  } catch (error) { }
   loading.value = false;
 };
 
@@ -192,13 +190,12 @@ const cancel = () => {
 
 /** 表单重置 */
 const reset = () => {
-  Object.assign(form, {
-    id: undefined,
-    url: undefined,
-    createTime: undefined,
-    updateTime: undefined,
-  });
-  formRef.value?.resetFields();
+ form.id = undefined;
+ form.url = undefined;
+ form.title = undefined;
+ form.subtitle = undefined;
+ form.cta = undefined;
+ form.link = undefined;
 };
 
 /** 搜索按钮操作 */
@@ -249,7 +246,7 @@ const submitForm = async () => {
         }
         open.value = false;
         getList();
-      } catch (error) {}
+      } catch (error) { }
     }
   });
 };

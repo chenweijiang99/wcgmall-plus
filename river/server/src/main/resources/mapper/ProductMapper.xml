@@ -70,6 +70,21 @@
     ORDER BY p.id
 </select>
 
-
-
+    <!-- 查询最新商品 -->
+    <select id="selectLatestProducts" resultType="java.util.Map">
+        SELECT
+            id,
+            name,
+            price,
+            inventory,
+            status,
+            DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%s') AS createTime
+        FROM product
+        ORDER BY createTime DESC
+        LIMIT #{limit}
+    </select>
+    <!-- 上架商品数量 -->
+    <select id="selectActiveProducts" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM product WHERE status = 1
+    </select>
 </mapper>

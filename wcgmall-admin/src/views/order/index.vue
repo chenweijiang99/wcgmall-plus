@@ -11,30 +11,29 @@
             @keyup.enter="handleQuery"
           />
         </el-form-item>
+        <!-- 订单状态 0待付款 1已付款 2待发货 3已发货 4已完成 5已取消 6已退款 -->
         <el-form-item
-          label="订单状态 1待付款 2待发货 3已发货 4已完成 5已取消 6已退款"
+          label="订单状态"
           prop="status"
         >
-          <el-input
+          <el-select
             v-model="queryParams.status"
-            placeholder="请输入订单状态 1待付款 2待发货 3已发货 4已完成 5已取消 6已退款"
+            placeholder="请选择订单状态"
             clearable
-            @keyup.enter="handleQuery"
-          />
+          >
+            <el-option
+              v-for="item in orderStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item label="支付方式" prop="payMethod">
           <el-input
             v-model="queryParams.payMethod"
             placeholder="请输入支付方式"
-            clearable
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="支付状态 0未支付 1已支付 2退款" prop="payStatus">
-          <el-input
-            v-model="queryParams.payStatus"
-            placeholder="请输入支付状态 0未支付 1已支付 2退款"
             clearable
             @keyup.enter="handleQuery"
           />
@@ -76,13 +75,17 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="主键ID" align="center" prop="id" />
+        <!-- <el-table-column label="主键ID" align="center" prop="id" /> -->
         <el-table-column label="订单编号" align="center" prop="orderNumber" />
         <el-table-column
-          label="订单状态 1待付款 2待发货 3已发货 4已完成 5已取消 6已退款"
+          label="订单状态"
           align="center"
           prop="status"
-        />
+        >
+          <template #default="scope">
+            {{ orderStatusOptions.find((item) => item.value === scope.row.status)?.label || "-" }}
+          </template>
+        </el-table-column>
         <el-table-column label="用户ID" align="center" prop="userId" />
         <el-table-column label="收货人姓名" align="center" prop="consignee" />
         <el-table-column label="收货地址" align="center" prop="consigneeAddress" />
@@ -90,10 +93,14 @@
         <el-table-column label="邮箱" align="center" prop="email" />
         <el-table-column label="支付方式" align="center" prop="payMethod" />
         <el-table-column
-          label="支付状态 0未支付 1已支付 2退款"
+          label="支付状态"
           align="center"
           prop="payStatus"
-        />
+        >
+          <template #default="scope">
+            {{ payStatusOptions.find((item) => item.value === scope.row.payStatus)?.label || "-" }}
+          </template>
+        </el-table-column>
         <el-table-column label="订单金额" align="center" prop="amount" />
         <el-table-column label="下单时间" align="center" prop="orderTime" />
         <el-table-column label="结账时间" align="center" prop="checkoutTime" />
@@ -248,7 +255,20 @@ const rules = reactive({
 
 const queryFormRef = ref();
 const formRef = ref();
-
+const orderStatusOptions = ref([
+  { value: 0, label: "待付款" },
+  { value: 1, label: "已付款" },
+  { value: 2, label: "待发货" },
+  { value: 3, label: "已发货" },
+  { value: 4, label: "已完成" },
+  { value: 5, label: "已取消" },
+  { value: 6, label: "已退款" },
+]);
+const payStatusOptions = ref([
+  { value: 0, label: "未支付" },
+  { value: 1, label: "已支付" },
+  { value: 2, label: "退款" },
+]);
 /** 查询列表 */
 const getList = async () => {
   loading.value = true;

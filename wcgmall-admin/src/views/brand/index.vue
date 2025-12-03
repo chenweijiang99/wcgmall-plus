@@ -189,10 +189,8 @@ const cancel = () => {
 
 /** 表单重置 */
 const reset = () => {
-  Object.assign(form, {
-    name: undefined,
-  });
-  formRef.value?.resetFields();
+  form.id = undefined;
+  form.name = "";
 };
 
 /** 搜索按钮操作 */
