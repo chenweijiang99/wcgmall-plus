@@ -1,5 +1,6 @@
 package com.river.service;
 
+import com.river.dto.OrderSubmitDTO;
 import com.river.entity.ProductOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -34,4 +35,6 @@ public interface ProductOrderService extends IService<ProductOrder> {
      * 批量删除
      */
     boolean deleteByIds(List<Long> ids);
+
+    String submitOrder(OrderSubmitDTO submitDTO);
 }

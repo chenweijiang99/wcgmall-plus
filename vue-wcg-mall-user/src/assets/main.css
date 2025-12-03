@@ -62,6 +62,9 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+a {
+  text-decoration: none;
+}
 .flex{
   display: flex;
 }
@@ -467,7 +470,7 @@ button:focus {
   box-shadow: none;
 }
 
-.form-control:focus,
+/* .form-control:focus,
 .page-link:focus,
 textarea:focus,
 textarea.form-control:focus,
@@ -494,7 +497,7 @@ input[type=number]:focus,
   -ms-box-shadow: 0 0 0px 1000px #ffffff inset;
   -o-box-shadow: 0 0 0px 1000px #ffffff inset;
   box-shadow: 0 0 0px 1000px #ffffff inset;
-}
+} */
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -4454,6 +4457,25 @@ input:-webkit-autofill:active {
   padding: 0.375rem 2.2rem 0.375rem 1rem;
 }
 
+/* Password strength indicator */
+.password-strength-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.password-strength-weak {
+  color: #f56c6c;
+}
+
+.password-strength-medium {
+  color: #e6a23c;
+}
+
+.password-strength-strong {
+  color: #67c23a;
+}
+
 /*----------------------------------------*/
 /*           04. Account CSS
 /*----------------------------------------*/
@@ -6755,4 +6777,9 @@ input:-webkit-autofill:active {
     -webkit-transform: rotate(-360deg);
   }
 }
+
+
+/*----------------------------------------*/
+/*           Element CSS
+/*----------------------------------------*/
 

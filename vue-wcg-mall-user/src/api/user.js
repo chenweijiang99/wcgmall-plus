@@ -1,8 +1,11 @@
 import request from '@/utils/request.js'
 
-export const userRegisterService = (registerData) => {
-
-    return request.post('/user/user/register', registerData);
+export const userRegisterService = (data) => {
+  return request({
+    url: '/auth/register',
+    method: 'post',
+    data
+  })
 }
 
 export const userLoginService = (loginData) => {
@@ -40,7 +43,13 @@ export const userCheckCode = (checkData) => {
 }
 
 export const userGetCode = (email) => {
-    return request.get('/user/user/getCode?email=' + email);
+     return request({
+    url: '/auth/getEmailCode',
+    method: 'get',
+    params: {
+      email
+    }
+  })
 }
 
 export const userUpdateService = (data) => {

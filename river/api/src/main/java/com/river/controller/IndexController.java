@@ -59,5 +59,4 @@ public class IndexController {
     public Result<List<Blog>> getNewBlog() {
         return Result.success(blogService.userGetNewBlogList());
     }
-
 }

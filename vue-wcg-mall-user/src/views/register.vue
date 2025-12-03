@@ -1,165 +1,160 @@
 <script setup>
 import { computed, watch, ref, reactive } from "vue";
-
 import { useScrollToTop } from "@/assets/base.js";
 import { ElMessageBox, ElMessage } from "element-plus";
-const { showLoader,backtopStyle,handleMouseEnter,handleMouseLeave} = useScrollToTop();
-
-//验证码图片
-import Img1 from "@/assets/images/code/code1.jpg";
-import Img2 from "@/assets/images/code/code2.jpg";
-import Img3 from "@/assets/images/code/code3.jpg";
-import Img4 from "@/assets/images/code/code4.jpg";
-const captchaImages = [Img1, Img2, Img3,Img4];
-//引入'vue3-puzzle-vcode'插件
-import Vcode from "vue3-puzzle-vcode";
-//验证码模态框是否出现，默认不展示
-const isShow = ref(false);
-
-//用户通过了验证
-const success = () => {
-  isShow.value = false;
-  register();
-};
-//用户点击遮罩层，关闭模态框
-const close = () => {
-  isShow.value = false;
-};
-// 打开验证组件
-const validate = () => {
-  if (
-    nameError.value != "" ||
-    emailError.value != "" ||
-    passwordError.value != "" ||
-    registerData.value.nickName == "" ||
-    registerData.value.email == "" ||
-    registerData.value.password == ""
-  ) {
-    ElMessage.error("请检查输入数据是否符合要求");
-    return;
-  }
-  //展现验证码模态框
-  isShow.value = true;
-};
-
-const registerData = ref({
-  nickName: "",
-  email: "",
-  password: "",
-});
-const nameError = ref("");
-const validateName = () => {
-  const name = registerData.value.nickName;
-  if (!name) {
-    nameError.value = "请输入昵称";
-  } else if (name.length < 2 || name.length > 12) {
-    nameError.value = "昵称长度在2-12个字符之间";
-  } else {
-    nameError.value = "";
-  }
-};
-const emailError = ref("");
-const validateEmail = () => {
-  const email = registerData.value.email;
-  if (!email) {
-    emailError.value = "邮箱不能为空";
-  } else if (!/\S+@\S+\.\S+/.test(email)) {
-    emailError.value = "请输入有效的邮箱地址";
-  } else {
-    emailError.value = "";
-  }
-};
-
-const passwordError = ref("");
-const validatePassword = () => {
-  const password = registerData.value.password;
-  if (!password) {
-    passwordError.value = "请输入密码";
-  } else if (password.length < 6 || password.length > 18) {
-    passwordError.value = "密码长度在6-18个字符之间";
-  } else {
-    passwordError.value = "";
-  }
-};
-
-import { userRegisterService } from "@/api/user.js";
+import MyButton from "@/components/Button/index.vue";
+import MyInput from "@/components/Input/index.vue";
+import { userGetCode, userRegisterService } from "@/api/user.js";
 import { useRouter } from "vue-router";
 import useUserInfoStore from "@/stores/userInfo";
+
 const userInfoStore = useUserInfoStore();
 const router = useRouter();
-const register = async () => {
-  showLoader.value = true;
-  let result = await userRegisterService(registerData.value);
-  if (result.code === 1) {
-    showLoader.value = false;
-    ElMessage({
-        showClose: true,
-        type: "success",
-        message: result.message ? result.message : "注册成功，请激活后登录",
-        plain: true,
-      });
-    userInfoStore.setInfo(registerData.value);
-    router.push("/activate");
-  } else if (result.code === 0) {
-    showLoader.value = false;
-    ElMessage.error(result.message ? result.message : "注册失败");
-  }
-};
+const { showLoader, backtopStyle, handleMouseEnter, handleMouseLeave } = useScrollToTop();
+// 注册表单数据
+const registerData = ref({
+  username: "",
+  nickname: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  code: "",
+});
+const formRef = ref(null);
+const countdown = ref(0);
+let countdownTimer = null;
 
-let percentage = ref(0);
-let status = ref("exception");
+// 密码强度计算
+const passwordStrength = computed(() => {
+  const password = registerData.value.password;
+  if (!password) return { percentage: 0, status: "", text: "" };
 
-const checkStrong = (sValue) => {
-  var modes = 0;
-  if (sValue.length < 1) return modes;
-  if (/\d/.test(sValue)) modes++; //数字
-  if (/[a-z]/.test(sValue)) modes++; //小写
-  if (/[A-Z]/.test(sValue)) modes++; //大写
-  if (/\W/.test(sValue)) modes++; //特殊字符
-  switch (modes) {
-    case 1:
-      return 1;
-      break;
-    case 2:
-      return 2;
-      break;
-    case 3:
-      return 3;
-    case 4:
-      return 4;
-      break;
-  }
-  return modes;
-};
+  let strength = 0;
+  let feedback = [];
 
-const statusChange = (modes) => {
-  if (modes == 1) {
-    percentage.value = 25;
-    status.value = "exception";
-  } else if (modes == 2) {
-    percentage.value = 50;
-    status.value = "exception";
-  } else if (modes == 3) {
-    percentage.value = 75;
-    status.value = "warning";
+  // 长度检查
+  if (password.length >= 6) strength += 25;
+  else feedback.push("至少6个字符");
+
+  // 包含数字
+  if (/\d/.test(password)) strength += 25;
+  else feedback.push("包含数字");
+
+  // 包含小写字母
+  if (/[a-z]/.test(password)) strength += 25;
+  else feedback.push("包含小写字母");
+
+  // 包含大写字母或特殊字符
+  if (/[A-Z]/.test(password) || /[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 25;
+  else feedback.push("包含大写字母或特殊字符");
+
+  // 根据强度返回状态和文本
+  if (strength < 50) {
+    return {
+      percentage: strength,
+      status: "exception",
+      text: "弱 (" + feedback.join(", ") + ")",
+    };
+  } else if (strength < 75) {
+    return {
+      percentage: strength,
+      status: "warning",
+      text: "中等 (还需改进)",
+    };
   } else {
-    percentage.value = 100;
-    status.value = "success";
+    return {
+      percentage: strength,
+      status: "success",
+      text: "强",
+    };
   }
+});
+// 注册表单验证规则
+const registerRules = {
+  username: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" },
+  ],
+  nickname: [
+    { required: true, message: "请输入昵称", trigger: "blur" },
+    { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" },
+  ],
+  email: [
+    { required: true, message: "请输入邮箱", trigger: "blur" },
+    { type: "email", message: "请输入正确的邮箱格式", trigger: "blur" },
+  ],
+  password: [
+    { required: true, message: "请设置密码", trigger: "blur" },
+    { min: 6, max: 20, message: "长度在 6 到 20 个字符", trigger: "blur" },
+  ],
+  confirmPassword: [
+    { required: true, message: "请确认密码", trigger: "blur" },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== registerData.value.password) {
+          callback(new Error("两次输入的密码不一致"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
 };
-watch(
-  () => registerData.value.password,
-  (newValue, oldValue) => {
-    let modes = checkStrong(newValue);
-    console.log(modes);
-    statusChange(modes);
+
+// 获取注册验证码
+const getRegisterCaptcha = async () => {
+  if (!registerData.value.email) {
+    ElMessage.warning("请先输入邮箱");
+    return;
   }
-);
+
+  userGetCode(registerData.value.email).then(() => {
+    ElMessage.success("验证码已发送到您的邮箱");
+  });
+
+  // 倒计时逻辑
+  countdown.value = 120;
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = window.setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+  }, 1000);
+};
+const handleRegister = async () => {
+  formRef.value?.validate(async (valid) => {
+    if (valid) {
+      const result = await userRegisterService(registerData.value);
+      if (result.code === 200) {
+        ElMessage({
+          showClose: true,
+          type: "success",
+          message: "注册成功，请登录",
+          plain: true,
+        });
+        router.push("/login");
+        // 清空注册表单
+        Object.keys(registerData).forEach((key) => {
+          registerData[key] = "";
+        });
+      } else {
+        ElMessage({
+          showClose: true,
+          type: "error",
+          message: result.message ? result.message : "登录失败",
+          plain: true,
+        });
+      }
+    }
+  });
+};
 </script>
 
 <template>
-  <!-- <headerView /> -->
-  <!-- breadcrumb -->
   <div class="container header-mt">
     <div class="row">
       <div class="col-12">
@@ -174,100 +169,110 @@ watch(
       </div>
     </div>
   </div>
-  <!-- end breadcrumb -->
-  <!-- main content -->
+
   <div class="main-content pb-100">
     <div class="container">
       <div class="row">
         <div class="col-lg-6 col-md-8 col-12 mx-auto">
           <div class="custom-form custom-form--box">
             <h3 class="custom-form__title">注册账户</h3>
-            <el-form :model="registerData" @submit.prevent="validate">
-              <div class="form-group custom-form__input">
-                <label for="name">昵称</label>
-                <el-form-item>
-                  <input
-                    class="form-control"
-                    id="nickName"
-                    v-model="registerData.nickName"
-                    @blur="validateName"
-                  />
-                  <small v-if="nameError">{{ nameError }}</small>
-                </el-form-item>
-              </div>
+            <el-form
+              :model="registerData"
+              ref="formRef"
+              :rules="registerRules"
+              label-position="top"
+            >
+              <el-form-item label="用户名" prop="username">
+                <my-input
+                  v-model="registerData.username"
+                  placeholder="输入您的用户名"
+                  clearable
+                  prefix-icon="User"
+                >
+                </my-input>
+              </el-form-item>
+              <el-form-item label="昵称" prop="nickname">
+                <my-input
+                  v-model="registerData.nickname"
+                  placeholder="输入您的昵称"
+                  clearable
+                  prefix-icon="UserFilled"
+                >
+                </my-input>
+              </el-form-item>
+              <el-form-item label="密码" prop="password">
+                <my-input
+                  v-model="registerData.password"
+                  type="password"
+                  placeholder="输入您的密码"
+                  clearable
+                  show-password
+                  prefix-icon="Lock"
+                >
+                </my-input>
+              </el-form-item>
+              <el-form-item label="确认密码" prop="confirmPassword">
+                <my-input
+                  v-model="registerData.confirmPassword"
+                  type="password"
+                  placeholder="请确认密码"
+                  clearable
+                  show-password
+                  prefix-icon="Lock"
+                >
+                </my-input>
+              </el-form-item>
+              <el-form-item label="邮箱" prop="email">
+                <my-input
+                  v-model="registerData.email"
+                  type="email"
+                  placeholder="输入您的邮箱"
+                  clearable
+                  prefix-icon="Message"
+                >
+                </my-input>
+              </el-form-item>
+              <el-form-item label="验证码" prop="code">
+                <my-input
+                  v-model="registerData.code"
+                  placeholder="请输入验证码"
+                  prefix-icon="CircleCheck"
+                  style="width: 60%"
+                ></my-input>
+                <my-button
+                  type="primary"
+                  :disabled="countdown > 0"
+                  style="width: 35%; margin-left: 5%"
+                  @click="getRegisterCaptcha"
+                >
+                  {{ countdown > 0 ? `${countdown}s后重试` : "获取验证码" }}
+                </my-button>
+              </el-form-item>
 
               <div class="form-group custom-form__input">
-                <label for="email">邮箱</label>
-                <el-form-item>
-                  <input
-                    type="email"
-                    id="email"
-                    class="form-control"
-                    @blur="validateEmail"
-                    v-model="registerData.email"
-                  />
-                  <small v-if="emailError">{{ emailError }}</small>
-                </el-form-item>
-              </div>
-
-              <div class="form-group custom-form__input">
-                <label for="password">密码</label>
-                <div class="input-box">
-                  <input
-                    type="password"
-                    class="form-control"
-                    id="password"
-                    v-model="registerData.password"
-                    @blur="validatePassword"
-                  />
-                  <small v-if="passwordError">{{ passwordError }}</small>
-                </div>
-              </div>
-              <div class="form-group custom-form__input">
-                <label>密码强度</label>
+                <label
+                  class="password-strength-label"
+                  :class="{
+                    'password-strength-weak': passwordStrength.status === 'exception',
+                    'password-strength-medium': passwordStrength.status === 'warning',
+                    'password-strength-strong': passwordStrength.status === 'success',
+                  }"
+                >
+                  {{ passwordStrength.text }}
+                </label>
 
                 <el-progress
                   v-show="registerData.password"
-                  :percentage="percentage"
-                  :status="status"
+                  :percentage="passwordStrength.percentage"
+                  :status="passwordStrength.status"
                   style="width: 100%"
                 />
               </div>
-              <Vcode
-                :show="isShow"
-                @success="success"
-                @close="close"
-                @fail="fail"
-                :imgs="captchaImages"
-              ></Vcode>
+
               <div class="custom-form__btn">
-                <button type="submit" class="btn submit-btn">注册</button>
+                <my-button type="primary" @click="handleRegister">注册</my-button>
               </div>
               <div class="custom-form__footer">
-                <!-- login/sign up with social media -->
-                <div class="devider">
-                  <span>使用其他账户注册</span>
-                </div>
-                <div class="social-login">
-                  <ul>
-                    <li>
-                      <a href="javascript:void(0)" class="social-icon tr-icon"
-                        ><i class="bi-tencent-qq"></i
-                      ></a>
-                    </li>
-                    <li>
-                      <a href="javascript:void(0)" class="social-icon gl-icon"
-                        ><i class="bi-sina-weibo"></i
-                      ></a>
-                    </li>
-                    <li>
-                      <a href="javascript:void(0)" class="social-icon gr-icon"
-                        ><i class="bi-wechat"></i
-                      ></a>
-                    </li>
-                  </ul>
-                </div>
-                <!-- form footer -->
                 <div class="custom-form__footer--link">
                   <h6>已经拥有账户?</h6>
                   <router-link to="/login" class="btn">登录</router-link>
@@ -279,9 +284,7 @@ watch(
       </div>
     </div>
   </div>
-  <!-- end main content -->
 
-  <!-- scroll up btn -->
   <el-backtop
     :right="100"
     :bottom="100"
@@ -289,25 +292,15 @@ watch(
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   />
-  <!-- end scroll up btn -->
-  <!-- loader -->
+
   <div class="loader" v-if="showLoader">
     <div class="spinner">
       <div class="cube1"></div>
       <div class="cube2"></div>
     </div>
   </div>
-  <!-- end loader -->
-  <!-- <footerView /> -->
+
 </template>
 
 <style scoped>
-@import "@/assets/main.css";
-a {
-  text-decoration: none;
-}
-small {
-  margin-left: 1rem;
-  color: darkgrey;
-}
 </style>

@@ -3,7 +3,7 @@
 <mapper namespace="com.river.mapper.ProductMapper">
     <!-- 可以在这里添加自定义的复杂SQL查询 -->
     <select id="userGetNewProductList" resultType="com.river.entity.Product">
-        select * from product where status = 1 order by create_time desc limit 6
+        select * from product where status = 1 order by create_time desc limit 8
     </select>
     <select id="getDetailById" resultType="com.river.vo.product.ProductDetailVo">
         select p.*,

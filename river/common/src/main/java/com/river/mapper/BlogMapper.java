@@ -22,4 +22,8 @@ public interface BlogMapper extends BaseMapper<Blog> {
     IPage<Blog> userGetListPage(Page<BlogPageDto> page, BlogPageDto blogPageDto);
 
     List<Blog> getHotBlogWithComment();
+
+    List<Blog> userGetListByUserId(Long userId);
+
+    Blog userGetDetail(Long id);
 }

@@ -21,7 +21,7 @@ instance.interceptors.request.use(
         //添加token
         const tokenStore = useTokenStore();
         if (tokenStore.token) {
-            config.headers['Authorization'] = tokenStore.token.token;
+            config.headers['Authorization'] = tokenStore.token;
         }
         return config;
     },
@@ -35,13 +35,25 @@ instance.interceptors.request.use(
 let is401Handled = false;
 instance.interceptors.response.use(
     result => {
-        return result.data;
-        // if(result.data.code === 1){
-        //     return result.data;
-        // }
-        // // alert(result.data.msg?result.data.msg:'服务异常')
-        // ElMessage.error(result.data.msg?result.data.msg:'服务异常')
-        // return Promise.reject(result.data);
+        if (result.data.code === 401) {
+            if (!is401Handled) {
+                ElMessage({
+                    showClose: true,
+                    type: 'error',
+                    message: '请先登录',
+                    plain: true,
+                });
+                const tokenStore = useTokenStore();
+                tokenStore.removeToken();
+                router.push('/login')
+                is401Handled = true;
+            }
+            router.push('/login');
+            return Promise.reject(err);
+        } else {
+            return result.data;
+        }
+
     },
     err => {
         if (err.response.status === 401) {

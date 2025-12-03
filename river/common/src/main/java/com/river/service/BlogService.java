@@ -46,4 +46,6 @@ public interface BlogService extends IService<Blog> {
     List<Blog> userGetListByUserId();
 
     boolean userDeleteBlog(Long id);
+
+    Blog userGetDetail(Long id);
 }

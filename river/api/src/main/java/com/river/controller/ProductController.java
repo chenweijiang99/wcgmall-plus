@@ -50,9 +50,9 @@ public class ProductController {
         log.info("分页获取商品列表:{}", productPageDTO);
         return Result.success(productService.selectPage1(productPageDTO));
     }
-    @GetMapping("/getProductDetail")
+    @GetMapping("/getProductDetail/{id}")
     @Operation(summary = "商品详情")
-    public Result<ProductDetailVo> userGetProduct(Long id){
+    public Result<ProductDetailVo> userGetProduct(@PathVariable Long id){
         return Result.success(productService.getDetailById(id));
     }
     @PutMapping("/addToWishList/{id}")

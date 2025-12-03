@@ -8,7 +8,8 @@ import { svgBuilder } from './src/plugins/svgBuilder'
 export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
   // 获取环境变量
   const env = loadEnv(mode, process.cwd())
-  
+
+
   return {
     css: {
       preprocessorOptions: {
@@ -37,6 +38,7 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
         '@': path.resolve(__dirname, 'src')
       }
     },
+
     server: {
       host: '0.0.0.0',
       port: Number(env.VITE_APP_PORT) || 3000,

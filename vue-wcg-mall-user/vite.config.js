@@ -2,14 +2,13 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-
-// https://vitejs.dev/config/
+import { svgBuilder } from './src/plugins/svgBuilder'
 export default defineConfig({
 
   base: './',
   plugins: [
     vue(),
-  
+     svgBuilder('./src/icons/svg/'),
   ],
   resolve: {
     alias: {
