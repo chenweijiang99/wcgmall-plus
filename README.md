@@ -4,12 +4,19 @@
 
 WCG Mall Plus 是一个基于 Spring Boot 3.x 和 Vue 3.x 的全栈电商管理系统，专注于文创商品销售和传统文化推广。项目采用前后端分离架构，包含管理后台和用户端两个独立应用。
 
+目前还有部分功能在开发中，如遇问题请联系邮箱或者提交Issues
+
+邮箱：1774532899@qq.com
+
 访问 http://wcgmall-plus-web.wcgmallcwj.online/ 查看用户端
 
 访问 http://wcgmall-plus-admin.wcgmallcwj.online/ 查看管理端
 
 账户：test
 密码：123456
+
+支付账户：oworsb4854@sandbox.com
+密码： 111111
 
 
 ### 项目特色
