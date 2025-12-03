@@ -8,8 +8,8 @@ import { emitter } from '@/event/emitter';
 import { getCartApi } from '@/api/cart';
 import { getFavoritesApi } from '@/api/favorites';
 import {Cart,Favorites} from '@/types';
-import { s } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
-
+import router from "@/router";
+import { getToken } from '@/utils/auth';
 const userStore = useUserStore();
 const route = useRoute();
 const isMenuOpen = ref(false);
@@ -40,9 +40,14 @@ const handleRemoveFromCart = (id: number) => {
 };
 
 onMounted(() => {
-    getCart();
-    getFavorites();
-    userStore.getUserInfo();
+  if(getToken()){
+        getCart();
+        getFavorites();
+        userStore.getUserInfo();
+  }else{
+    router.push('/login');
+  }
+
   emitter.on('refresh', () => {
     getCart();
     getFavorites();

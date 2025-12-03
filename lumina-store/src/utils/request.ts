@@ -5,8 +5,18 @@ import { useUserStore } from '@/stores/modules/user'
 
 let isRelogin = { show: false }; // 是否显示弹框
 
+// 动态获取API基础URL
+const getBaseURL = () => {
+  // 开发环境使用代理路径
+  if (process.env.NODE_ENV === 'development' || import.meta.env.DEV) {
+    return import.meta.env.VITE_APP_BASE_API || '/api'
+  }
+  // 生产环境直接使用完整API地址
+  return import.meta.env.VITE_APP_API_URL || process.env.VITE_APP_API_URL
+}
+
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: getBaseURL(),
   timeout: 300000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
 })

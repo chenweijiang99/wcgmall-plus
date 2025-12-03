@@ -8,7 +8,7 @@ spring:
       max-request-size: 10MB
 
   profiles:
-    active: dev
+    active: prod
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -79,7 +79,7 @@ mail:
     password: # 请填写你的SMTP服务器密码
 #验证码配置
 captcha:
-  place: local
+  place: remote
   local-path: D:/river-files/captcha/
   remote-path: https://v2.api-m.com/api/wallpaper?return=302
   allow-deviation: 5
@@ -138,7 +138,7 @@ alipay:
   #notify-url的地址必须为外网可以访问的地址
   #  notify-url: http://29ffe1a1.r19.cpolar.top/pay/notify
   #支付宝前端回跳地址（支付完成后展示页面）
-  return-url: http://localhost:3001/payClose
+  return-url: https://wcgmall-web.wcgmallcwj.online/payClose
   charset: utf-8
   sign-type: RSA2
   #支付宝网关
