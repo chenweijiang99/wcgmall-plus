@@ -9,9 +9,7 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
   // 获取环境变量
   const env = loadEnv(mode, process.cwd())
 
-  // 判断是否为生产环境构建
-  const isProduction = command === 'build' || mode === 'production'
-  
+
   return {
     css: {
       preprocessorOptions: {
@@ -40,19 +38,7 @@ export default defineConfig(({ command, mode }: ConfigEnv): UserConfig => {
         '@': path.resolve(__dirname, 'src')
       }
     },
-    build: {
-      // 配置环境变量，让构建后的应用也能读取正确的API地址
-      rollupOptions: {
-        output: {
-          manualChunks: undefined
-        }
-      }
-    },
-    // 定义全局变量，让构建后的应用也能使用
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-      'process.env.VITE_APP_API_URL': JSON.stringify(env.VITE_APP_API_URL)
-    },
+
     server: {
       host: '0.0.0.0',
       port: Number(env.VITE_APP_PORT) || 3000,
