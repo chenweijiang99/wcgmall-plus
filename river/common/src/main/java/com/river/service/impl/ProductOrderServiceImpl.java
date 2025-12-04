@@ -159,7 +159,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
                 .consigneeAddress(addressBook.getConsigneeAddress())
                 .consigneePhone(addressBook.getConsigneePhone())
                 .email(sysUser.getEmail())
-                .status(1)
+                .status(0)
                 .amount(totalPrice)
                 .orderTime(LocalDateTime.now())
                 .payStatus(0)

@@ -37,7 +37,7 @@ public class UnpaidOrderExpireQuartz {
             LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
             List<ProductOrder> recentUnpaidOrders = productOrderService.list(
                     new LambdaQueryWrapper<ProductOrder>()
-                            .eq(ProductOrder::getStatus, 1) // 订单状态为待支付
+                            .eq(ProductOrder::getStatus, 0) // 订单状态为待支付
                             .eq(ProductOrder::getPayStatus, 0)   // 支付状态为未支付
                             .ge(ProductOrder::getCreateTime, threshold) // 创建时间在5分钟内
             );
@@ -88,7 +88,7 @@ public class UnpaidOrderExpireQuartz {
             if ("TRADE_SUCCESS".equals(tradeStatus)) {
                 // 更新订单状态为已支付
                 order.setPayStatus(1);
-                order.setStatus(2);
+                order.setStatus(1);
                 order.setCheckoutTime(LocalDateTime.now());
                 order.setPayMethod("支付宝");
 
@@ -112,7 +112,7 @@ public class UnpaidOrderExpireQuartz {
         // 获取5分钟前的订单，即创建时间在5分钟前的订单
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
          List<ProductOrder> unpaidOrders = productOrderService.list(new LambdaQueryWrapper<ProductOrder>()
-                        .eq(ProductOrder::getStatus, 1)
+                        .eq(ProductOrder::getStatus, 0)
                         .eq(ProductOrder::getPayStatus, 0)
                         .le(ProductOrder::getCreateTime, threshold));
          if(unpaidOrders.isEmpty()){

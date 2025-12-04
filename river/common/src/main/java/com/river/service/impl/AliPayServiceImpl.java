@@ -81,7 +81,7 @@ public class AliPayServiceImpl implements AliPayService {
         if (order == null) {
             throw new ServiceException("订单不存在");
         }
-        if(order.getPayStatus() == null || order.getPayStatus() == 0 || order.getStatus() != 1){
+        if(order.getPayStatus() == null || order.getPayStatus() == 0 || order.getStatus() != 0){
             throw new ServiceException("订单未支付，不能退款");
         }
         //调用支付宝退款接口
@@ -124,7 +124,7 @@ public class AliPayServiceImpl implements AliPayService {
                 return paySuccess;
             } else if (alipayTradeQueryResponse.get("trade_status").equals("TRADE_SUCCESS")) {
                 order.setPayStatus(1);
-                order.setStatus(2);
+                order.setStatus(1);
                 order.setCheckoutTime(LocalDateTime.now());
                 order.setAmount(new BigDecimal(String.valueOf(alipayTradeQueryResponse.get("total_amount"))));
                 order.setPayMethod("支付宝");

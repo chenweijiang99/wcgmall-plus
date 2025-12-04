@@ -23,7 +23,7 @@ public class ProductOrder implements Serializable {
     @Schema(description = "订单编号")
     private String orderNumber;
 
-    @Schema(description = "订单状态 1待付款 2待发货 3已发货 4已完成 5已取消 6已退款")
+    @Schema(description = "订单状态 0待付款 1已付款 2待发货 3已发货 4已完成 5已取消 6已退款")
     private Integer status;
 
     @Schema(description = "用户ID")
