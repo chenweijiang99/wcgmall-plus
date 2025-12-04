@@ -49,7 +49,7 @@ const addressRules = {
 
 const total = computed(() => cartStore.selectedTotal);
 const orderItems = computed(() => cartStore.selectedCartItems);
-const countdown = ref(15 * 60);
+const countdown = ref(5 * 60);
 const timer = ref<any>(null); // 倒计时 Timer
 const pollingTimer = ref<any>(null); // 轮询 Timer
 

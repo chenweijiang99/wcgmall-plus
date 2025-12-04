@@ -4,10 +4,10 @@ export function getFavoritesApi() {
   return request.get<any, ApiResponse<Favorites[]>>('/user/wishList');
 }
 
-export function addWishListProductToCartApi(productId: number) {
+export function addFavoritesToCartApi(productId: number) {
   return request.post<any, ApiResponse<boolean>>(`/user/wishList/${productId}`);
 }
 
-export function deleteWishListApi(productId: number) {
+export function deleteFavoritesApi(productId: number) {
   return request.delete<any, ApiResponse<boolean>>(`/user/wishList/${productId}`);
 }

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch,onMounted,onUnmounted } from 'vue';
+import { ElMessage, ElMessageBox } from "element-plus";
 import { RouterLink, useRoute } from 'vue-router';
 import { ShoppingBag, User as UserIcon, Sun, Moon, Menu, X, Heart, Trash2,ShoppingCart } from 'lucide-vue-next';
 import { useUserStore } from "@/stores/modules/user";
 import {toggleTheme,themeStore} from '@/stores/modules/theme';
 import { emitter } from '@/event/emitter';
-import { getCartApi } from '@/api/cart';
-import { getFavoritesApi } from '@/api/favorites';
+import { getCartApi,deleteShoppingCartApi } from '@/api/cart';
+import { getFavoritesApi,deleteFavoritesApi } from '@/api/favorites';
 import {Cart,Favorites} from '@/types';
 import router from "@/router";
 import { getToken } from '@/utils/auth';
@@ -31,12 +32,20 @@ const getFavorites = async () => {
 };
 
 
-const handleToggleFavorite = (id: number) => {
 
+const removeFromCart = async (item: Cart) => {
+    await deleteShoppingCartApi(item.productId);
+    emitter.emit("refresh");
+    ElMessage.success("删除成功");
+    await getCart();
+  
 };
-
-const handleRemoveFromCart = (id: number) => {
-
+const removeFromFavorites = async (item: Favorites) => {
+    await deleteFavoritesApi(item.productId);
+    emitter.emit("refresh");
+    ElMessage.success("删除成功");
+    await getFavorites();
+  
 };
 
 onMounted(() => {
@@ -105,7 +114,7 @@ onUnmounted(() => {
                     <p class="text-sm font-medium truncate">{{ p.productName }}</p>
                     <p class="text-xs text-gray-500">${{ p.productPrice }}</p>
                   </div>
-                  <button @click="(e) => handleToggleFavorite(p.id)" class="text-gray-400 hover:text-red-500">
+                  <button @click="(e) => removeFromFavorites(p)" class="text-gray-400 hover:text-red-500">
                     <X :size="14" />
                   </button>
                 </div>
@@ -138,7 +147,7 @@ onUnmounted(() => {
                         <span>￥{{ item.productPrice * item.number }}</span>
                       </div>
                     </div>
-                    <button @click="(e) => handleRemoveFromCart(item.id)" class="text-gray-400 hover:text-red-500">
+                    <button @click="(e) => removeFromCart(item)" class="text-gray-400 hover:text-red-500">
                       <Trash2 :size="14" />
                     </button>
                   </div>

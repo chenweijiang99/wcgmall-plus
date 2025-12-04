@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import router from "@/router";
 import { useUserStore } from "@/stores/modules/user";
-import { ElMessage,ElNotification } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { User, Lock, Mail, ArrowLeft } from "lucide-vue-next";
 import type { FormInstance } from "element-plus";
 import type { FormItemRule } from "element-plus";
@@ -13,8 +13,12 @@ import {
   getEmailCodeApi,
   registerApi,
   forgotPasswordApi,
+  checkUsernameApi,
+  checkEmailApi,
+  getJuHeLoginApi,
+  getJuHeLoginTypeApi,
 } from "@/api/auth";
-import { emitter } from '@/event/emitter';
+import { emitter } from "@/event/emitter";
 
 type AuthMode = "login" | "register" | "forgot";
 
@@ -58,6 +62,71 @@ const forgotForm = reactive({
   confirmPassword: "",
 });
 
+const loginTypes = {
+  qq: {
+    title: "QQ账号登录",
+    icon: "qq",
+    type: 1,
+  },
+  wechat: {
+    title: "微信扫码登录",
+    icon: "wechat",
+    type: 2,
+  },
+  alipay: {
+    title: "支付宝扫码登录",
+    icon: "alipay",
+    type: 3,
+  },
+  weibo: {
+    title: "微博账号登录",
+    icon: "weibo",
+    type: 4,
+  },
+  baidu: {
+    title: "百度账号登录",
+    icon: "baidu",
+    type: 5,
+  },
+  huawei: {
+    title: "华为账号登录",
+    icon: "huawei",
+    type: 6,
+  },
+  xiaomi: {
+    title: "小米账号登录",
+    icon: "xiaomi",
+    type: 7,
+  },
+  microsoft: {
+    title: "微软账号登录",
+    icon: "microsoft",
+    type: 8,
+  },
+  dingding: {
+    title: "钉钉账号登录",
+    icon: "dingding",
+    type: 9,
+  },
+  gitee: {
+    title: "Gitee账号登录",
+    icon: "gitee",
+    type: 10,
+  },
+  github: {
+    title: "GitHub账号登录",
+    icon: "github",
+    type: 11,
+  },
+  douyin: {
+    title: "抖音账号登录",
+    icon: "douyin",
+    type: 12,
+  },
+};
+
+const enabledLoginTypes = ref<any[]>([]);
+
 // 标题和描述计算属性
 const pageTitle = computed(() => {
   switch (authMode.value) {
@@ -97,6 +166,22 @@ const registerRules = {
   username: [
     { required: true, message: "请输入用户名", trigger: "blur" },
     { min: 3, max: 20, message: "长度在 3 到 20 个字符", trigger: "blur" },
+    {
+      validator: (rule: any, value: string, callback: any) => {
+        if (!value) {
+          callback();
+          return;
+        }
+        handleCheckUsername(value)
+          .then(() => {
+            callback();
+          })
+          .catch((error) => {
+            callback(new Error(error.message));
+          });
+      },
+      trigger: "blur",
+    },
   ] as FormItemRule[],
   nickname: [
     { required: true, message: "请输入昵称", trigger: "blur" },
@@ -105,6 +190,22 @@ const registerRules = {
   email: [
     { required: true, message: "请输入邮箱", trigger: "blur" },
     { type: "email", message: "请输入正确的邮箱格式", trigger: "blur" },
+    {
+      validator: (rule: any, value: string, callback: any) => {
+        if (!value) {
+          callback();
+          return;
+        }
+        handleCheckEmail(value)
+          .then(() => {
+            callback();
+          })
+          .catch((error) => {
+            callback(new Error(error.message));
+          });
+      },
+      trigger: "blur",
+    },
   ] as FormItemRule[],
   password: [
     { required: true, message: "请设置密码", trigger: "blur" },
@@ -157,22 +258,132 @@ const forgotRules = {
     },
   ] as FormItemRule[],
 };
-// 模拟发送验证码
-const sendCode = (email: string) => {
+
+/**
+ * 第三方登录
+ */
+const handleThirdPartyLogin = async (type: any) => {
+  getJuHeLoginApi(type).then((res) => {
+    if (res.code === 200) {
+      window.open(res.logurl, "_self");
+    }
+  });
+};
+
+const getThirdLoginType = async () => {
+  try {
+    const res = await getJuHeLoginTypeApi();
+    if (res.code === 200) {
+      const enabledTypes = res.data.filter((type: string) => loginTypes[type]);
+      
+      // 映射到本地配置
+      enabledLoginTypes.value = enabledTypes.map((type: string) => {
+        return {
+          ...loginTypes[type],
+          label: type,
+          value: type
+        };
+      });
+    }
+  } catch (error) {
+    console.error("获取登录方式失败:", error);
+  }
+};
+
+onMounted(() => {
+  getThirdLoginType();
+});
+
+const handleCheckUsername = async (username: string) => {
+  const res = await checkUsernameApi(username);
+  if (res.data === true) {
+    return Promise.reject(new Error("用户名已存在"));
+  } else {
+    return Promise.resolve();
+  }
+};
+
+const handleCheckEmail = async (email: string) => {
+  const res = await checkEmailApi(email);
+  if (res.data === true) {
+    return Promise.reject(new Error("邮箱已存在"));
+  } else {
+    return Promise.resolve();
+  }
+};
+
+const validateEmail = () => {
+  if (registerFormRef.value && registerForm.email) {
+    registerFormRef.value.validateField("email");
+  }
+};
+
+const validateUsername = () => {
+  if (registerFormRef.value && registerForm.username) {
+    registerFormRef.value.validateField("username");
+  }
+};
+
+// 密码强度计算
+const passwordStrength = computed(() => {
+  const pwd = registerForm.password;
+  if (!pwd) return 0;
+  let score = 0;
+  if (pwd.length >= 6) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[a-z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  return Math.min(score, 4);
+});
+
+const passwordStrengthText = computed(() => {
+  const scores = ["", "弱", "中", "强", "极强"];
+  return scores[passwordStrength.value];
+});
+
+const passwordStrengthColor = computed(() => {
+  const colors = [
+    "bg-gray-200",
+    "bg-red-500",
+    "bg-yellow-500",
+    "bg-blue-500",
+    "bg-green-500",
+  ];
+  return colors[passwordStrength.value];
+});
+
+// 发送验证码
+const sendCode = async (email: string) => {
   if (!email) {
-    ElMessage.warning("Please enter your email address first.");
+    ElMessage.warning("请输入邮箱地址");
     return;
   }
+  // 简单的邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    ElMessage.warning("请输入有效的邮箱地址");
+    return;
+  }
+
   if (countdown.value > 0) return;
 
-  // 模拟 API 调用
-  ElMessage.success(`Verification code sent to ${email} (Mock: 123456)`);
+  try {
+    await getEmailCodeApi(email);
+    ElMessage.success(`验证码已发送至 ${email}`);
 
-  countdown.value = 60;
-  timer = window.setInterval(() => {
-    countdown.value--;
-    if (countdown.value <= 0) clearInterval(timer);
-  }, 1000);
+    countdown.value = 60;
+    timer = window.setInterval(() => {
+      countdown.value--;
+      if (countdown.value <= 0) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    }, 1000);
+  } catch (error: any) {
+    console.error(error);
+    ElMessage.error(error.response?.data?.message || "验证码发送失败");
+  }
 };
 
 // 滑动验证刷新
@@ -202,8 +413,7 @@ const login = () => {
     })
     .catch(() => {
       refresh();
-    }
-  );
+    });
 };
 
 /* 滑动验证失败*/
@@ -231,10 +441,58 @@ const handleLogin = async () => {
 };
 
 // 处理注册
-const handleRegister = () => {};
+const handleRegister = async () => {
+  if (!registerFormRef.value) return;
+
+  await registerFormRef.value.validate(async (valid) => {
+    if (valid) {
+      isLoading.value = true;
+      try {
+        await registerApi({
+          username: registerForm.username,
+          nickname: registerForm.nickname,
+          email: registerForm.email,
+          password: registerForm.password,
+          code: registerForm.code,
+        });
+
+        ElMessage.success("注册成功，请登录");
+        switchMode("login");
+      } catch (error: any) {
+        console.error(error);
+        ElMessage.error(error.response?.data?.message || "注册失败");
+      } finally {
+        isLoading.value = false;
+      }
+    }
+  });
+};
 
 // 处理重置密码
-const handleResetPassword = () => {};
+const handleResetPassword = async () => {
+  if (!forgotFormRef.value) return;
+
+  await forgotFormRef.value.validate(async (valid) => {
+    if (valid) {
+      isLoading.value = true;
+      try {
+        await forgotPasswordApi({
+          email: forgotForm.email,
+          code: forgotForm.code,
+          password: forgotForm.password,
+        });
+
+        ElMessage.success("密码重置成功，请登录");
+        switchMode("login");
+      } catch (error: any) {
+        console.error(error);
+        ElMessage.error(error.response?.data?.message || "重置密码失败");
+      } finally {
+        isLoading.value = false;
+      }
+    }
+  });
+};
 
 const switchMode = (mode: AuthMode) => {
   authMode.value = mode;
@@ -282,7 +540,7 @@ const switchMode = (mode: AuthMode) => {
           class="animate-fade-in"
           :rules="rules"
         >
-          <el-form-item label="邮箱">
+          <el-form-item label="邮箱" prop="username">
             <el-input
               v-model="loginForm.username"
               placeholder="请输入邮箱或用户名"
@@ -290,7 +548,7 @@ const switchMode = (mode: AuthMode) => {
             />
           </el-form-item>
 
-          <el-form-item label="密码">
+          <el-form-item label="密码" prop="password">
             <el-input
               v-model="loginForm.password"
               type="password"
@@ -301,6 +559,7 @@ const switchMode = (mode: AuthMode) => {
           </el-form-item>
 
           <!--第三方登录 -->
+          <!-- 登录方式，1=QQ，2=微信，3=支付宝，4=新浪微博，5=百度，6=华为，7=小米，8=微软，9=钉钉，10=Gitee，11=GitHub，12=抖音 -->
           <div class="mt-8">
             <div class="relative">
               <div class="absolute inset-0 flex items-center">
@@ -313,20 +572,15 @@ const switchMode = (mode: AuthMode) => {
               </div>
             </div>
 
-            <div class="flex justify-center gap-8 mt-6">
-              <div
-                class="w-12 h-12 rounded-full border border-gray-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform hover:scale-110 shadow-sm"
-                title="Sign in with Google"
-              >
-                <svg-icon name="github" />
-              </div>
-
-              <!-- WeChat -->
-              <div
-                class="w-12 h-12 rounded-full border border-gray-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform hover:scale-110 shadow-sm"
-                title="Sign in with WeChat"
-              >
-                <svg-icon name="wechat" />
+            <div class="grid grid-cols-4 gap-4 mt-6 justify-items-center">
+              <div v-for="item in enabledLoginTypes" @click="handleThirdPartyLogin(item.type)" class="flex justify-center">
+                <el-tooltip :content="item.title" placement="top">
+                  <div
+                    class="w-12 h-12 rounded-full border border-gray-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform hover:scale-110 shadow-sm"
+                  >
+                    <svg-icon :name="item.icon"  :size="30"></svg-icon>
+                  </div>
+                </el-tooltip>
               </div>
             </div>
           </div>
@@ -366,29 +620,40 @@ const switchMode = (mode: AuthMode) => {
         <el-form
           v-else-if="authMode === 'register'"
           :model="registerForm"
+          ref="registerFormRef"
+          :rules="registerRules"
           label-position="top"
           size="large"
           class="animate-fade-in"
         >
-          <el-form-item label="用户名" required>
-            <el-input v-model="registerForm.username" placeholder="jordan_smith" />
-          </el-form-item>
-
-          <el-form-item label="昵称">
-            <el-input v-model="registerForm.nickname" placeholder="Jordan" />
-          </el-form-item>
-
-          <el-form-item label="邮箱" required>
+          <el-form-item prop="username" label="用户名" required>
             <el-input
-              v-model="registerForm.email"
-              type="email"
-              placeholder="name@example.com"
+              v-model="registerForm.username"
+              placeholder="注册后不可修改"
+              @blur="validateUsername"
             />
           </el-form-item>
 
-          <el-form-item label="验证码" required>
+          <el-form-item label="昵称" prop="nickname">
+            <el-input v-model="registerForm.nickname" placeholder="请输入昵称" />
+          </el-form-item>
+
+          <el-form-item label="邮箱" required prop="email">
+            <el-input
+              v-model="registerForm.email"
+              type="email"
+              placeholder="请输入邮箱"
+              @blur="validateEmail"
+            />
+          </el-form-item>
+
+          <el-form-item label="验证码" required prop="code">
             <div class="flex gap-3">
-              <el-input v-model="registerForm.code" placeholder="123456" class="flex-1" />
+              <el-input
+                v-model="registerForm.code"
+                placeholder="请输入验证码"
+                class="flex-1"
+              />
               <el-button
                 type="primary"
                 class="!w-32 !rounded-full"
@@ -400,20 +665,43 @@ const switchMode = (mode: AuthMode) => {
             </div>
           </el-form-item>
 
-          <el-form-item label="密码" required>
+          <el-form-item label="密码" required prop="password">
             <el-input
               v-model="registerForm.password"
               type="password"
-              placeholder="Create a strong password"
+              placeholder="请输入密码"
               show-password
             />
+            <!-- 密码强度条 -->
+            <div class="mt-2" v-if="registerForm.password">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-500">密码强度</span>
+                <span
+                  :class="{
+                    'text-red-500': passwordStrength <= 1,
+                    'text-yellow-500': passwordStrength === 2,
+                    'text-blue-500': passwordStrength === 3,
+                    'text-green-500': passwordStrength === 4,
+                  }"
+                >
+                  {{ passwordStrengthText }}
+                </span>
+              </div>
+              <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  class="h-full transition-all duration-300"
+                  :class="passwordStrengthColor"
+                  :style="{ width: `${(passwordStrength / 4) * 100}%` }"
+                ></div>
+              </div>
+            </div>
           </el-form-item>
 
-          <el-form-item label="确认密码" required>
+          <el-form-item label="确认密码" required prop="confirmPassword">
             <el-input
               v-model="registerForm.confirmPassword"
               type="password"
-              placeholder="Repeat password"
+              placeholder="请再次输入密码"
               show-password
             />
           </el-form-item>
@@ -443,21 +731,27 @@ const switchMode = (mode: AuthMode) => {
         <el-form
           v-else-if="authMode === 'forgot'"
           :model="forgotForm"
+          :rules="forgotRules"
+          ref="forgotFormRef"
           label-position="top"
           size="large"
           class="animate-fade-in"
         >
-          <el-form-item label="邮箱" required>
+          <el-form-item label="邮箱" required prop="email">
             <el-input
               v-model="forgotForm.email"
               type="email"
-              placeholder="Enter your registered email"
+              placeholder="请输入你注册账户的邮箱"
             />
           </el-form-item>
 
-          <el-form-item label="验证码" required>
+          <el-form-item label="验证码" required prop="code">
             <div class="flex gap-3">
-              <el-input v-model="forgotForm.code" placeholder="123456" class="flex-1" />
+              <el-input
+                v-model="forgotForm.code"
+                placeholder="请输入验证码"
+                class="flex-1"
+              />
               <el-button
                 type="primary"
                 class="!w-32 !rounded-full"
@@ -469,20 +763,20 @@ const switchMode = (mode: AuthMode) => {
             </div>
           </el-form-item>
 
-          <el-form-item label="新密码" required>
+          <el-form-item label="新密码" required prop="password">
             <el-input
               v-model="forgotForm.password"
               type="password"
-              placeholder="Enter new password"
+              placeholder="输入你的新密码"
               show-password
             />
           </el-form-item>
 
-          <el-form-item label="确认密码" required>
+          <el-form-item label="确认密码" required prop="confirmPassword">
             <el-input
               v-model="forgotForm.confirmPassword"
               type="password"
-              placeholder="Confirm new password"
+              placeholder="请确认新密码"
               show-password
             />
           </el-form-item>
@@ -492,6 +786,7 @@ const switchMode = (mode: AuthMode) => {
             native-type="submit"
             :loading="isLoading"
             class="w-full !rounded-full !h-12 !text-lg !font-bold mt-2"
+            @click="handleResetPassword"
           >
             重置密码
           </el-button>

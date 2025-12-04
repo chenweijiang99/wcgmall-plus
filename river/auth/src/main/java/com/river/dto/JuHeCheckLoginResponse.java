@@ -1,4 +1,4 @@
-package com.mojian.dto;
+package com.river.dto;
 
 import lombok.Data;
 

@@ -37,6 +37,18 @@ public class AuthController {
         return Result.success(authService.login(loginDTO));
     }
 
+    @GetMapping("/auth/checkUsername")
+    @Operation(summary = "检查用户名是否存在 true 表示存在")
+    public Result<Boolean> checkUsername(@RequestParam String username) {
+        return Result.success(authService.checkUsername(username));
+    }
+
+    @GetMapping("/auth/checkEmail")
+    @Operation(summary = "检查邮箱是否存在 true 表示存在")
+    public Result<Boolean> checkEmail(@RequestParam String email) {
+        return Result.success(authService.checkEmail(email));
+    }
+
     @SaIgnore
     @Operation(summary = "获取滑块验证码")
     @GetMapping("/auth/getCaptcha")

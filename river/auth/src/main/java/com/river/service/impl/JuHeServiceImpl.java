@@ -1,36 +1,38 @@
-package com.mojian.service.impl;
+package com.river.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.http.HttpUtil;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mojian.common.Constants;
-import com.mojian.common.RedisConstants;
-import com.mojian.config.properties.FrontProperties;
-import com.mojian.config.properties.JuHeLoginConfigProperties;
-import com.mojian.dto.JuHeCheckLoginResponse;
-import com.mojian.dto.JuHeLoginResponse;
-import com.mojian.entity.SysRole;
-import com.mojian.entity.SysUser;
-import com.mojian.mapper.SysRoleMapper;
-import com.mojian.mapper.SysUserMapper;
-import com.mojian.service.JuHeService;
-import com.mojian.utils.IpUtil;
-import com.mojian.utils.RedisUtil;
+import com.river.common.Constants;
+import com.river.common.RedisConstants;
+import com.river.config.properties.FrontConfigProperties;
+import com.river.config.properties.JuHeLoginConfigProperties;
+import com.river.dto.JuHeCheckLoginResponse;
+import com.river.dto.JuHeLoginResponse;
+import com.river.entity.SysDict;
+import com.river.entity.SysDictData;
+import com.river.entity.SysRole;
+import com.river.entity.SysUser;
+import com.river.mapper.SysDictDataMapper;
+import com.river.mapper.SysDictMapper;
+import com.river.mapper.SysRoleMapper;
+import com.river.mapper.SysUserMapper;
+import com.river.service.JuHeService;
+import com.river.utils.IpUtil;
+import com.river.utils.RedisUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -39,9 +41,11 @@ public class JuHeServiceImpl implements JuHeService {
 
     private final SysUserMapper userMapper;
     private final SysRoleMapper sysRoleMapper;
+    private final SysDictMapper sysDictMapper;
+    private final SysDictDataMapper sysDictDataMapper;
     private final RedisUtil redisUtil;
     private final JuHeLoginConfigProperties juHeLoginConfigProperties;
-    private final FrontProperties frontProperties;
+    private final FrontConfigProperties frontProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String LOGIN_EXPIRED_MESSAGE = "登录过期";
@@ -51,7 +55,8 @@ public class JuHeServiceImpl implements JuHeService {
 
     /**
      * 获取聚合登录链接
-     * @param type 登录类型，1：微信，2：QQ，3：微博
+     *
+     * @param type 登录方式，1=QQ，2=微信，3=支付宝，4=新浪微博，5=百度，6=华为，7=小米，8=微软，9=钉钉，10=Gitee，11=GitHub，12=抖音
      */
     @Override
     public JuHeLoginResponse getJuHeAuth(Integer type) {
@@ -142,13 +147,37 @@ public class JuHeServiceImpl implements JuHeService {
                     .nickname(juHeCheckLoginResponse.getNickname())
                     .avatar(juHeCheckLoginResponse.getFaceimg())
                     .build();
+            if(juHeCheckLoginResponse.getGender().equals("男")){
+                user.setSex(Constants.MALE);
+            }else{
+                user.setSex(Constants.FEMALE);
+            }
             userMapper.insert(user);
             insertRole(user);
+        }else {
+            user.setLastLoginTime(LocalDateTime.now());
+            user.setIpLocation(juHeCheckLoginResponse.getLocation());
+            user.setIp(juHeCheckLoginResponse.getIp());
+            userMapper.updateById(user);
         }
 
         StpUtil.login(user.getId());
         log.info("聚合登录验证成功，重定向到前端首页，token：{}", StpUtil.getTokenValue());
         httpServletResponse.sendRedirect(String.format(REDIRECT_HOME_URL_FORMAT, frontProperties.getUrl(), StpUtil.getTokenValue()));
+    }
+
+    @Override
+    public List<String> getLoginType() {
+        SysDict sysDict = sysDictMapper.selectOne(new LambdaQueryWrapper<SysDict>().eq(SysDict::getType, "login_type"));
+        if (ObjectUtils.isEmpty(sysDict)) {
+            return Collections.emptyList();
+        }
+        LambdaQueryWrapper<SysDictData> query = new LambdaQueryWrapper<SysDictData>()
+                .eq(SysDictData::getDictId, sysDict.getId())
+                .eq(SysDictData::getStatus, Constants.YES);
+        return sysDictDataMapper.selectList(query).stream()
+                .map(SysDictData::getLabel)
+                .collect(Collectors.toList());
     }
 
     /**

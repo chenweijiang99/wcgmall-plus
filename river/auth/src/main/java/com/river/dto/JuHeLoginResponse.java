@@ -1,6 +1,5 @@
-package com.mojian.dto;
+package com.river.dto;
 
-import io.swagger.models.auth.In;
 import lombok.Data;
 
 @Data

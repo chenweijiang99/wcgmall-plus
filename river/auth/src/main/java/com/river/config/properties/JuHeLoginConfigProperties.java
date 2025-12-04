@@ -1,4 +1,4 @@
-package com.mojian.config.properties;
+package com.river.config.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -37,6 +37,9 @@ public class LoginUserInfo implements Serializable {
     @Schema(description = "token")
     private String token;
 
+    @Schema(description = "登录类型")
+    private String loginType;
+
     @Schema(description = "权限列表")
     private List<String> permissions;
 

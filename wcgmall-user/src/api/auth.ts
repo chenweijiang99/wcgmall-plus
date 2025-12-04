@@ -86,3 +86,58 @@ export function forgotPasswordApi(data: ResetParams) {
     data
   })
 }
+
+// 修改密码
+export function updatePasswordApi(data: any) {
+  return request({
+    url: '/user/user/updatePwd',
+    method: 'post',
+    data
+  })
+}
+
+// 检查用户名是否存在
+export function checkUsernameApi(username: string) {
+  return request({
+    url: '/auth/checkUsername',
+    method: 'get',
+    params: { username }
+  })
+}
+
+// 检查邮箱是否存在
+export function checkEmailApi(email: string) {
+  return request({
+    url: '/auth/checkEmail',
+    method: 'get',
+    params: { email }
+  })
+}
+
+interface JuHeLoginResponse {
+  code: number;
+  msg: string;
+  cxid: string;
+  logurl: string;
+  logqrcode: string;
+}
+
+/**
+ * 获取聚合登录授权地址
+ */
+export function getJuHeLoginApi(source: any) {
+  return request.get<any, JuHeLoginResponse>(`/api/juhe/getJuHeAuth/${source}`);
+}
+/**
+ * 获取聚合登录状态
+ */
+export function getJuHeIsLoginApi(cxid: any) {
+  return request({
+    url: `/api/juhe/checkLogin/${cxid}`,
+    method: 'get',
+  })
+}
+// 聚合登录类型
+export function getJuHeLoginTypeApi() {
+  return request.get<any, ApiResponse<string[]>>('/api/juhe/getLoginType');
+}

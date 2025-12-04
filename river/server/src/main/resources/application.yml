@@ -65,6 +65,9 @@ springdoc:
     - group: '授权中心'
       paths-to-match: '/auth/**'
       packages-to-scan: com.river.controller
+    - group: '聚合登录'
+      paths-to-match: '/api/juhe/**'
+      packages-to-scan: com.river.controller
     - group: '文件中心'
       paths-to-match: '/file/**'
       packages-to-scan: com.river.controller
@@ -141,3 +144,13 @@ alipay:
   #支付宝网关
   gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
   format: json
+#==============================聚合登录配置信息===================================
+juhe:
+  id:
+  key:
+  login-url:
+  check-login-url:
+  return-url:
+#前端访问地址
+front:
+  url:

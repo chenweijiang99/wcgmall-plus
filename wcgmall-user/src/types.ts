@@ -38,6 +38,7 @@ export interface User {
   sex: number;
   mobile: string;
   signature: string;
+  loginType: string;
   token: string;
 }
 
@@ -136,10 +137,14 @@ export interface Favorites {
 
 export interface Order {
   id: number;
-  total: number;
-  date: string;
-  status: 'Processing' | 'Shipped' | 'Delivered';
-  shippingAddress: string;
+  orderNumber: string;
+  status: number;
+  amount: number;
+  createTime: string;
+  payStatus: number;
+  consignee: string;
+  consigneeAddress: string;
+  consigneePhone: string;
 }
 
 export interface Captcha {

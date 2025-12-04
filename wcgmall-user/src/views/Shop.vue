@@ -7,9 +7,17 @@ import { getBrandListApi } from "@/api/brand";
 import { useUserStore } from "@/stores/modules/user";
 import { addShoppingCartApi } from "@/api/cart";
 import { Product } from "@/types";
-import { Search, Loader, SlidersHorizontal, Heart, ShoppingCart } from "lucide-vue-next";
+import {
+  Search,
+  Loader,
+  SlidersHorizontal,
+  Heart,
+  ShoppingCart,
+  PackageCheck,
+  AlertCircle,
+} from "lucide-vue-next";
 import { ElMessage } from "element-plus";
-import { emitter } from '@/event/emitter';
+import { emitter } from "@/event/emitter";
 const userStore = useUserStore();
 
 // === 数据状态 ===
@@ -49,7 +57,14 @@ const fetchBasics = async () => {
     console.error(e);
   }
 };
-
+// 库存状态辅助函数
+const getInventoryStatus = (inventory: number) => {
+  if (inventory > 10)
+    return { text: "库存充足", class: "text-green-600", icon: PackageCheck };
+  if (inventory > 0)
+    return { text: `仅剩 ${inventory} 件`, class: "text-orange-500", icon: AlertCircle };
+  return { text: "暂时缺货", class: "text-red-500", icon: AlertCircle };
+};
 /**
  * 获取商品列表
  */
@@ -235,7 +250,12 @@ onUnmounted(() => {
           <ul class="space-y-2">
             <li>
               <button
-                @click="() => { category = null; search = ''; }"
+                @click="
+                  () => {
+                    category = null;
+                    search = '';
+                  }
+                "
                 :class="`text-sm transition-colors ${
                   category === null
                     ? 'font-bold text-black dark:text-white'
@@ -247,7 +267,12 @@ onUnmounted(() => {
             </li>
             <li v-for="cat in categories" :key="cat.id">
               <button
-                @click="() => { category = cat.id; search = ''; }"
+                @click="
+                  () => {
+                    category = cat.id;
+                    search = '';
+                  }
+                "
                 :class="`text-sm transition-colors ${
                   category === cat.id
                     ? 'font-bold text-black dark:text-white'
@@ -313,13 +338,20 @@ onUnmounted(() => {
                   class="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
-                
                 <div
-                  class="absolute inset-x-0 bottom-4 flex justify-center gap-4 
-                         opacity-100 translate-y-0 
-                         md:opacity-0 md:translate-y-4 
-                         md:group-hover:opacity-100 md:group-hover:translate-y-0 
-                         transition-all duration-300 z-10"
+                  :class="`absolute bottom-0 right-0 bg-black/60 text-white text-xs px-2 py-1 rounded-tl-lg ${
+                    getInventoryStatus(product.inventory).class
+                  }`"
+                >
+                  <!-- <component
+                    :is="getInventoryStatus(product.inventory).icon"
+                    :size="18"
+                  /> -->
+                  {{ getInventoryStatus(product.inventory).text }}
+                </div>
+
+                <div
+                  class="absolute inset-x-0 bottom-4 flex justify-center gap-4 opacity-100 translate-y-0 md:opacity-0 md:translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300 z-10"
                 >
                   <el-button
                     circle
@@ -372,10 +404,10 @@ onUnmounted(() => {
       <div class="p-4 space-y-8 h-full overflow-y-auto pb-20">
         <!-- 搜索 -->
         <div>
-          <el-input 
-            v-model="search" 
-            placeholder="搜索商品..." 
-            :prefix-icon="Search" 
+          <el-input
+            v-model="search"
+            placeholder="搜索商品..."
+            :prefix-icon="Search"
             size="large"
             clearable
           />
@@ -386,7 +418,13 @@ onUnmounted(() => {
           <h3 class="font-bold mb-4 text-lg">分类</h3>
           <div class="flex flex-col gap-2">
             <button
-              @click="() => { category = null; search = ''; isMobileFilterOpen = false; }"
+              @click="
+                () => {
+                  category = null;
+                  search = '';
+                  isMobileFilterOpen = false;
+                }
+              "
               :class="`text-left px-3 py-3 rounded-xl transition-all ${
                 category === null
                   ? 'bg-black text-white dark:bg-white dark:text-black font-bold shadow-md'
@@ -398,7 +436,13 @@ onUnmounted(() => {
             <button
               v-for="cat in categories"
               :key="cat.id"
-              @click="() => { category = cat.id; search = ''; isMobileFilterOpen = false; }"
+              @click="
+                () => {
+                  category = cat.id;
+                  search = '';
+                  isMobileFilterOpen = false;
+                }
+              "
               :class="`text-left px-3 py-3 rounded-xl transition-all ${
                 category === cat.id
                   ? 'bg-black text-white dark:bg-white dark:text-black font-bold shadow-md'

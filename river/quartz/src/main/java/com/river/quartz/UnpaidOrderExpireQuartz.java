@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component("orderExpire")
 @RequiredArgsConstructor
@@ -122,16 +123,18 @@ public class UnpaidOrderExpireQuartz {
         unpaidOrders.forEach(order -> {
                     try {
                         order.setStatus(5);
-                        productOrderService.update(order);
+                        productOrderService.updateById(order);
                         // 返回库存
                         List<OrderDetail> orderDetails = orderDetailMapper.selectList(new LambdaQueryWrapper<OrderDetail>()
                                 .eq(OrderDetail::getOrderNumber, order.getOrderNumber()));
                         orderDetails.forEach(detail -> {
                             Product product = productService.getById(detail.getProductId());
-                            product.setInventory(product.getInventory() + detail.getProductNumber());
-                            productService.updateById(product);
+                            if (product != null) {
+                                product.setInventory(product.getInventory() + detail.getProductNumber());
+                                productService.updateById(product);
+                            }
                         });
-                        orderDetailMapper.deleteBatchIds(orderDetails);
+                        orderDetailMapper.deleteBatchIds(orderDetails.stream().map(OrderDetail::getId).collect(Collectors.toList()));
                         log.info("订单{}已超时取消", order.getOrderNumber());
                     } catch (Exception e) {
                         log.error("订单超时取消失败: {}", order.getOrderNumber(), e);

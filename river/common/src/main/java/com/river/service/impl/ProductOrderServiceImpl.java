@@ -170,4 +170,102 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         shoppingCartMapper.deleteBatchIds(submitDTO.getCartItemIds());
         return orderNo;
     }
+    @Override
+    public List<com.river.vo.OrderDetailVO> getOrderDetail(String orderNumber) {
+        LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderDetail::getOrderNumber, orderNumber);
+        List<OrderDetail> orderDetails = orderDetailMapper.selectList(wrapper);
+        
+        return orderDetails.stream().map(detail -> {
+            Product product = productMapper.selectById(detail.getProductId());
+            return com.river.vo.OrderDetailVO.builder()
+                    .productId(detail.getProductId())
+                    .productName(product != null ? product.getName() : "未知商品")
+                    .productImage(product != null ? product.getImage() : "")
+                    .productPrice(product != null ? product.getPrice() : BigDecimal.ZERO)
+                    .number(detail.getProductNumber())
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public void cancelOrder(String orderNumber) {
+        ProductOrder order = getOrderByNumber(orderNumber);
+        if (order.getStatus() != 0) {
+            throw new ServiceException("订单状态不正确，无法取消");
+        }
+        order.setStatus(5); // 已取消
+        updateById(order);
+        restoreInventory(orderNumber);
+    }
+
+    @Override
+    public void refundOrder(String orderNumber) {
+        ProductOrder order = getOrderByNumber(orderNumber);
+        if (order.getStatus() != 1 && order.getStatus() != 2) {
+            throw new ServiceException("订单状态不正确，无法退款");
+        }
+        order.setStatus(6); // 已退款
+        updateById(order);
+        restoreInventory(orderNumber);
+    }
+
+    @Override
+    public void confirmReceipt(String orderNumber) {
+        ProductOrder order = getOrderByNumber(orderNumber);
+        if (order.getStatus() != 3) {
+            throw new ServiceException("订单状态不正确，无法确认收货");
+        }
+        order.setStatus(4); // 已完成
+        updateById(order);
+    }
+
+    @Override
+    public boolean deleteOrder(String orderNumber) {
+        ProductOrder order = getOrderByNumber(orderNumber);
+        if (order.getStatus() != 4 && order.getStatus() != 5 && order.getStatus() != 6) {
+            throw new ServiceException("订单状态不正确，无法删除");
+        }
+        if(order.getUserId() != StpUtil.getLoginIdAsLong()){
+            throw new ServiceException("订单不属于当前用户，无法删除");
+        }
+        removeById(order.getId());
+        
+        LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderDetail::getOrderNumber, orderNumber);
+        orderDetailMapper.delete(wrapper);
+        return true;
+    }
+
+    @Override
+    public IPage<ProductOrder> userSelectPage(ProductOrder productOrder) {
+        LambdaQueryWrapper<ProductOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductOrder::getUserId, StpUtil.getLoginIdAsLong());
+        wrapper.orderByDesc(ProductOrder::getOrderTime);
+        return page(PageUtil.getPage(), wrapper);
+    }
+
+    private ProductOrder getOrderByNumber(String orderNumber) {
+        LambdaQueryWrapper<ProductOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductOrder::getOrderNumber, orderNumber);
+        ProductOrder order = getOne(wrapper);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        return order;
+    }
+
+    private void restoreInventory(String orderNumber) {
+        LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderDetail::getOrderNumber, orderNumber);
+        List<OrderDetail> orderDetails = orderDetailMapper.selectList(wrapper);
+        
+        for (OrderDetail detail : orderDetails) {
+            Product product = productMapper.selectById(detail.getProductId());
+            if (product != null) {
+                product.setInventory(product.getInventory() + detail.getProductNumber());
+                productMapper.updateById(product);
+            }
+        }
+    }
 }

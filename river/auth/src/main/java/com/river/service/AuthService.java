@@ -58,4 +58,8 @@ public interface AuthService {
      * @param httpServletResponse
      */
     void authLogin(AuthCallback callback, String source, HttpServletResponse httpServletResponse) throws IOException ;
+
+    Boolean checkUsername(String username);
+
+    Boolean checkEmail(String email);
 }

@@ -23,4 +23,7 @@ public class Constants {
 
     public static final Long XIAO_ASSISTANT_ID  = 2L;
     public static final String DEFAULT_AVATAR = "https://api.dicebear.com/6.x/pixel-art/svg?seed=Raccoon";
+    public static final String EMAIL = "email";
+    public static final Integer MALE = 1;
+    public static final Integer FEMALE = 2;
 }

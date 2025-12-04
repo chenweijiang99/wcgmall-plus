@@ -2,6 +2,7 @@ package com.river.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.river.common.Result;
+import com.river.dto.user.UpdatePwdDTO;
 import com.river.entity.SysUser;
 import com.river.service.SysUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,12 @@ public class UserController {
     @Operation(summary = "用户登出")
     public Result<Object> logout(@RequestHeader("Authorization") String token){
         StpUtil.logoutByTokenValue(token);
+        return Result.success();
+    }
+    @PostMapping("/updatePwd")
+    @Operation(summary = "更新用户密码")
+    public Result<Void> updatePwd(@RequestBody UpdatePwdDTO updatePwdDTO) {
+        sysUserService.updatePwd(updatePwdDTO);
         return Result.success();
     }
 }

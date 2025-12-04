@@ -152,6 +152,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(dto.getEmail())
                 .avatar(avatar)
                 .status(Constants.YES)
+                .loginType(Constants.EMAIL)
                 .build();
         sysUserMapper.insert(sysUser);
 
@@ -226,6 +227,18 @@ public class AuthServiceImpl implements AuthService {
 
         StpUtil.login(user.getId());
         httpServletResponse.sendRedirect(frontConfigProperties.getUrl() + "?token=" + StpUtil.getTokenValue());
+    }
+
+    @Override
+    public Boolean checkUsername(String username) {
+        SysUser sysUser = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, username));
+        return sysUser != null;
+    }
+
+    @Override
+    public Boolean checkEmail(String email) {
+        SysUser sysUser = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, email));
+        return sysUser != null;
     }
 
     /**

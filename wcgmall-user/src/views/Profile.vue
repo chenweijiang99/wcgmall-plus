@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
 import {
   Package,
   Heart,
@@ -15,32 +14,59 @@ import {
   Camera,
   ChevronDown,
   ChevronUp,
+  CreditCard,
+  Clock,
+  Loader2,
+  CheckCircle,
+  Truck,
+  ShoppingCart,
+  Lock,
 } from "lucide-vue-next";
+import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 import { Cart, Favorites, Order, Address } from "@/types";
 import { useUserStore } from "@/stores/modules/user";
-import { getFavoritesApi } from "@/api/favorites";
+import {
+  getFavoritesApi,
+  deleteFavoritesApi,
+  addFavoritesToCartApi,
+} from "@/api/favorites";
 import { uploadApi } from "@/api/file";
-import { updateUserApi, getEmailCodeApi } from "@/api/auth";
+import { updateUserApi, getEmailCodeApi, updatePasswordApi } from "@/api/auth";
 import {
   getAddtessListApi,
   addAddressApi,
   updateAddressApi,
   deleteAddressApi,
 } from "@/api/address";
+import {
+  getOrderListApi,
+  getOrderDetailApi,
+  cancelOrderApi,
+  refundOrderApi,
+  confirmReceiptApi,
+  deleteOrderApi,
+  alipayPayApi,
+  getOrderStatusApi,
+} from "@/api/order";
+import { emitter } from "@/event/emitter";
 
 const userStore = useUserStore();
 const router = useRouter();
 const isEditing = ref(false);
 const activeTab = ref<"orders" | "favorites" | "addresses">("orders");
 const expandedOrder = ref<number | null>(null);
-const shoppingCart = ref<Cart[]>([]); // 注意：你的代码里没用到 getCartApi，如果不展示可以删掉
+const shoppingCart = ref<Cart[]>([]);
 const favorites = ref<Favorites[]>([]);
 const orders = ref<Order[]>([]);
+const totalOrders = ref(0);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const loading = ref(false);
+const orderDetailsMap = ref<Record<string, any[]>>({});
 const addresses = ref<Address[]>([]);
 const showAddressForm = ref(false);
 const addressForm = ref<any>({});
 const addressFormRef = ref();
-
 // 编辑表单数据
 const editForm = ref({
   nickname: "",
@@ -51,10 +77,155 @@ const editForm = ref({
   sex: undefined,
 });
 
+// === 修改密码相关 ===
+const showPasswordDialog = ref(false);
+const passwordFormRef = ref();
+const passwordForm = ref({
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+});
+
+const validateConfirmPassword = (rule: any, value: any, callback: any) => {
+  if (value === "") {
+    callback(new Error("请再次输入密码"));
+  } else if (value !== passwordForm.value.newPassword) {
+    callback(new Error("两次输入密码不一致!"));
+  } else {
+    callback();
+  }
+};
+
+const passwordRules = {
+  oldPassword: [{ required: true, message: "请输入原密码", trigger: "blur" }],
+  newPassword: [
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    { min: 6, message: "密码长度不能少于6位", trigger: "blur" },
+  ],
+  confirmPassword: [
+    { required: true, message: "请确认密码", trigger: "blur" },
+    { validator: validateConfirmPassword, trigger: "blur" },
+  ],
+};
+
 // === 验证码相关 ===
 const emailCode = ref("");
 const countdown = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
+
+// === 支付相关 ===
+const showPaymentDialog = ref(false);
+const paymentStep = ref<"checking" | "success">("checking");
+const currentOrderNumber = ref("");
+const payCountdown = ref(15 * 60);
+const payTimer = ref<any>(null);
+const pollingTimer = ref<any>(null);
+
+// === 物流相关 ===
+const showLogisticsDialog = ref(false);
+const currentLogistics = ref<any>(null);
+
+// 模拟物流数据
+const mockLogisticsData = {
+  company: "顺丰速运",
+  trackingNumber: "SF1234567890123",
+  status: "运输中",
+  tracks: [
+    {
+      time: "2025-12-04 08:30:00",
+      status: "【广州市】快件已送达,感谢使用顺丰",
+      location: "广州市天河区",
+    },
+    {
+      time: "2025-12-04 06:15:00",
+      status: "【广州市】快件正在派送中,派送员:张师傅,电话:138****5678",
+      location: "广州市天河区",
+    },
+    {
+      time: "2025-12-03 22:45:00",
+      status: "【广州市】快件到达【广州天河集散中心】",
+      location: "广州市",
+    },
+    {
+      time: "2025-12-03 18:20:00",
+      status: "【深圳市】快件离开【深圳宝安集散中心】已发往【广州天河集散中心】",
+      location: "深圳市",
+    },
+    {
+      time: "2025-12-03 15:30:00",
+      status: "【深圳市】快件到达【深圳宝安集散中心】",
+      location: "深圳市",
+    },
+    {
+      time: "2025-12-03 10:00:00",
+      status: "【深圳市】顺丰速运已收件",
+      location: "深圳市南山区",
+    },
+  ],
+};
+
+const formattedPayTime = computed(() => {
+  const m = Math.floor(payCountdown.value / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (payCountdown.value % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+});
+
+// 计算订单剩余支付时间
+const getOrderRemainingTime = (createTime: string) => {
+  const orderCreateTime = new Date(createTime).getTime();
+  const now = Date.now();
+  const elapsedSeconds = Math.floor((now - orderCreateTime) / 1000);
+  const totalSeconds = 5 * 60; // 总共5分钟
+  const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+  return remainingSeconds;
+};
+
+const formatTime = (seconds: number) => {
+  const m = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (seconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+};
+
+// 订单倒计时Map
+const orderCountdowns = ref<Record<string, number>>({});
+const orderCountdownTimer = ref<any>(null);
+const autoCanceledOrders = ref<Set<string>>(new Set()); // 记录已自动取消的订单
+
+// 更新所有未支付订单的倒计时
+const updateOrderCountdowns = () => {
+  orders.value.forEach((order) => {
+    if (order.status === 0) {
+      const remainingTime = getOrderRemainingTime(order.createTime);
+      orderCountdowns.value[order.orderNumber] = remainingTime;
+
+      // 如果倒计时结束且未被自动取消过,则自动取消订单
+      if (remainingTime <= 0 && !autoCanceledOrders.value.has(order.orderNumber)) {
+        autoCanceledOrders.value.add(order.orderNumber);
+        autoCancelOrder(order.orderNumber);
+      }
+    }
+  });
+};
+
+// 自动取消订单
+const autoCancelOrder = async (orderNumber: string) => {
+  try {
+    await cancelOrderApi(orderNumber);
+    ElMessage.warning(`订单 ${orderNumber} 已超时,已自动取消`);
+    // 延迟刷新订单列表,避免立即刷新导致用户看不到提示
+    setTimeout(() => {
+      getOrders();
+    }, 2000);
+  } catch (error) {
+    console.error("自动取消订单失败:", error);
+    // 如果取消失败,从已取消集合中移除,下次继续尝试
+    autoCanceledOrders.value.delete(orderNumber);
+  }
+};
 
 // 判断邮箱是否改变
 const isEmailChanged = computed(() => {
@@ -64,6 +235,32 @@ const isEmailChanged = computed(() => {
 const getFavorites = async () => {
   const data = await getFavoritesApi();
   favorites.value = data.data;
+};
+
+// 删除收藏
+const handleDeleteFavorite = async (productId: number) => {
+  try {
+    await deleteFavoritesApi(productId);
+    ElMessage.success("已取消收藏");
+    await getFavorites();
+    emitter.emit("refresh");
+  } catch (error) {
+    console.error(error);
+    ElMessage.error("取消收藏失败");
+  }
+};
+
+// 添加到购物车
+const handleAddToCart = async (favorite: Favorites) => {
+  try {
+    await addFavoritesToCartApi(favorite.productId);
+    ElMessage.success("已添加到购物车");
+    await getFavorites();
+    emitter.emit("refresh");
+  } catch (error) {
+    console.error(error);
+    ElMessage.error("添加失败");
+  }
 };
 
 // 地址簿相关规则
@@ -229,17 +426,279 @@ const handleLogout = async () => {
   router.push("/login");
 };
 
+// 修改密码
+const openPasswordDialog = () => {
+  passwordForm.value = {
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  };
+  showPasswordDialog.value = true;
+};
+
+const handleUpdatePassword = async () => {
+  if (!passwordFormRef.value) return;
+
+  await passwordFormRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      try {
+        await updatePasswordApi(passwordForm);
+
+        ElMessage.success("密码修改成功,请重新登录");
+        showPasswordDialog.value = false;
+
+        // 延迟1秒后退出登录
+        setTimeout(() => {
+          userStore.logout();
+          router.push("/login");
+        }, 1000);
+      } catch (error: any) {
+        console.error(error);
+        ElMessage.error(error.response?.data?.message || "密码修改失败");
+      }
+    }
+  });
+};
+
 const toggleOrderExpand = (id: number) => {
   expandedOrder.value = expandedOrder.value === id ? null : id;
+};
+
+const getOrders = async () => {
+  loading.value = true;
+  try {
+    const res = await getOrderListApi({
+      pageNum: currentPage.value,
+      pageSize: pageSize.value,
+    });
+    orders.value = res.data.records;
+    totalOrders.value = res.data.total;
+
+    // 初始化倒计时
+    updateOrderCountdowns();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  getOrders();
+};
+
+const expandChange = async (row: any, expandedRows: any[]) => {
+  if (expandedRows.length > 0) {
+    // 展开时获取详情
+    if (!orderDetailsMap.value[row.orderNumber]) {
+      try {
+        const res = await getOrderDetailApi(row.orderNumber);
+        orderDetailsMap.value[row.orderNumber] = res.data;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
+};
+const startPayCountdown = () => {
+  payTimer.value = setInterval(() => {
+    if (payCountdown.value > 0) payCountdown.value--;
+    else {
+      clearInterval(payTimer.value);
+      // 倒计时结束逻辑，可以根据需求处理
+    }
+  }, 1000);
+};
+
+const startPollingOrder = () => {
+  const startTime = Date.now();
+
+  const poll = async () => {
+    if (!showPaymentDialog.value || paymentStep.value !== "checking") return;
+
+    try {
+      const res = await getOrderStatusApi(currentOrderNumber.value);
+      if (res.data === true) {
+        paymentStep.value = "success";
+        ElMessage.success("支付成功！");
+        getOrders(); // 刷新列表
+        return;
+      }
+    } catch (error) {
+      console.warn("轮询状态异常", error);
+    }
+
+    const elapsedSeconds = (Date.now() - startTime) / 1000;
+    let delay = 3000;
+
+    if (elapsedSeconds > 300) delay = 30 * 1000;
+    else if (elapsedSeconds > 180) delay = 10 * 1000;
+    else if (elapsedSeconds > 60) delay = 5 * 1000;
+
+    pollingTimer.value = setTimeout(poll, delay);
+  };
+
+  poll();
+};
+
+const handlePay = async (order: Order) => {
+  currentOrderNumber.value = order.orderNumber;
+
+  const newWindow = window.open("", "_blank");
+  if (!newWindow) {
+    ElMessage.error("支付窗口被拦截,请在浏览器设置中允许弹出窗口");
+    return;
+  }
+  newWindow.document.title = "正在跳转支付宝...";
+  newWindow.document.body.innerHTML = `
+    <div style="text-align:center; padding-top:100px;">
+      <h3 style="font-family: sans-serif;">正在连接支付宝安全支付...</h3>
+      <p style="color:#666;">请勿关闭此窗口</p>
+    </div>
+  `;
+
+  const loadingInstance = ElLoading.service({
+    lock: true,
+    text: "正在获取支付信息...",
+    background: "rgba(0, 0, 0, 0.7)",
+  });
+
+  try {
+    const res = await alipayPayApi(order.orderNumber);
+    newWindow.document.open();
+    newWindow.document.write(res.data);
+    newWindow.document.close();
+
+    // 打开支付弹窗
+    showPaymentDialog.value = true;
+    paymentStep.value = "checking";
+
+    // 计算从订单创建时间到现在已经过去的时间
+    const orderCreateTime = new Date(order.createTime).getTime();
+    const now = Date.now();
+    const elapsedSeconds = Math.floor((now - orderCreateTime) / 1000);
+    const totalSeconds = 5 * 60; // 总共5分钟
+    const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+
+    payCountdown.value = remainingSeconds;
+    startPayCountdown();
+    startPollingOrder();
+  } catch (error) {
+    newWindow.close();
+    ElMessage.error("获取支付信息失败");
+  } finally {
+    loadingInstance.close();
+  }
+};
+
+const closePaymentDialog = () => {
+  showPaymentDialog.value = false;
+  if (payTimer.value) clearInterval(payTimer.value);
+  if (pollingTimer.value) clearTimeout(pollingTimer.value);
+  getOrders(); // 关闭时刷新列表
+};
+
+// 查看物流
+const handleViewLogistics = (order: Order) => {
+  ElMessage.info("暂未实现，目前展示模拟数据");
+  currentLogistics.value = {
+    orderNumber: order.orderNumber,
+    ...mockLogisticsData,
+  };
+  showLogisticsDialog.value = true;
+};
+
+const handleCancel = (order: Order) => {
+  ElMessageBox.confirm("确定要取消该订单吗?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(async () => {
+    await cancelOrderApi(order.orderNumber);
+    ElMessage.success("取消成功");
+    getOrders();
+  });
+};
+
+const handleRefund = (order: Order) => {
+  ElMessageBox.confirm("确定要申请退款吗?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(async () => {
+    await refundOrderApi(order.orderNumber);
+    ElMessage.success("申请退款成功");
+    getOrders();
+  });
+};
+
+const handleConfirm = (order: Order) => {
+  ElMessageBox.confirm("确认已收到货物?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "info",
+  }).then(async () => {
+    await confirmReceiptApi(order.orderNumber);
+    ElMessage.success("确认收货成功");
+    getOrders();
+  });
+};
+
+const handleDelete = (order: Order) => {
+  ElMessageBox.confirm("确定要删除该订单记录吗?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(async () => {
+    await deleteOrderApi(order.orderNumber);
+    ElMessage.success("删除成功");
+    getOrders();
+  });
+};
+
+const getStatusText = (status: number) => {
+  const map: Record<number, string> = {
+    0: "待付款",
+    1: "已付款",
+    2: "待发货",
+    3: "已发货",
+    4: "已完成",
+    5: "已取消",
+    6: "已退款",
+  };
+  return map[status] || "未知状态";
+};
+
+const getStatusTagType = (status: number) => {
+  const map: Record<number, string> = {
+    0: "warning",
+    1: "success",
+    2: "primary",
+    3: "primary",
+    4: "success",
+    5: "info",
+    6: "info",
+  };
+  return map[status] || "info";
 };
 
 onMounted(() => {
   getFavorites();
   getAddresses();
+  getOrders();
+
+  // 启动订单倒计时定时器
+  orderCountdownTimer.value = setInterval(() => {
+    updateOrderCountdowns();
+  }, 1000);
 });
 
 onUnmounted(() => {
   if (timer) clearInterval(timer);
+  if (payTimer.value) clearInterval(payTimer.value);
+  if (pollingTimer.value) clearTimeout(pollingTimer.value);
+  if (orderCountdownTimer.value) clearInterval(orderCountdownTimer.value);
 });
 </script>
 
@@ -282,7 +741,7 @@ onUnmounted(() => {
           <el-input v-model="editForm.nickname" placeholder="昵称" />
 
           <!-- 邮箱编辑区域 -->
-          <div>
+          <div v-if="userStore.user.loginType === 'email'">
             <el-input v-model="editForm.email" placeholder="邮箱" />
             <!-- 当检测到邮箱变化时显示验证码输入框 -->
             <div v-if="isEmailChanged" class="mt-2 flex gap-2 animate-fade-in">
@@ -318,11 +777,16 @@ onUnmounted(() => {
         <!-- 展示模式 -->
         <div v-else>
           <h1 class="text-3xl font-bold mb-2">{{ userStore.user.nickname }}</h1>
-          <p class="text-gray-500 mb-1">用户名：{{ userStore.user.username }}</p>
+          <p class="text-gray-500 mb-1" v-if="userStore.user.loginType === 'email'">
+            用户名：{{ userStore.user.username }}
+          </p>
           <p class="text-gray-500 text-sm mb-1">
             性别：{{ userStore.user.sex === 1 ? "男" : "女" }}
           </p>
-          <p class="text-gray-500 text-sm mb-1">
+          <p
+            class="text-gray-500 text-sm mb-1"
+            v-if="userStore.user.loginType === 'email'"
+          >
             邮箱：{{ userStore.user.email || "无" }}
           </p>
           <p class="text-gray-500 text-sm mb-1">
@@ -335,6 +799,15 @@ onUnmounted(() => {
           <div class="flex gap-4 justify-center md:justify-start mt-4">
             <el-button round @click="startEditing">
               <Edit2 :size="16" class="mr-2" /> 编辑信息
+            </el-button>
+            <el-button
+              v-if="userStore.user.loginType === 'email'"
+              round
+              type="warning"
+              plain
+              @click="openPasswordDialog"
+            >
+              <Lock :size="16" class="mr-2" /> 修改密码
             </el-button>
             <el-button round type="danger" plain @click="handleLogout">
               <LogOut :size="16" class="mr-2" /> 退出登录
@@ -385,7 +858,220 @@ onUnmounted(() => {
     <div class="min-h-[400px] animate-fade-in">
       <!-- 复制你原有的 Content 区域代码即可 -->
       <div v-if="activeTab === 'orders'" class="space-y-4">
-        <!-- ... -->
+        <div v-if="orders.length === 0" class="text-center py-20 text-gray-500">
+          <Package :size="48" class="mx-auto mb-4 text-gray-300" />
+          <p>暂无订单</p>
+          <RouterLink to="/shop" class="text-blue-600 hover:underline mt-2 block"
+            >去购物</RouterLink
+          >
+        </div>
+        <div v-else>
+          <el-table :data="orders" @expand-change="expandChange" row-key="id">
+            <el-table-column type="expand">
+              <template #default="props">
+                <div class="p-6 bg-gray-50 dark:bg-zinc-800/50 rounded-xl">
+                  <!-- 订单信息头部：地址 & 支付信息 -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <!-- 收货信息 -->
+                    <div class="space-y-3">
+                      <div
+                        class="flex items-center gap-2 text-gray-900 dark:text-white font-bold text-lg"
+                      >
+                        <MapPin :size="20" class="text-blue-600" />
+                        收货信息
+                      </div>
+                      <div
+                        class="pl-7 space-y-1 text-sm text-gray-600 dark:text-gray-300"
+                      >
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium text-gray-900 dark:text-white">{{
+                            props.row.consignee
+                          }}</span>
+                          <span class="text-gray-400">|</span>
+                          <span>{{ props.row.consigneePhone }}</span>
+                        </div>
+                        <div class="leading-relaxed">
+                          {{ props.row.consigneeAddress }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 支付信息 (仅已付款订单显示) -->
+                    <div
+                      v-if="[1, 2, 3, 4, 6].includes(props.row.status)"
+                      class="space-y-3"
+                    >
+                      <div
+                        class="flex items-center gap-2 text-gray-900 dark:text-white font-bold text-lg"
+                      >
+                        <CreditCard :size="20" class="text-green-600" />
+                        支付信息
+                      </div>
+                      <div
+                        class="pl-7 space-y-2 text-sm text-gray-600 dark:text-gray-300"
+                      >
+                        <div class="flex items-center gap-2">
+                          <span class="text-gray-500">支付方式:</span>
+                          <span class="font-medium">{{
+                            props.row.payMethod || "支付宝"
+                          }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-gray-500">支付时间:</span>
+                          <div class="flex items-center gap-1">
+                            <Clock :size="14" class="text-gray-400" />
+                            <span>{{ props.row.checkoutTime || "未知" }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 商品列表 (Grid 布局) -->
+                  <div v-if="orderDetailsMap[props.row.orderNumber]">
+                    <div
+                      class="flex items-center gap-2 mb-4 text-gray-900 dark:text-white font-bold"
+                    >
+                      <Package :size="20" class="text-purple-600" />
+                      商品清单
+                    </div>
+                    <div
+                      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                    >
+                      <div
+                        v-for="item in orderDetailsMap[props.row.orderNumber]"
+                        :key="item.productId"
+                        class="group relative bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl overflow-hidden hover:shadow-md transition-all cursor-pointer"
+                        @click="router.push(`/product/${item.productId}`)"
+                      >
+                        <div class="aspect-square relative bg-gray-100 dark:bg-black">
+                          <img
+                            :src="item.productImage"
+                            class="w-full h-full object-cover"
+                          />
+                          <div
+                            class="absolute bottom-0 right-0 bg-black/60 text-white text-xs px-2 py-1 rounded-tl-lg"
+                          >
+                            x{{ item.number }}
+                          </div>
+                        </div>
+                        <div class="p-3">
+                          <h4 class="font-medium text-sm truncate mb-1">
+                            {{ item.productName }}
+                          </h4>
+                          <div class="text-blue-600 font-bold text-sm">
+                            ￥{{ item.productPrice }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else class="text-center py-8 text-gray-500">
+                    <el-icon class="is-loading mr-2"><Loading /></el-icon>
+                    正在加载订单详情...
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="订单号" prop="orderNumber" width="180" />
+            <el-table-column label="下单时间" prop="createTime" width="180" />
+            <el-table-column label="总金额" width="120">
+              <template #default="scope">
+                <span class="font-bold">￥{{ scope.row.amount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="100">
+              <template #default="scope">
+                <el-tag :type="getStatusTagType(scope.row.status)">{{
+                  getStatusText(scope.row.status)
+                }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" fixed="right" min-width="250">
+              <template #default="scope">
+                <div class="flex gap-2 flex-wrap items-center">
+                  <el-button
+                    v-if="scope.row.status === 0"
+                    type="primary"
+                    size="small"
+                    @click="handlePay(scope.row)"
+                    >去支付</el-button
+                  >
+                  <span
+                    v-if="
+                      scope.row.status === 0 && orderCountdowns[scope.row.orderNumber] > 0
+                    "
+                    class="text-red-600 font-mono text-sm font-bold"
+                  >
+                    {{ formatTime(orderCountdowns[scope.row.orderNumber]) }}
+                  </span>
+                  <span
+                    v-if="
+                      scope.row.status === 0 &&
+                      orderCountdowns[scope.row.orderNumber] <= 0
+                    "
+                    class="text-gray-400 text-sm"
+                  >
+                    已超时
+                  </span>
+                  <el-button
+                    v-if="scope.row.status === 0"
+                    type="danger"
+                    plain
+                    size="small"
+                    @click="handleCancel(scope.row)"
+                    >取消</el-button
+                  >
+
+                  <el-button
+                    v-if="scope.row.status === 1 || scope.row.status === 2"
+                    type="warning"
+                    plain
+                    size="small"
+                    @click="handleRefund(scope.row)"
+                    >退款</el-button
+                  >
+
+                  <el-button
+                    v-if="scope.row.status === 3"
+                    type="success"
+                    size="small"
+                    @click="handleConfirm(scope.row)"
+                    >确认收货</el-button
+                  >
+                  <el-button
+                    v-if="scope.row.status === 3 || scope.row.status === 4"
+                    type="info"
+                    plain
+                    size="small"
+                    @click="handleViewLogistics(scope.row)"
+                    >查看物流</el-button
+                  >
+
+                  <el-button
+                    v-if="[4, 5, 6].includes(scope.row.status)"
+                    type="danger"
+                    link
+                    size="small"
+                    @click="handleDelete(scope.row)"
+                    >删除订单</el-button
+                  >
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <div class="flex justify-center mt-6">
+            <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :total="totalOrders"
+              layout="prev, pager, next"
+              @current-change="handlePageChange"
+              background
+            />
+          </div>
+        </div>
       </div>
       <div v-if="activeTab === 'favorites'">
         <!-- ... -->
@@ -411,14 +1097,26 @@ onUnmounted(() => {
                 :alt="product.productName"
                 class="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
               />
-              <!-- <el-button circle class="absolute top-2 right-2 !p-2">
-                        <X :size="16" class="text-red-500" />
-                    </el-button> -->
+              <el-button
+                circle
+                class="absolute top-2 right-2 !p-2"
+                @click.prevent="handleDeleteFavorite(product.productId)"
+              >
+                <X :size="16" class="text-red-500" />
+              </el-button>
+
+              <el-button
+                circle
+                class="absolute bottom-2 right-2 !p-2 bg-blue-600 hover:bg-blue-700 border-0"
+                @click.prevent="handleAddToCart(product)"
+              >
+                <ShoppingCart :size="16" />
+              </el-button>
             </div>
-            <RouterLink :to="`/product/${product.id}`">
+            <RouterLink :to="`/product/${product.productId}`">
               <h3 class="font-semibold truncate">{{ product.productName }}</h3>
               <div class="flex justify-between items-center">
-                <span class="font-bold">${{ product.productPrice }}</span>
+                <span class="font-bold">￥{{ product.productPrice }}</span>
                 <span class="text-xs text-blue-600 font-medium group-hover:underline"
                   >查看详情</span
                 >
@@ -519,6 +1217,198 @@ onUnmounted(() => {
           <el-button @click="showAddressForm = false">取消</el-button>
           <el-button type="primary" @click="saveAddress">保存</el-button>
         </span>
+      </template>
+    </el-dialog>
+
+    <!-- 支付状态弹窗 -->
+    <el-dialog
+      v-model="showPaymentDialog"
+      title="支付状态"
+      width="500px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      class="dark:bg-zinc-900"
+    >
+      <div
+        v-if="paymentStep === 'checking'"
+        class="flex flex-col items-center py-8 text-center"
+      >
+        <Loader2 :size="48" class="animate-spin text-blue-600 mb-6" />
+        <h2 class="text-2xl font-bold mb-2">正在等待支付结果...</h2>
+        <p class="text-gray-500 max-w-md mb-6">
+          已在新窗口打开支付宝页面。支付完成后，此页面将自动更新。
+        </p>
+
+        <div
+          class="bg-red-50 text-red-600 px-4 py-2 rounded-lg inline-block mb-8 font-mono font-bold text-xl"
+        >
+          剩余支付时间: {{ formattedPayTime }}
+        </div>
+
+        <div class="flex gap-4">
+          <el-button @click="handlePay({ orderNumber: currentOrderNumber } as any)"
+            >重新打开支付页</el-button
+          >
+          <el-button type="info" text @click="closePaymentDialog"
+            >遇到问题？关闭窗口</el-button
+          >
+        </div>
+      </div>
+
+      <div
+        v-else-if="paymentStep === 'success'"
+        class="flex flex-col items-center py-8 text-center"
+      >
+        <div
+          class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-500/20"
+        >
+          <CheckCircle :size="48" />
+        </div>
+        <h1 class="text-3xl font-bold mb-4">支付成功!</h1>
+        <p class="text-gray-500 mb-8">感谢您的购买。</p>
+        <el-button
+          type="primary"
+          size="large"
+          round
+          class="!px-12 !font-bold"
+          @click="closePaymentDialog"
+        >
+          确定
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 物流信息弹窗 -->
+    <el-dialog
+      v-model="showLogisticsDialog"
+      title="物流信息"
+      width="600px"
+      class="dark:bg-zinc-900"
+    >
+      <div v-if="currentLogistics" class="space-y-4">
+        <!-- 物流公司信息 -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+          <div class="flex items-center gap-3 mb-2">
+            <Truck :size="24" class="text-blue-600" />
+            <div>
+              <div class="font-bold text-lg">{{ currentLogistics.company }}</div>
+              <div class="text-sm text-gray-500">
+                运单号: {{ currentLogistics.trackingNumber }}
+              </div>
+            </div>
+          </div>
+          <div class="text-sm mt-2">
+            <span class="text-gray-600">订单号:</span>
+            <span class="font-mono ml-2">{{ currentLogistics.orderNumber }}</span>
+          </div>
+        </div>
+
+        <!-- 物流轨迹 -->
+        <div class="relative">
+          <div class="text-sm font-bold mb-4 text-gray-700 dark:text-gray-300">
+            物流轨迹
+          </div>
+          <div class="space-y-4">
+            <div
+              v-for="(track, index) in currentLogistics.tracks"
+              :key="index"
+              class="relative pl-8 pb-4"
+              :class="{
+                'border-l-2 border-gray-200 dark:border-zinc-700':
+                  index !== currentLogistics.tracks.length - 1,
+              }"
+            >
+              <!-- 时间轴节点 -->
+              <div
+                class="absolute left-0 top-0 w-3 h-3 rounded-full"
+                :class="index === 0 ? 'bg-blue-600' : 'bg-gray-300 dark:bg-zinc-600'"
+              ></div>
+
+              <!-- 物流信息 -->
+              <div>
+                <div class="text-xs text-gray-500 mb-1">{{ track.time }}</div>
+                <div
+                  class="text-sm"
+                  :class="
+                    index === 0
+                      ? 'text-blue-600 font-bold'
+                      : 'text-gray-700 dark:text-gray-300'
+                  "
+                >
+                  {{ track.status }}
+                </div>
+                <div class="text-xs text-gray-400 mt-1">{{ track.location }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 提示信息 -->
+        <div
+          class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-sm text-gray-600 dark:text-gray-400"
+        >
+          <div class="flex items-start gap-2">
+            <span class="text-yellow-600">💡</span>
+            <div>
+              <div class="font-medium mb-1">温馨提示</div>
+              <div class="text-xs">• 物流信息仅供参考,实际配送时间可能有所延迟</div>
+              <div class="text-xs">• 如有疑问请联系客服或快递公司</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <el-button @click="showLogisticsDialog = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 修改密码弹窗 -->
+    <el-dialog
+      v-model="showPasswordDialog"
+      title="修改密码"
+      width="500px"
+      class="dark:bg-zinc-900"
+    >
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-position="top"
+        label-width="100px"
+      >
+        <el-form-item label="原密码" prop="oldPassword">
+          <el-input
+            v-model="passwordForm.oldPassword"
+            type="password"
+            placeholder="请输入原密码"
+            show-password
+          />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input
+            v-model="passwordForm.newPassword"
+            type="password"
+            placeholder="请输入新密码(至少6位)"
+            show-password
+          />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            placeholder="请再次输入新密码"
+            show-password
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <el-button @click="showPasswordDialog = false">取消</el-button>
+          <el-button type="primary" @click="handleUpdatePassword">确定</el-button>
+        </div>
       </template>
     </el-dialog>
   </div>

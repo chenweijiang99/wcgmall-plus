@@ -37,4 +37,37 @@ public interface ProductOrderService extends IService<ProductOrder> {
     boolean deleteByIds(List<Long> ids);
 
     String submitOrder(OrderSubmitDTO submitDTO);
+
+    /**
+     * 获取订单详情列表
+     * @param orderNumber 订单号
+     * @return 订单详情列表
+     */
+    List<com.river.vo.OrderDetailVO> getOrderDetail(String orderNumber);
+
+    /**
+     * 取消订单
+     * @param orderNumber 订单号
+     */
+    void cancelOrder(String orderNumber);
+
+    /**
+     * 申请退款
+     * @param orderNumber 订单号
+     */
+    void refundOrder(String orderNumber);
+
+    /**
+     * 确认收货
+     * @param orderNumber 订单号
+     */
+    void confirmReceipt(String orderNumber);
+
+    /**
+     * 删除订单
+     * @param orderNumber 订单号
+     */
+    boolean deleteOrder(String orderNumber);
+
+    IPage<ProductOrder> userSelectPage(ProductOrder productOrder);
 }
