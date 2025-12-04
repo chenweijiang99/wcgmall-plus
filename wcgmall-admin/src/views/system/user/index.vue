@@ -65,14 +65,7 @@
           </template>
         </el-table-column>
         <el-table-column label="昵称" align="center" prop="nickname" show-overflow-tooltip />
-        <el-table-column label="登录方式" align="center" prop="ipLocation" >
-          <template #default="{ row }">
-            <span v-for="item in loginTypes">
-                <el-tag :type="item.style" v-if="row.loginType === item.value">
-                  {{ item.label}}
-              </el-tag>
-            </span>
-          </template>
+        <el-table-column label="登录方式" align="center" prop="loginType" >
         </el-table-column>
         <el-table-column label="登录IP" align="center" prop="ip" show-overflow-tooltip />
         <el-table-column label="登录地址" align="center" prop="ipLocation" show-overflow-tooltip />
