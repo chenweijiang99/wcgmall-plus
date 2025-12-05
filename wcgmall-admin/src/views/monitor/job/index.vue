@@ -308,7 +308,8 @@ const rules = {
 // 任务组名字典
 const jobGroupOptions = [
   { value: 'DEFAULT', label: '默认' },
-  { value: 'SYSTEM', label: '系统' }
+  { value: 'SYSTEM', label: '系统' },
+  { value: 'NOSQL', label: '不保存到数据库' }
 ]
 
 // 状态字典

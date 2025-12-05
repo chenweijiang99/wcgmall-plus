@@ -63,8 +63,8 @@ public abstract class AbstractQuartzJob implements org.quartz.Job {
     protected void after(JobExecutionContext context, SysJob job, Exception e) {
         LocalDateTime startTime = THREAD_LOCAL.get();
         THREAD_LOCAL.remove();
-        //redis心跳任务不添加日志
-        if (!job.getInvokeTarget().contains("redisTimer")) {
+        //redis心跳任务不添加日志, NOSQL任务不添加日志
+        if (!job.getInvokeTarget().contains("redisTimer") && !job.getJobGroup().equals("NOSQL")) {
             final SysJobLog jobLog = new SysJobLog();
             jobLog.setJobId(job.getJobId());
             jobLog.setJobName(job.getJobName());

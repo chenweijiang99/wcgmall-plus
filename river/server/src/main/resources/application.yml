@@ -1,6 +1,3 @@
-logging:
-  level:
-    com.river.utils.SfExpressClient: DEBUG
 server:
   port: 8080
 

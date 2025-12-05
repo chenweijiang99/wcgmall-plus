@@ -66,7 +66,64 @@
         v-loading="loading"
         :data="dataList"
         @selection-change="handleSelectionChange"
+        :row-key="getRowKey"
+        @expand-change="handleExpandChange"
       >
+        <el-table-column type="expand" width="60">
+          <template #default="{ row }">
+            <div v-loading="expandedRows[row.id]?.loading" class="order-detail-container">
+              <div v-if="expandedRows[row.id]?.details && expandedRows[row.id].details.length > 0">
+                <h4 class="detail-title">订单商品详情</h4>
+                <el-table :data="expandedRows[row.id].details" border size="small" class="detail-table">
+                  <el-table-column label="商品图片" align="center" width="100">
+                    <template #default="{ row: detail }">
+                      <el-image
+                        v-if="detail.productImage"
+                        :src="detail.productImage"
+                        :preview-src-list="[detail.productImage]"
+                        fit="cover"
+                        style="width: 60px; height: 60px"
+                      >
+                        <template #error>
+                          <div class="image-slot">
+                            <el-icon><Picture /></el-icon>
+                          </div>
+                        </template>
+                      </el-image>
+                      <span v-else>无图片</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="商品名称" prop="productName" align="center" />
+                  <el-table-column label="商品价格" prop="productPrice" align="center">
+                    <template #default="{ row: detail }">
+                      ¥{{ detail.productPrice }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="购买数量" prop="number" align="center" />
+                  <el-table-column label="小计" align="center">
+                    <template #default="{ row: detail }">
+                      ¥{{ (detail.productPrice * detail.number).toFixed(2) }}
+                    </template>
+                  </el-table-column>
+                </el-table>
+                <div class="detail-summary">
+                  <span>商品总数：{{ getTotalQuantity(expandedRows[row.id].details) }} 件</span>
+                  <span>总金额：¥{{ getTotalAmount(expandedRows[row.id].details).toFixed(2) }}</span>
+                </div>
+              </div>
+              <div v-else-if="expandedRows[row.id]?.error" class="detail-error">
+                <el-alert
+                  :title="expandedRows[row.id].error"
+                  type="error"
+                  :closable="false"
+                />
+              </div>
+              <div v-else class="detail-empty">
+                <el-empty description="暂无订单详情数据" />
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column type="selection" width="55" align="center" />
         <!-- <el-table-column label="主键ID" align="center" prop="id" /> -->
         <el-table-column label="订单编号" align="center" prop="orderNumber" />
@@ -113,7 +170,7 @@
               >发货
             </el-button>
             <el-button
-              v-if="scope.row.status >= 3"
+              v-if="scope.row.status === 3 || scope.row.status === 4"
               type="info"
               link
               icon="Position"
@@ -183,9 +240,7 @@
               placeholder="请输入支付状态 0未支付 1已支付 2退款"
             />
           </el-form-item>
-          <el-form-item label="订单金额" prop="amount">
-            <el-input v-model="form.amount" placeholder="请输入订单金额" />
-          </el-form-item>
+          <el-table-column label="订单金额" align="center" prop="amount" />
           <el-form-item label="下单时间" prop="orderTime">
             <el-input v-model="form.orderTime" placeholder="请输入下单时间" />
           </el-form-item>
@@ -261,12 +316,8 @@
       >
         <div v-loading="logisticsLoading">
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="订单编号">{{
-              logisticsInfo.orderNumber
-            }}</el-descriptions-item>
-            <el-descriptions-item label="运单号">{{
-              logisticsInfo.waybillNo || "-"
-            }}</el-descriptions-item>
+            <el-descriptions-item label="订单编号">{{ logisticsInfo.orderNumber }}</el-descriptions-item>
+            <el-descriptions-item label="运单号">{{ logisticsInfo.waybillNo || "-" }}</el-descriptions-item>
             <el-descriptions-item label="物流状态" :span="2">
               <el-tag :type="getLogisticsStatusType(logisticsInfo.status)">
                 {{ logisticsInfo.statusDesc }}
@@ -307,9 +358,11 @@ import {
   deleteOrderApi,
   addOrderApi,
   updateOrderApi,
+  getOrderDetailApi
 } from "@/api/order/order";
 import { shipOrderApi, getLogisticsApi } from "@/api/order/logistics";
 import ButtonGroup from "@/components/ButtonGroup/index.vue";
+import { Picture } from '@element-plus/icons-vue'
 
 // 遮罩层
 const loading = ref(false);
@@ -403,6 +456,68 @@ const logisticsInfo = reactive<any>({
   statusDesc: "",
   routes: [],
 });
+
+// 订单详情相关 - 新增
+const expandedRows = ref<Record<string, any>>({});
+
+/** 获取行唯一标识 */
+const getRowKey = (row: any) => {
+  return row.id;
+};
+
+/** 处理表格展开事件 */
+const handleExpandChange = async (row: any, expandedRowsArr: any[]) => {
+  const isExpanded = expandedRowsArr.some(item => item.id === row.id);
+  
+  if (isExpanded) {
+    // 展开时加载订单详情
+    await loadOrderDetail(row);
+  } else {
+    // 收起时清理数据
+    if (expandedRows.value[row.id]) {
+      delete expandedRows.value[row.id];
+    }
+  }
+};
+
+/** 加载订单详情 */
+const loadOrderDetail = async (row: any) => {
+  // 如果已经加载过，直接返回
+  if (expandedRows.value[row.id] && expandedRows.value[row.id].details) {
+    return;
+  }
+  
+  // 初始化订单详情状态
+  expandedRows.value[row.id] = {
+    loading: true,
+    details: [],
+    error: null
+  };
+  
+  try {
+    const { data } = await getOrderDetailApi(row.orderNumber);
+    expandedRows.value[row.id].details = data || [];
+    expandedRows.value[row.id].loading = false;
+  } catch (error: any) {
+    expandedRows.value[row.id].error = error.message || "加载订单详情失败";
+    expandedRows.value[row.id].loading = false;
+    ElMessage.error("加载订单详情失败");
+  }
+};
+
+/** 计算商品总数 */
+const getTotalQuantity = (details: any[]) => {
+  return details.reduce((total, item) => total + (item.number || 0), 0);
+};
+
+/** 计算总金额 */
+const getTotalAmount = (details: any[]) => {
+  return details.reduce((total, item) => {
+    const price = item.productPrice || 0;
+    const quantity = item.number || 0;
+    return total + (price * quantity);
+  }, 0);
+};
 
 /** 查询列表 */
 const getList = async () => {
@@ -618,3 +733,43 @@ onMounted(() => {
   getList();
 });
 </script>
+
+<style scoped>
+.order-detail-container {
+  padding: 16px;
+  background-color: #f8f9fa;
+}
+
+.detail-title {
+  margin-bottom: 16px;
+  color: #333;
+  font-weight: 600;
+}
+
+.detail-table {
+  margin-bottom: 16px;
+}
+
+.detail-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid #e8e8e8;
+  font-weight: 600;
+  color: #333;
+}
+
+.detail-error {
+  padding: 16px;
+}
+
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  background: #f5f7fa;
+  color: #909399;
+}
+</style>

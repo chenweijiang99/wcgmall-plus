@@ -3,6 +3,7 @@ package com.river.controller.order;
 import java.util.List;
 
 import com.river.entity.ProductOrder;
+import com.river.vo.OrderDetailVO;
 import org.springframework.web.bind.annotation.*;
 import com.river.service.ProductOrderService;
 import com.river.common.Result;
@@ -28,9 +29,15 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "获取订单详情")
+    @Operation(summary = "获取订单信息")
     public Result<ProductOrder> getInfo(@PathVariable("id") Long id) {
         return Result.success(orderService.getById(id));
+    }
+
+    @Operation(summary = "获取订单详情")
+    @GetMapping("/detail/{orderNumber}")
+    public Result<List<OrderDetailVO>> getOrderDetail(@PathVariable String orderNumber) {
+        return Result.success(orderService.getOrderDetail(orderNumber));
     }
 
     @PostMapping("/add")

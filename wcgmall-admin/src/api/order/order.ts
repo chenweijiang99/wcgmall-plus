@@ -12,11 +12,22 @@ export function listOrderApi(params?: any) {
 }
 
 /**
- * 获取详情
+ * 获取信息
  */
 export function detailOrderApi(id: any) {
     return request({
         url: '/sys/order/' + id,
+        method: 'get'
+    })
+}
+
+
+/**
+ * 获取详情
+ */
+export function getOrderDetailApi(orderNumber: any) {
+    return request({
+        url: '/sys/order/detail/' + orderNumber,
         method: 'get'
     })
 }
@@ -53,5 +64,7 @@ export function deleteOrderApi(ids: number[] | number) {
         method: 'delete'
     })
 }
+
+
 
 
