@@ -48,6 +48,7 @@ import {
   alipayPayApi,
   getOrderStatusApi,
 } from "@/api/order";
+import { getOrderLogistics } from "@/api/logistics";
 import { emitter } from "@/event/emitter";
 
 const userStore = useUserStore();
@@ -125,44 +126,6 @@ const pollingTimer = ref<any>(null);
 const showLogisticsDialog = ref(false);
 const currentLogistics = ref<any>(null);
 
-// 模拟物流数据
-const mockLogisticsData = {
-  company: "顺丰速运",
-  trackingNumber: "SF1234567890123",
-  status: "运输中",
-  tracks: [
-    {
-      time: "2025-12-04 08:30:00",
-      status: "【广州市】快件已送达,感谢使用顺丰",
-      location: "广州市天河区",
-    },
-    {
-      time: "2025-12-04 06:15:00",
-      status: "【广州市】快件正在派送中,派送员:张师傅,电话:138****5678",
-      location: "广州市天河区",
-    },
-    {
-      time: "2025-12-03 22:45:00",
-      status: "【广州市】快件到达【广州天河集散中心】",
-      location: "广州市",
-    },
-    {
-      time: "2025-12-03 18:20:00",
-      status: "【深圳市】快件离开【深圳宝安集散中心】已发往【广州天河集散中心】",
-      location: "深圳市",
-    },
-    {
-      time: "2025-12-03 15:30:00",
-      status: "【深圳市】快件到达【深圳宝安集散中心】",
-      location: "深圳市",
-    },
-    {
-      time: "2025-12-03 10:00:00",
-      status: "【深圳市】顺丰速运已收件",
-      location: "深圳市南山区",
-    },
-  ],
-};
 
 const formattedPayTime = computed(() => {
   const m = Math.floor(payCountdown.value / 60)
@@ -600,13 +563,35 @@ const closePaymentDialog = () => {
 };
 
 // 查看物流
-const handleViewLogistics = (order: Order) => {
-  ElMessage.info("暂未实现，目前展示模拟数据");
-  currentLogistics.value = {
-    orderNumber: order.orderNumber,
-    ...mockLogisticsData,
-  };
+const handleViewLogistics = async (order: Order) => {
   showLogisticsDialog.value = true;
+  try {
+    const res = await getOrderLogistics(order.orderNumber);
+    const logisticsData = res.data;
+    
+    currentLogistics.value = {
+      orderNumber: logisticsData.orderNumber,
+      company: "顺丰速运",
+      trackingNumber: logisticsData.waybillNo || "暂无运单号",
+      status: logisticsData.statusDesc || "待发货",
+      tracks: (logisticsData.routes || []).map((route: any) => ({
+        time: route.acceptTime,
+        status: route.remark,
+        location: route.acceptAddress || "",
+      })),
+    };
+  } catch (error) {
+    console.error("获取物流信息失败:", error);
+    ElMessage.error("获取物流信息失败");
+    // 使用空数据
+    currentLogistics.value = {
+      orderNumber: order.orderNumber,
+      company: "顺丰速运",
+      trackingNumber: "暂无运单号",
+      status: "暂无物流信息",
+      tracks: [],
+    };
+  }
 };
 
 const handleCancel = (order: Order) => {

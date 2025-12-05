@@ -1,3 +1,6 @@
+logging:
+  level:
+    com.river.utils.SfExpressClient: DEBUG
 server:
   port: 8080
 
@@ -8,7 +11,7 @@ spring:
       max-request-size: 10MB
 
   profiles:
-    active: prod
+    active: dev
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -154,3 +157,16 @@ juhe:
 #前端访问地址
 front:
   url:
+
+#快递配置
+sf-express:
+# 顾客编码
+  partnerId:
+# 校验码
+  checkWord:
+#  接口地址
+  url:
+#  下单接口服务代码
+  createOrderServiceCode:
+#  路由查询接口服务代码
+  searchRoutesServiceCode:

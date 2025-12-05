@@ -110,8 +110,25 @@
           label="操作"
           align="center"
           class-name="small-padding fixed-width"
+          width="260"
         >
           <template #default="scope">
+            <el-button 
+              v-if="scope.row.status === 1 || scope.row.status === 2" 
+              type="success" 
+              link 
+              icon="Van" 
+              @click="handleShip(scope.row)"
+            >发货
+            </el-button>
+            <el-button 
+              v-if="scope.row.status >= 3" 
+              type="info" 
+              link 
+              icon="Position" 
+              @click="handleViewLogistics(scope.row)"
+            >物流
+            </el-button>
             <el-button type="primary" link icon="Edit" @click="handleUpdate(scope.row)"
               >修改
             </el-button>
@@ -198,6 +215,77 @@
           </div>
         </template>
       </el-dialog>
+
+      <!-- 发货对话框 -->
+      <el-dialog v-model="shipDialogOpen" title="发货" width="600px" append-to-body>
+        <el-form ref="shipFormRef" :model="shipForm" :rules="shipRules" label-width="100px">
+          <el-form-item label="订单编号">
+            <el-input v-model="shipForm.orderNumber" disabled />
+          </el-form-item>
+          <el-form-item label="发件人姓名" prop="senderName">
+            <el-input v-model="shipForm.senderName" placeholder="请输入发件人姓名" />
+          </el-form-item>
+          <el-form-item label="发件人电话" prop="senderPhone">
+            <el-input v-model="shipForm.senderPhone" placeholder="请输入发件人电话" />
+          </el-form-item>
+          <el-form-item label="发件省" prop="senderProvince">
+            <el-input v-model="shipForm.senderProvince" placeholder="例如：广东省" />
+          </el-form-item>
+          <el-form-item label="发件市" prop="senderCity">
+            <el-input v-model="shipForm.senderCity" placeholder="例如：深圳市" />
+          </el-form-item>
+          <el-form-item label="发件区/县" prop="senderCounty">
+            <el-input v-model="shipForm.senderCounty" placeholder="例如：南山区" />
+          </el-form-item>
+          <el-form-item label="详细地址" prop="senderAddress">
+            <el-input 
+              v-model="shipForm.senderAddress" 
+              type="textarea" 
+              :rows="2"
+              placeholder="请输入详细地址" 
+            />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button type="primary" @click="submitShipForm" :loading="shipLoading">确认发货</el-button>
+            <el-button @click="shipDialogOpen = false">取 消</el-button>
+          </div>
+        </template>
+      </el-dialog>
+
+      <!-- 物流查看对话框 -->
+      <el-dialog v-model="logisticsDialogOpen" title="物流信息" width="700px" append-to-body>
+        <div v-loading="logisticsLoading">
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="订单编号">{{ logisticsInfo.orderNumber }}</el-descriptions-item>
+            <el-descriptions-item label="运单号">{{ logisticsInfo.waybillNo || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="物流状态" :span="2">
+              <el-tag :type="getLogisticsStatusType(logisticsInfo.status)">
+                {{ logisticsInfo.statusDesc }}
+              </el-tag>
+            </el-descriptions-item>
+          </el-descriptions>
+
+          <el-divider content-position="left">物流轨迹</el-divider>
+          
+          <el-timeline v-if="logisticsInfo.routes && logisticsInfo.routes.length > 0">
+            <el-timeline-item
+              v-for="(route, index) in logisticsInfo.routes"
+              :key="index"
+              :timestamp="route.acceptTime"
+              placement="top"
+            >
+              <el-card>
+                <p>{{ route.remark }}</p>
+                <p v-if="route.acceptAddress" class="text-gray">{{ route.acceptAddress }}</p>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+          
+          <el-empty v-else description="暂无物流轨迹信息" />
+        </div>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -211,6 +299,10 @@ import {
   addOrderApi,
   updateOrderApi,
 } from "@/api/order/order";
+import { 
+  shipOrderApi, 
+  getLogisticsApi 
+} from "@/api/order/logistics";
 import ButtonGroup from "@/components/ButtonGroup/index.vue";
 
 // 遮罩层
@@ -269,6 +361,43 @@ const payStatusOptions = ref([
   { value: 1, label: "已支付" },
   { value: 2, label: "退款" },
 ]);
+
+// 发货相关
+const shipDialogOpen = ref(false);
+const shipLoading = ref(false);
+const shipFormRef = ref();
+const shipForm = reactive<any>({
+  orderNumber: undefined,
+  senderName: undefined,
+  senderPhone: undefined,
+  senderProvince: undefined,
+  senderCity: undefined,
+  senderCounty: undefined,
+  senderAddress: undefined,
+});
+const shipRules = reactive({
+  senderName: [{ required: true, message: "发件人姓名不能为空", trigger: "blur" }],
+  senderPhone: [
+    { required: true, message: "发件人电话不能为空", trigger: "blur" },
+    { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" }
+  ],
+  senderProvince: [{ required: true, message: "发件省不能为空", trigger: "blur" }],
+  senderCity: [{ required: true, message: "发件市不能为空", trigger: "blur" }],
+  senderCounty: [{ required: true, message: "发件区/县不能为空", trigger: "blur" }],
+  senderAddress: [{ required: true, message: "详细地址不能为空", trigger: "blur" }],
+});
+
+// 物流相关
+const logisticsDialogOpen = ref(false);
+const logisticsLoading = ref(false);
+const logisticsInfo = reactive<any>({
+  orderNumber: '',
+  waybillNo: '',
+  status: 0,
+  statusDesc: '',
+  routes: []
+});
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true;
@@ -413,6 +542,70 @@ const handleSizeChange = (val: any) => {
 const handleCurrentChange = (val: any) => {
   queryParams.pageNum = val;
   getList();
+};
+
+/** 发货操作 */
+const handleShip = (row: any) => {
+  Object.assign(shipForm, {
+    orderNumber: row.orderNumber,
+    senderName: undefined,
+    senderPhone: undefined,
+    senderProvince: undefined,
+    senderCity: undefined,
+    senderCounty: undefined,
+    senderAddress: undefined,
+  });
+  shipFormRef.value?.resetFields();
+  shipDialogOpen.value = true;
+};
+
+/** 提交发货表单 */
+const submitShipForm = async () => {
+  await shipFormRef.value?.validate(async (valid: any) => {
+    if (valid) {
+      shipLoading.value = true;
+      try {
+        await shipOrderApi(shipForm);
+        ElMessage.success("发货成功");
+        shipDialogOpen.value = false;
+        getList();
+      } catch (error: any) {
+        ElMessage.error(error.message || "发货失败");
+      } finally {
+        shipLoading.value = false;
+      }
+    }
+  });
+};
+
+/** 查看物流 */
+const handleViewLogistics = async (row: any) => {
+  logisticsDialogOpen.value = true;
+  logisticsLoading.value = true;
+  try {
+    const { data } = await getLogisticsApi(row.orderNumber);
+    Object.assign(logisticsInfo, data);
+  } catch (error: any) {
+    ElMessage.error(error.message || "查询物流信息失败");
+  } finally {
+    logisticsLoading.value = false;
+  }
+};
+
+/** 获取物流状态类型 */
+const getLogisticsStatusType = (status: number) => {
+  switch (status) {
+    case 0:
+      return "info";
+    case 1:
+      return "warning";
+    case 2:
+      return "primary";
+    case 3:
+      return "success";
+    default:
+      return "info";
+  }
 };
 
 onMounted(() => {

@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.river.common.Result;
 import com.river.dto.OrderSubmitDTO;
 import com.river.entity.ProductOrder;
+import com.river.service.LogisticsService;
 import com.river.service.ProductOrderService;
+import com.river.vo.LogisticsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProductOrderController {
     private final ProductOrderService productOrderService;
+    private final LogisticsService logisticsService;
 
     @Operation(summary = "提交订单")
     @PostMapping("/submit")
@@ -64,5 +67,11 @@ public class ProductOrderController {
     @DeleteMapping("/{orderNumber}")
     public Result<Object> deleteOrder(@PathVariable String orderNumber) {
         return Result.success(productOrderService.deleteOrder(orderNumber));
+    }
+
+    @Operation(summary = "查询物流信息")
+    @GetMapping("/logistics/{orderNumber}")
+    public Result<LogisticsVO> getLogistics(@PathVariable String orderNumber) {
+        return Result.success(logisticsService.getLogistics(orderNumber));
     }
 }

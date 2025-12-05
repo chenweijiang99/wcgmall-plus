@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @MapperScan("com.river.mapper")
 @EnableFileStorage
-@EnableScheduling
+//@EnableScheduling
 public class ServerApplication {
 
     public static void main(String[] args) {
