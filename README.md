@@ -12,9 +12,9 @@ WCG Mall Plus 是一个基于 Spring Boot 3.x 和 Vue 3.x 的全栈电商管理�
 
 邮箱：1774532899@qq.com
 
-访问 http://wcgmall-plus-web.wcgmallcwj.online/ 查看用户端
+访问 https://wcgmall-plus-web.wcgmallcwj.online/ 查看用户端
 
-访问 http://wcgmall-plus-admin.wcgmallcwj.online/ 查看管理端
+访问 https://wcgmall-plus-admin.wcgmallcwj.online/ 查看管理端
 
 账户：test
 密码：123456
