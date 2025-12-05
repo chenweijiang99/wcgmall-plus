@@ -49,7 +49,7 @@
       <!-- 操作工具栏 -->
       <template #header>
         <ButtonGroup>
-          <el-button type="primary" plain icon="Plus" @click="handleAdd">新增 </el-button>
+          <!-- <el-button type="primary" plain icon="Plus" @click="handleAdd">新增 </el-button> -->
           <el-button
             type="danger"
             plain
@@ -136,9 +136,9 @@
           </template>
         </el-table-column>
         <el-table-column label="用户ID" align="center" prop="userId" />
-        <el-table-column label="收货人姓名" align="center" prop="consignee" />
-        <el-table-column label="收货地址" align="center" prop="consigneeAddress" />
-        <el-table-column label="收货人电话" align="center" prop="consigneePhone" />
+        <el-table-column label="姓名" align="center" prop="consignee" />
+        <el-table-column label="地址" align="center" prop="consigneeAddress" />
+        <el-table-column label="电话" align="center" prop="consigneePhone" />
         <el-table-column label="邮箱" align="center" prop="email" />
         <el-table-column label="支付方式" align="center" prop="payMethod" />
         <el-table-column label="支付状态" align="center" prop="payStatus">
@@ -208,24 +208,28 @@
             <el-input v-model="form.orderNumber" placeholder="请输入订单编号" />
           </el-form-item>
           <el-form-item
-            label="订单状态 1待付款 2待发货 3已发货 4已完成 5已取消 6已退款"
+            label="订单状态"
             prop="status"
           >
-            <el-input
-              v-model="form.status"
-              placeholder="请输入订单状态 1待付款 2待发货 3已发货 4已完成 5已取消 6已退款"
+            <el-select v-model="form.status" placeholder="请选择订单状态"> 
+            <el-option
+              v-for="item in orderStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
             />
+            </el-select>
           </el-form-item>
           <el-form-item label="用户ID" prop="userId">
             <el-input v-model="form.userId" placeholder="请输入用户ID" />
           </el-form-item>
-          <el-form-item label="收货人姓名" prop="consignee">
+          <el-form-item label="姓名" prop="consignee">
             <el-input v-model="form.consignee" placeholder="请输入收货人姓名" />
           </el-form-item>
           <el-form-item label="收货地址" prop="consigneeAddress">
             <el-input v-model="form.consigneeAddress" placeholder="请输入收货地址" />
           </el-form-item>
-          <el-form-item label="收货人电话" prop="consigneePhone">
+          <el-form-item label="电话" prop="consigneePhone">
             <el-input v-model="form.consigneePhone" placeholder="请输入收货人电话" />
           </el-form-item>
           <el-form-item label="邮箱" prop="email">
@@ -234,13 +238,19 @@
           <el-form-item label="支付方式" prop="payMethod">
             <el-input v-model="form.payMethod" placeholder="请输入支付方式" />
           </el-form-item>
-          <el-form-item label="支付状态 0未支付 1已支付 2退款" prop="payStatus">
-            <el-input
-              v-model="form.payStatus"
-              placeholder="请输入支付状态 0未支付 1已支付 2退款"
+          <el-form-item label="支付状态" prop="payStatus">
+            <el-select v-model="form.payStatus" placeholder="请选择支付状态"> 
+            <el-option
+              v-for="item in payStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
             />
+            </el-select>
           </el-form-item>
-          <el-table-column label="订单金额" align="center" prop="amount" />
+          <el-form-item label="订单金额" prop="amount">
+            <el-input v-model="form.amount" placeholder="请输入订单金额" />
+          </el-form-item>
           <el-form-item label="下单时间" prop="orderTime">
             <el-input v-model="form.orderTime" placeholder="请输入下单时间" />
           </el-form-item>
@@ -351,6 +361,7 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
   listOrderApi,
@@ -495,12 +506,14 @@ const loadOrderDetail = async (row: any) => {
   };
   
   try {
-    const { data } = await getOrderDetailApi(row.orderNumber);
-    expandedRows.value[row.id].details = data || [];
+    const response = await getOrderDetailApi(row.orderNumber);
+    // 确保数据不为null，避免Element Plus表格组件内部错误
+    expandedRows.value[row.id].details = response?.data || [];
     expandedRows.value[row.id].loading = false;
   } catch (error: any) {
     expandedRows.value[row.id].error = error.message || "加载订单详情失败";
     expandedRows.value[row.id].loading = false;
+    expandedRows.value[row.id].details = []; // 确保details不为null
     ElMessage.error("加载订单详情失败");
   }
 };
@@ -583,13 +596,18 @@ const handleAdd = () => {
 };
 
 /** 修改按钮操作 */
-const handleUpdate = (row: any) => {
+const handleUpdate = async (row: any) => {
   reset();
-  detailOrderApi(row.id).then((response) => {
+  try {
+    const response = await detailOrderApi(row.id);
     Object.assign(form, response.data);
+    // 确保表单引用已经正确绑定
+    await nextTick();
     open.value = true;
     title.value = "修改";
-  });
+  } catch (error) {
+    ElMessage.error("获取订单详情失败");
+  }
 };
 
 /** 提交按钮 */

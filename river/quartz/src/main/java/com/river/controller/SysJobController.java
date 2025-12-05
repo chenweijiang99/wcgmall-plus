@@ -73,6 +73,8 @@ public class SysJobController {
 
     @Operation(summary = "定时任务立即执行一次")
     @PutMapping("/run")
+    @OperationLogger(value = "定时任务立即执行一次")
+    @SaCheckPermission("sys:job:run")
     public Result<Void> run(@RequestBody SysJob sysJob) {
         jobService.runJob(sysJob);
         return Result.success();

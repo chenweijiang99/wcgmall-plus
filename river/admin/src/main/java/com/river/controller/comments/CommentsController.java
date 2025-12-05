@@ -1,6 +1,9 @@
 package com.river.controller.comments;
 
 import java.util.List;
+
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.river.annotation.OperationLogger;
 import org.springframework.web.bind.annotation.*;
 import com.river.entity.Comments;
 import com.river.service.CommentsService;
@@ -34,18 +37,24 @@ public class CommentsController {
 
     @PostMapping("/add")
     @Operation(summary = "添加")
+    @OperationLogger("添加评论")
+    @SaCheckPermission("sys:comments:add")
     public Result<Object> add(@RequestBody Comments comments) {
         return Result.success(commentsService.insert(comments));
     }
 
     @PutMapping("/update")
     @Operation(summary = "修改")
+    @OperationLogger("修改评论")
+    @SaCheckPermission("sys:comments:update")
     public Result<Object> edit(@RequestBody Comments comments) {
         return Result.success(commentsService.update(comments));
     }
 
     @DeleteMapping("/delete/{ids}")
     @Operation(summary = "删除")
+    @OperationLogger("删除评论")
+    @SaCheckPermission("sys:comments:delete")
     public Result<Object> remove(@PathVariable List<Long> ids) {
         return Result.success(commentsService.deleteByIds(ids));
     }

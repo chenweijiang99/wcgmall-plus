@@ -3,6 +3,7 @@ package com.river.controller.monitor;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.river.annotation.OperationLogger;
 import com.river.common.Result;
 import com.river.service.SysUserService;
 import com.river.vo.user.OnlineUserVo;
@@ -30,6 +31,7 @@ public class OnlineUserController {
 
     @Operation(summary = "强制踢出")
     @GetMapping("/forceLogout/{token}")
+    @OperationLogger("强制踢出")
     @SaCheckPermission("monitor:online:forceLogout")
     public Result<Void> forceLogout(@PathVariable String token) {
         StpUtil.logoutByTokenValue(token);

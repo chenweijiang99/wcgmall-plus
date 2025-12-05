@@ -30,11 +30,11 @@
     </select>
     <!-- 查询总销售额 -->
     <select id="selectTotalSales" resultType="java.lang.Double">
-        SELECT SUM(amount) as totalSales FROM product_order WHERE status = 1
+        SELECT SUM(amount) as totalSales FROM product_order WHERE pay_status = 1
     </select>
     <!-- 查询待付款订单数量 -->
     <select id="selectPendingPayments" resultType="java.lang.Long">
-        SELECT COUNT(*) as pendingPayments FROM product_order WHERE status = 0
+        SELECT COUNT(*) as pendingPayments FROM product_order WHERE pay_status = 0
     </select>
 
 </mapper>

@@ -1,5 +1,7 @@
 package com.river.controller.order;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.river.annotation.OperationLogger;
 import com.river.common.Result;
 import com.river.dto.ShipOrderDTO;
 import com.river.entity.OrderLogistics;
@@ -24,6 +26,8 @@ public class LogisticsController {
 
     @PostMapping("/ship")
     @Operation(summary = "发货 - 调用顺丰下单接口")
+    @OperationLogger("发货 - 调用顺丰下单接口")
+    @SaCheckPermission("sys:logistics:ship")
     public Result<OrderLogistics> shipOrder(@RequestBody @Validated ShipOrderDTO dto) {
         OrderLogistics logistics = logisticsService.shipOrder(dto);
         return Result.success(logistics);

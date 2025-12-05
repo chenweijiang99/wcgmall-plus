@@ -2,6 +2,8 @@ package com.river.controller.order;
 
 import java.util.List;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.river.annotation.OperationLogger;
 import com.river.entity.ProductOrder;
 import com.river.vo.OrderDetailVO;
 import org.springframework.web.bind.annotation.*;
@@ -42,18 +44,24 @@ public class OrderController {
 
     @PostMapping("/add")
     @Operation(summary = "添加订单")
+    @OperationLogger("添加订单")
+    @SaCheckPermission("sys:order:add")
     public Result<Object> add(@RequestBody ProductOrder productOrder) {
         return Result.success(orderService.insert(productOrder));
     }
 
     @PutMapping("/update")
     @Operation(summary = "修改订单")
+    @OperationLogger("修改订单")
+    @SaCheckPermission("sys:order:update")
     public Result<Object> edit(@RequestBody ProductOrder productOrder) {
         return Result.success(orderService.update(productOrder));
     }
 
     @DeleteMapping("/delete/{ids}")
     @Operation(summary = "删除订单")
+    @OperationLogger("删除订单")
+    @SaCheckPermission("sys:order:delete")
     public Result<Object> remove(@PathVariable List<Long> ids) {
         return Result.success(orderService.deleteByIds(ids));
     }

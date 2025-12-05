@@ -1,6 +1,8 @@
 package com.river.controller.monitor;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.river.annotation.OperationLogger;
 import com.river.common.Result;
 import com.river.service.CacheService;
 import com.river.vo.cache.*;
@@ -40,6 +42,8 @@ public class CacheController {
 
     @Operation(summary = "清空缓存")
     @DeleteMapping
+    @OperationLogger("清空缓存")
+    @SaCheckPermission("monitor:cache")
     public Result<Void> clearCache() {
         cacheService.clearCache();
         return Result.success();

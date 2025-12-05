@@ -61,6 +61,7 @@ public class SysUserController {
     @PutMapping("/updatePwd")
     @Operation(summary = "修改密码")
     @SaCheckPermission("sys:user:updatePwd")
+    @OperationLogger("修改密码")
     public Result<Void> updatePwd(@RequestBody UpdatePwdDTO updatePwdDTO) {
         sysUserService.updatePwd(updatePwdDTO);
         return Result.success();
