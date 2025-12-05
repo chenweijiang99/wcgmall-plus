@@ -12,15 +12,8 @@
           />
         </el-form-item>
         <!-- 订单状态 0待付款 1已付款 2待发货 3已发货 4已完成 5已取消 6已退款 -->
-        <el-form-item
-          label="订单状态"
-          prop="status"
-        >
-          <el-select
-            v-model="queryParams.status"
-            placeholder="请选择订单状态"
-            clearable
-          >
+        <el-form-item label="订单状态" prop="status">
+          <el-select v-model="queryParams.status" placeholder="请选择订单状态" clearable>
             <el-option
               v-for="item in orderStatusOptions"
               :key="item.value"
@@ -77,13 +70,12 @@
         <el-table-column type="selection" width="55" align="center" />
         <!-- <el-table-column label="主键ID" align="center" prop="id" /> -->
         <el-table-column label="订单编号" align="center" prop="orderNumber" />
-        <el-table-column
-          label="订单状态"
-          align="center"
-          prop="status"
-        >
+        <el-table-column label="订单状态" align="center" prop="status">
           <template #default="scope">
-            {{ orderStatusOptions.find((item) => item.value === scope.row.status)?.label || "-" }}
+            {{
+              orderStatusOptions.find((item) => item.value === scope.row.status)?.label ||
+              "-"
+            }}
           </template>
         </el-table-column>
         <el-table-column label="用户ID" align="center" prop="userId" />
@@ -92,13 +84,12 @@
         <el-table-column label="收货人电话" align="center" prop="consigneePhone" />
         <el-table-column label="邮箱" align="center" prop="email" />
         <el-table-column label="支付方式" align="center" prop="payMethod" />
-        <el-table-column
-          label="支付状态"
-          align="center"
-          prop="payStatus"
-        >
+        <el-table-column label="支付状态" align="center" prop="payStatus">
           <template #default="scope">
-            {{ payStatusOptions.find((item) => item.value === scope.row.payStatus)?.label || "-" }}
+            {{
+              payStatusOptions.find((item) => item.value === scope.row.payStatus)
+                ?.label || "-"
+            }}
           </template>
         </el-table-column>
         <el-table-column label="订单金额" align="center" prop="amount" />
@@ -113,21 +104,21 @@
           width="260"
         >
           <template #default="scope">
-            <el-button 
-              v-if="scope.row.status === 1 || scope.row.status === 2" 
-              type="success" 
-              link 
-              icon="Van" 
+            <el-button
+              v-if="scope.row.status === 1 || scope.row.status === 2"
+              type="success"
+              link
+              icon="Van"
               @click="handleShip(scope.row)"
-            >发货
+              >发货
             </el-button>
-            <el-button 
-              v-if="scope.row.status >= 3" 
-              type="info" 
-              link 
-              icon="Position" 
+            <el-button
+              v-if="scope.row.status >= 3"
+              type="info"
+              link
+              icon="Position"
               @click="handleViewLogistics(scope.row)"
-            >物流
+              >物流
             </el-button>
             <el-button type="primary" link icon="Edit" @click="handleUpdate(scope.row)"
               >修改
@@ -218,7 +209,12 @@
 
       <!-- 发货对话框 -->
       <el-dialog v-model="shipDialogOpen" title="发货" width="600px" append-to-body>
-        <el-form ref="shipFormRef" :model="shipForm" :rules="shipRules" label-width="100px">
+        <el-form
+          ref="shipFormRef"
+          :model="shipForm"
+          :rules="shipRules"
+          label-width="100px"
+        >
           <el-form-item label="订单编号">
             <el-input v-model="shipForm.orderNumber" disabled />
           </el-form-item>
@@ -238,28 +234,39 @@
             <el-input v-model="shipForm.senderCounty" placeholder="例如：南山区" />
           </el-form-item>
           <el-form-item label="详细地址" prop="senderAddress">
-            <el-input 
-              v-model="shipForm.senderAddress" 
-              type="textarea" 
+            <el-input
+              v-model="shipForm.senderAddress"
+              type="textarea"
               :rows="2"
-              placeholder="请输入详细地址" 
+              placeholder="请输入详细地址"
             />
           </el-form-item>
         </el-form>
         <template #footer>
           <div class="dialog-footer">
-            <el-button type="primary" @click="submitShipForm" :loading="shipLoading">确认发货</el-button>
+            <el-button type="primary" @click="submitShipForm" :loading="shipLoading"
+              >确认发货</el-button
+            >
             <el-button @click="shipDialogOpen = false">取 消</el-button>
           </div>
         </template>
       </el-dialog>
 
       <!-- 物流查看对话框 -->
-      <el-dialog v-model="logisticsDialogOpen" title="物流信息" width="700px" append-to-body>
+      <el-dialog
+        v-model="logisticsDialogOpen"
+        title="物流信息"
+        width="700px"
+        append-to-body
+      >
         <div v-loading="logisticsLoading">
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="订单编号">{{ logisticsInfo.orderNumber }}</el-descriptions-item>
-            <el-descriptions-item label="运单号">{{ logisticsInfo.waybillNo || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="订单编号">{{
+              logisticsInfo.orderNumber
+            }}</el-descriptions-item>
+            <el-descriptions-item label="运单号">{{
+              logisticsInfo.waybillNo || "-"
+            }}</el-descriptions-item>
             <el-descriptions-item label="物流状态" :span="2">
               <el-tag :type="getLogisticsStatusType(logisticsInfo.status)">
                 {{ logisticsInfo.statusDesc }}
@@ -268,7 +275,7 @@
           </el-descriptions>
 
           <el-divider content-position="left">物流轨迹</el-divider>
-          
+
           <el-timeline v-if="logisticsInfo.routes && logisticsInfo.routes.length > 0">
             <el-timeline-item
               v-for="(route, index) in logisticsInfo.routes"
@@ -278,11 +285,13 @@
             >
               <el-card>
                 <p>{{ route.remark }}</p>
-                <p v-if="route.acceptAddress" class="text-gray">{{ route.acceptAddress }}</p>
+                <p v-if="route.acceptAddress" class="text-gray">
+                  {{ route.acceptAddress }}
+                </p>
               </el-card>
             </el-timeline-item>
           </el-timeline>
-          
+
           <el-empty v-else description="暂无物流轨迹信息" />
         </div>
       </el-dialog>
@@ -299,10 +308,7 @@ import {
   addOrderApi,
   updateOrderApi,
 } from "@/api/order/order";
-import { 
-  shipOrderApi, 
-  getLogisticsApi 
-} from "@/api/order/logistics";
+import { shipOrderApi, getLogisticsApi } from "@/api/order/logistics";
 import ButtonGroup from "@/components/ButtonGroup/index.vue";
 
 // 遮罩层
@@ -379,7 +385,7 @@ const shipRules = reactive({
   senderName: [{ required: true, message: "发件人姓名不能为空", trigger: "blur" }],
   senderPhone: [
     { required: true, message: "发件人电话不能为空", trigger: "blur" },
-    { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" }
+    { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" },
   ],
   senderProvince: [{ required: true, message: "发件省不能为空", trigger: "blur" }],
   senderCity: [{ required: true, message: "发件市不能为空", trigger: "blur" }],
@@ -391,11 +397,11 @@ const shipRules = reactive({
 const logisticsDialogOpen = ref(false);
 const logisticsLoading = ref(false);
 const logisticsInfo = reactive<any>({
-  orderNumber: '',
-  waybillNo: '',
+  orderNumber: "",
+  waybillNo: "",
   status: 0,
-  statusDesc: '',
-  routes: []
+  statusDesc: "",
+  routes: [],
 });
 
 /** 查询列表 */
@@ -548,12 +554,12 @@ const handleCurrentChange = (val: any) => {
 const handleShip = (row: any) => {
   Object.assign(shipForm, {
     orderNumber: row.orderNumber,
-    senderName: undefined,
-    senderPhone: undefined,
-    senderProvince: undefined,
-    senderCity: undefined,
-    senderCounty: undefined,
-    senderAddress: undefined,
+    senderName: "韋",
+    senderPhone: "13290010299",
+    senderProvince: "重庆市",
+    senderCity: "重庆市",
+    senderCounty: "重庆市",
+    senderAddress: "两江新区蔡家岗街道柚米社区",
   });
   shipFormRef.value?.resetFields();
   shipDialogOpen.value = true;
