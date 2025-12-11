@@ -9,14 +9,15 @@ import type { FormItemRule } from "element-plus";
 import SliderVerify from "@/components/SliderVerify.vue";
 import {
   getCaptchaSwitchApi,
-  getAuthRenderApi,
   getEmailCodeApi,
   registerApi,
   forgotPasswordApi,
   checkUsernameApi,
   checkEmailApi,
-  getJuHeLoginApi,
-  getJuHeLoginTypeApi,
+  getSocialLoginUrlApi,
+  getEnabledSocialConfigApi,
+  getSocialSettingsApi,
+  type SocialConfigItem,
 } from "@/api/auth";
 import { emitter } from "@/event/emitter";
 
@@ -125,7 +126,13 @@ const loginTypes = {
   },
 };
 
-const enabledLoginTypes = ref<any[]>([]);
+// 第三方登录配置（从后端获取）
+const enabledLoginTypes = ref<SocialConfigItem[]>([]);
+// 第三方登录全局设置
+const socialSettings = ref({
+  enabled: true,
+  loginMode: 'juhe'
+});
 
 // 标题和描述计算属性
 const pageTitle = computed(() => {
@@ -260,38 +267,54 @@ const forgotRules = {
 };
 
 /**
- * 第三方登录
+ * 第三方登录 - 使用统一接口
  */
-const handleThirdPartyLogin = async (type: any) => {
-  getJuHeLoginApi(type).then((res) => {
-    if (res.code === 200) {
-      window.open(res.logurl, "_self");
-    }
-  });
-};
-
-const getThirdLoginType = async () => {
+const handleThirdPartyLogin = async (item: SocialConfigItem) => {
   try {
-    const res = await getJuHeLoginTypeApi();
-    if (res.code === 200) {
-      const enabledTypes = res.data.filter((type: string) => loginTypes[type]);
-      
-      // 映射到本地配置
-      enabledLoginTypes.value = enabledTypes.map((type: string) => {
-        return {
-          ...loginTypes[type],
-          label: type,
-          value: type
-        };
-      });
+    const res = await getSocialLoginUrlApi(item.socialType);
+    if (res.error) {
+      ElMessage.error(res.error);
+      return;
+    }
+    // 跳转到登录URL
+    if (res.loginUrl) {
+      window.open(res.loginUrl, "_self");
     }
   } catch (error) {
-    console.error("获取登录方式失败:", error);
+    console.error("获取登录链接失败:", error);
+    ElMessage.error("获取登录链接失败");
+  }
+};
+
+/**
+ * 获取第三方登录配置
+ */
+const getThirdLoginConfig = async () => {
+  try {
+    // 获取全局设置
+    const settingsRes = await getSocialSettingsApi();
+    if (settingsRes.code === 200 && settingsRes.data) {
+      socialSettings.value = settingsRes.data;
+    }
+
+    // 如果第三方登录未开启，不加载登录方式
+    if (!socialSettings.value.enabled) {
+      enabledLoginTypes.value = [];
+      return;
+    }
+
+    // 获取启用的登录方式
+    const res = await getEnabledSocialConfigApi();
+    if (res.code === 200 && res.data) {
+      enabledLoginTypes.value = res.data;
+    }
+  } catch (error) {
+    console.error("获取第三方登录配置失败:", error);
   }
 };
 
 onMounted(() => {
-  getThirdLoginType();
+  getThirdLoginConfig();
 });
 
 const handleCheckUsername = async (username: string) => {
@@ -559,8 +582,7 @@ const switchMode = (mode: AuthMode) => {
           </el-form-item>
 
           <!--第三方登录 -->
-          <!-- 登录方式，1=QQ，2=微信，3=支付宝，4=新浪微博，5=百度，6=华为，7=小米，8=微软，9=钉钉，10=Gitee，11=GitHub，12=抖音 -->
-          <div class="mt-8">
+          <div class="mt-8" v-if="socialSettings.enabled && enabledLoginTypes.length > 0">
             <div class="relative">
               <div class="absolute inset-0 flex items-center">
                 <div class="w-full border-t border-gray-200 dark:border-zinc-800"></div>
@@ -573,12 +595,12 @@ const switchMode = (mode: AuthMode) => {
             </div>
 
             <div class="grid grid-cols-4 gap-4 mt-6 justify-items-center">
-              <div v-for="item in enabledLoginTypes" @click="handleThirdPartyLogin(item.type)" class="flex justify-center">
-                <el-tooltip :content="item.title" placement="top">
+              <div v-for="item in enabledLoginTypes" :key="item.id" @click="handleThirdPartyLogin(item)" class="flex justify-center">
+                <el-tooltip :content="item.socialName + '登录'" placement="top">
                   <div
                     class="w-12 h-12 rounded-full border border-gray-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform hover:scale-110 shadow-sm"
                   >
-                    <svg-icon :name="item.icon"  :size="30"></svg-icon>
+                    <svg-icon :name="item.icon || item.socialType" :size="30"></svg-icon>
                   </div>
                 </el-tooltip>
               </div>

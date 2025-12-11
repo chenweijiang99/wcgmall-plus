@@ -23,6 +23,8 @@ import com.river.mapper.SysMenuMapper;
 import com.river.mapper.SysRoleMapper;
 import com.river.mapper.SysUserMapper;
 import com.river.service.AuthService;
+import com.river.service.SysSocialConfigService;
+import com.river.entity.SysSocialConfig;
 import com.river.utils.*;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,6 +67,7 @@ public class AuthServiceImpl implements AuthService {
     private final QqConfigProperties qqConfigProperties;
     private final WeiboConfigProperties weiboConfigProperties;
     private final FrontConfigProperties frontConfigProperties;
+    private final SysSocialConfigService sysSocialConfigService;
 
 
     @Override
@@ -302,40 +305,77 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * 获取第三方授权地址
+     * 优先从数据库读取配置，若数据库无配置则使用配置文件
      *
      * @param source
      * @return
      */
     private @NotNull AuthRequest getAuthRequest(String source) {
         AuthRequest authRequest = null;
+
+        // 优先从数据库获取配置
+        SysSocialConfig dbConfig = sysSocialConfigService.selectByType(source);
+
         switch (source) {
             case "gitee":
-                authRequest = new AuthGiteeRequest(AuthConfig.builder()
-                        .clientId(giteeConfigProperties.getAppId())
-                        .clientSecret(giteeConfigProperties.getAppSecret())
-                        .redirectUri(giteeConfigProperties.getRedirectUrl())
-                        .build());
+                if (dbConfig != null && dbConfig.getAppId() != null && !dbConfig.getAppId().isEmpty()) {
+                    authRequest = new AuthGiteeRequest(AuthConfig.builder()
+                            .clientId(dbConfig.getAppId())
+                            .clientSecret(dbConfig.getAppSecret())
+                            .redirectUri(dbConfig.getRedirectUrl())
+                            .build());
+                } else {
+                    authRequest = new AuthGiteeRequest(AuthConfig.builder()
+                            .clientId(giteeConfigProperties.getAppId())
+                            .clientSecret(giteeConfigProperties.getAppSecret())
+                            .redirectUri(giteeConfigProperties.getRedirectUrl())
+                            .build());
+                }
                 break;
             case "qq":
-                authRequest = new AuthQqRequest(AuthConfig.builder()
-                        .clientId(qqConfigProperties.getAppId())
-                        .clientSecret(qqConfigProperties.getAppSecret())
-                        .redirectUri(qqConfigProperties.getRedirectUrl())
-                        .build());
+                if (dbConfig != null && dbConfig.getAppId() != null && !dbConfig.getAppId().isEmpty()) {
+                    authRequest = new AuthQqRequest(AuthConfig.builder()
+                            .clientId(dbConfig.getAppId())
+                            .clientSecret(dbConfig.getAppSecret())
+                            .redirectUri(dbConfig.getRedirectUrl())
+                            .build());
+                } else {
+                    authRequest = new AuthQqRequest(AuthConfig.builder()
+                            .clientId(qqConfigProperties.getAppId())
+                            .clientSecret(qqConfigProperties.getAppSecret())
+                            .redirectUri(qqConfigProperties.getRedirectUrl())
+                            .build());
+                }
                 break;
             case "weibo":
-                authRequest = new AuthWeiboRequest(AuthConfig.builder()
-                        .clientId(weiboConfigProperties.getAppId())
-                        .clientSecret(weiboConfigProperties.getAppSecret())
-                        .redirectUri(weiboConfigProperties.getRedirectUrl())
-                        .build());
+                if (dbConfig != null && dbConfig.getAppId() != null && !dbConfig.getAppId().isEmpty()) {
+                    authRequest = new AuthWeiboRequest(AuthConfig.builder()
+                            .clientId(dbConfig.getAppId())
+                            .clientSecret(dbConfig.getAppSecret())
+                            .redirectUri(dbConfig.getRedirectUrl())
+                            .build());
+                } else {
+                    authRequest = new AuthWeiboRequest(AuthConfig.builder()
+                            .clientId(weiboConfigProperties.getAppId())
+                            .clientSecret(weiboConfigProperties.getAppSecret())
+                            .redirectUri(weiboConfigProperties.getRedirectUrl())
+                            .build());
+                }
                 break;
             case "github":
-                authRequest = new AuthGithubRequest(AuthConfig.builder()
-                        .clientId(githubConfigProperties.getAppId())
-                        .clientSecret(githubConfigProperties.getAppSecret())
-                        .redirectUri(githubConfigProperties.getRedirectUrl())
-                        .build());
+                if (dbConfig != null && dbConfig.getAppId() != null && !dbConfig.getAppId().isEmpty()) {
+                    authRequest = new AuthGithubRequest(AuthConfig.builder()
+                            .clientId(dbConfig.getAppId())
+                            .clientSecret(dbConfig.getAppSecret())
+                            .redirectUri(dbConfig.getRedirectUrl())
+                            .build());
+                } else {
+                    authRequest = new AuthGithubRequest(AuthConfig.builder()
+                            .clientId(githubConfigProperties.getAppId())
+                            .clientSecret(githubConfigProperties.getAppSecret())
+                            .redirectUri(githubConfigProperties.getRedirectUrl())
+                            .build());
+                }
                 break;
             default:
                 break;

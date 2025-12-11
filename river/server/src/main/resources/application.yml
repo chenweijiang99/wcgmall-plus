@@ -63,10 +63,10 @@ springdoc:
       paths-to-match: '/user/**'
       packages-to-scan: com.river.controller
     - group: '授权中心'
-      paths-to-match: '/auth/**'
-      packages-to-scan: com.river.controller
-    - group: '聚合登录'
-      paths-to-match: '/api/juhe/**'
+      paths-to-match:
+        - '/auth/**'
+        - '/api/social/**'
+        - '/api/juhe/**'
       packages-to-scan: com.river.controller
     - group: '文件中心'
       paths-to-match: '/file/**'

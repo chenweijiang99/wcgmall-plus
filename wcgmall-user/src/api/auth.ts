@@ -41,7 +41,7 @@ export function getCaptchaSwitchApi() {
   return request.get<any, ApiResponse<SysConfig>>('/sys/config/getConfigByKey/slider_verify_switch');
 }
 
-// 获取第三方登录地址
+// 获取第三方登录地址（OAuth2模式）
 export function getAuthRenderApi(type: string) {
   return request({
     url: '/auth/render/' + type,
@@ -114,6 +114,69 @@ export function checkEmailApi(email: string) {
   })
 }
 
+// ==================== 第三方登录相关接口 ====================
+
+/**
+ * 第三方登录配置项
+ */
+export interface SocialConfigItem {
+  id: number;
+  socialType: string;
+  socialName: string;
+  juheTypeCode: number;
+  supportOauth2: number;
+  supportJuhe: number;
+  icon: string;
+  status: number;
+  sort: number;
+}
+
+/**
+ * 第三方登录全局设置
+ */
+export interface SocialSettings {
+  enabled: boolean;
+  loginMode: string;  // 'juhe' | 'oauth2'
+}
+
+/**
+ * 获取第三方登录全局设置
+ */
+export function getSocialSettingsApi() {
+  return request.get<any, ApiResponse<SocialSettings>>('/sys/socialConfig/settings');
+}
+
+/**
+ * 获取当前模式下启用的第三方登录配置
+ */
+export function getEnabledSocialConfigApi() {
+  return request.get<any, ApiResponse<SocialConfigItem[]>>('/sys/socialConfig/enabledList');
+}
+
+/**
+ * 获取第三方登录URL（统一入口）
+ * 根据后端配置的登录模式自动选择聚合登录或OAuth2登录
+ */
+export function getSocialLoginUrlApi(type: string) {
+  return request.get<any, any>(`/api/social/login/${type}`);
+}
+
+/**
+ * 获取支持的第三方登录类型列表
+ */
+export function getSupportedLoginTypesApi() {
+  return request.get<any, ApiResponse<any[]>>('/api/social/types');
+}
+
+/**
+ * 获取当前登录模式
+ */
+export function getCurrentLoginModeApi() {
+  return request.get<any, ApiResponse<string>>('/api/social/mode');
+}
+
+// ==================== 旧接口（保留兼容） ====================
+
 interface JuHeLoginResponse {
   code: number;
   msg: string;
@@ -123,11 +186,13 @@ interface JuHeLoginResponse {
 }
 
 /**
- * 获取聚合登录授权地址
+ * 获取聚合登录授权地址（旧接口，保留兼容）
+ * @deprecated 请使用 getSocialLoginUrlApi
  */
 export function getJuHeLoginApi(source: any) {
   return request.get<any, JuHeLoginResponse>(`/api/juhe/getJuHeAuth/${source}`);
 }
+
 /**
  * 获取聚合登录状态
  */
@@ -137,7 +202,11 @@ export function getJuHeIsLoginApi(cxid: any) {
     method: 'get',
   })
 }
-// 聚合登录类型
+
+/**
+ * 聚合登录类型（旧接口，保留兼容）
+ * @deprecated 请使用 getEnabledSocialConfigApi
+ */
 export function getJuHeLoginTypeApi() {
   return request.get<any, ApiResponse<string[]>>('/api/juhe/getLoginType');
 }

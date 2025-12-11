@@ -12,17 +12,36 @@ const route = useRoute();
 // 在登录页隐藏导航栏和页脚
 const isAuthPage = computed(() => !!route.meta.hideLayout);
 
+/**
+ * 处理第三方登录回调
+ * 第三方登录成功后，后端会重定向到前端并携带 token 参数
+ */
 const handleThirdPartyLogin = () => {
-  let flag = window.location.href.indexOf("token") != -1;
-  if (flag) {
-    let token = window.location.href.split("token=")[1];
+  const url = new URL(window.location.href);
+  const token = url.searchParams.get("token");
+  const errorCode = url.searchParams.get("code");
+  const errorMessage = url.searchParams.get("message");
+
+  // 处理登录错误
+  if (errorCode && errorCode !== "200") {
+    ElMessage.error(errorMessage || "第三方登录失败");
+    // 清除URL参数
+    window.history.replaceState({}, document.title, url.pathname);
+    router.push("/login");
+    return;
+  }
+
+  // 处理登录成功
+  if (token) {
     setToken(token);
     userStore.getUserInfo();
     ElMessage.success("登录成功");
-    // 延长1秒后跳转
+    // 清除URL参数，避免刷新页面时重复处理
+    window.history.replaceState({}, document.title, "/");
     router.push("/");
   }
 };
+
 onMounted(() => {
   handleThirdPartyLogin();
 });
