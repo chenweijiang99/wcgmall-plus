@@ -179,7 +179,7 @@
         >
           <template #default="scope">
             <el-button
-              v-if="scope.row.status === 1 || scope.row.status === 2"
+              v-if="scope.row.status === 1"
               type="success"
               link
               icon="Van"
@@ -187,7 +187,7 @@
               >发货
             </el-button>
             <el-button
-              v-if="scope.row.status === 3 || scope.row.status === 4"
+              v-if="scope.row.status === 2 || scope.row.status === 3 || scope.row.status === 4"
               type="info"
               link
               icon="Position"
@@ -416,11 +416,13 @@ const totalStatusCount = computed(() => {
 });
 
 // 状态标签配置
+// 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
 const orderStatusTabs = [
   { value: null, label: '全部', icon: 'List', color: '#409EFF' },
   { value: 0, label: '待付款', icon: 'Clock', color: '#E6A23C' },
-  { value: 2, label: '待发货', icon: 'Box', color: '#409EFF' },
-  { value: 3, label: '已发货', icon: 'Van', color: '#67C23A' },
+  { value: 1, label: '待发货', icon: 'Box', color: '#409EFF' },
+  { value: 2, label: '待收货', icon: 'Van', color: '#67C23A' },
+  { value: 3, label: '待评价', icon: 'ChatLineSquare', color: '#67C23A' },
   { value: 4, label: '已完成', icon: 'CircleCheck', color: '#67C23A' },
   { value: 5, label: '已取消', icon: 'CircleClose', color: '#909399' },
   { value: 6, label: '已退款', icon: 'RefreshRight', color: '#F56C6C' },
@@ -445,11 +447,12 @@ const rules = reactive({
 
 const queryFormRef = ref();
 const formRef = ref();
+// 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
 const orderStatusOptions = ref([
   { value: 0, label: "待付款" },
-  { value: 1, label: "已付款" },
-  { value: 2, label: "待发货" },
-  { value: 3, label: "已发货" },
+  { value: 1, label: "待发货" },
+  { value: 2, label: "待收货" },
+  { value: 3, label: "待评价" },
   { value: 4, label: "已完成" },
   { value: 5, label: "已取消" },
   { value: 6, label: "已退款" },
@@ -590,12 +593,13 @@ const handleStatusFilter = (status: number | null) => {
 };
 
 /** 获取状态标签类型 */
+// 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
 const getStatusTagType = (status: number) => {
   const typeMap: Record<number, string> = {
     0: 'warning',
-    1: 'success',
-    2: 'primary',
-    3: '',
+    1: 'primary',
+    2: '',
+    3: 'success',
     4: 'success',
     5: 'info',
     6: 'danger',
@@ -604,12 +608,13 @@ const getStatusTagType = (status: number) => {
 };
 
 /** 获取状态标签文字 */
+// 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
 const getStatusLabel = (status: number) => {
   const labelMap: Record<number, string> = {
     0: '待付款',
-    1: '已付款',
-    2: '待发货',
-    3: '已发货',
+    1: '待发货',
+    2: '待收货',
+    3: '待评价',
     4: '已完成',
     5: '已取消',
     6: '已退款',

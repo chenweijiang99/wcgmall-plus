@@ -22,6 +22,7 @@ import {
   ShoppingCart,
   Lock,
   RefreshCw,
+  MessageSquare,
 } from "lucide-vue-next";
 import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 import { Cart, Favorites, Order, Address } from "@/types";
@@ -77,16 +78,14 @@ const orderStatusCount = ref<Record<number, number>>({
   0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0
 });
 
-// 订单状态标签配置
+// 订单状态标签配置 - 用户端只显示常用状态
+// 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
 const orderStatusTabs = [
   { value: null, label: "全部", icon: "Package" },
   { value: 0, label: "待付款", icon: "Clock" },
-  { value: 1, label: "已付款", icon: "CreditCard" },
-  { value: 2, label: "待发货", icon: "Package" },
-  { value: 3, label: "已发货", icon: "Truck" },
-  { value: 4, label: "已完成", icon: "CheckCircle" },
-  { value: 5, label: "已取消", icon: "X" },
-  { value: 6, label: "已退款", icon: "RefreshCw" },
+  { value: 1, label: "待发货", icon: "Package" },
+  { value: 2, label: "待收货", icon: "Truck" },
+  { value: 3, label: "待评价", icon: "MessageSquare" },
 ];
 
 // 计算全部订单数量
@@ -696,11 +695,12 @@ const handleDelete = (order: Order) => {
 };
 
 const getStatusText = (status: number) => {
+  // 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
   const map: Record<number, string> = {
     0: "待付款",
-    1: "已付款",
-    2: "待发货",
-    3: "已发货",
+    1: "待发货",
+    2: "待收货",
+    3: "待评价",
     4: "已完成",
     5: "已取消",
     6: "已退款",
@@ -709,14 +709,15 @@ const getStatusText = (status: number) => {
 };
 
 const getStatusTagType = (status: number) => {
+  // 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
   const map: Record<number, string> = {
     0: "warning",
-    1: "success",
-    2: "primary",
-    3: "primary",
+    1: "primary",
+    2: "",
+    3: "success",
     4: "success",
     5: "info",
-    6: "info",
+    6: "danger",
   };
   return map[status] || "info";
 };
@@ -1091,7 +1092,7 @@ onUnmounted(() => {
                   >
 
                   <el-button
-                    v-if="scope.row.status === 1 || scope.row.status === 2"
+                    v-if="scope.row.status === 1"
                     type="warning"
                     plain
                     size="small"
@@ -1100,14 +1101,14 @@ onUnmounted(() => {
                   >
 
                   <el-button
-                    v-if="scope.row.status === 3"
+                    v-if="scope.row.status === 2"
                     type="success"
                     size="small"
                     @click="handleConfirm(scope.row)"
                     >确认收货</el-button
                   >
                   <el-button
-                    v-if="scope.row.status === 3 || scope.row.status === 4"
+                    v-if="scope.row.status === 2"
                     type="info"
                     plain
                     size="small"
@@ -1116,7 +1117,14 @@ onUnmounted(() => {
                   >
 
                   <el-button
-                    v-if="[4, 5, 6].includes(scope.row.status)"
+                    v-if="scope.row.status === 3"
+                    type="primary"
+                    size="small"
+                    >去评价</el-button
+                  >
+
+                  <el-button
+                    v-if="[3, 4, 5, 6].includes(scope.row.status)"
                     type="danger"
                     link
                     size="small"

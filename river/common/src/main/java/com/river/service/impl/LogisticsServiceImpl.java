@@ -50,9 +50,9 @@ public class LogisticsServiceImpl implements LogisticsService {
             throw new RuntimeException("订单不存在");
         }
 
-        // 检查订单状态 - 1已付款 或 2待发货 可以发货
-        if (order.getStatus() != 1 && order.getStatus() != 2) {
-            throw new RuntimeException("订单状态不允许发货");
+        // 检查订单状态 - 1待发货 可以发货
+        if (order.getStatus() != 1) {
+            throw new RuntimeException("订单状态不允许发货，只有待发货状态可以发货");
         }
 
         // 检查是否已发货
@@ -130,8 +130,8 @@ public class LogisticsServiceImpl implements LogisticsService {
             logisticsMapper.insert(logistics);
         }
 
-        // 更新订单状态为已发货
-        order.setStatus(3); // 已发货
+        // 更新订单状态为待收货
+        order.setStatus(2); // 待收货
         order.setUpdateTime(LocalDateTime.now());
         orderMapper.updateById(order);
 

@@ -204,8 +204,9 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     @Override
     public void refundOrder(String orderNumber) {
         ProductOrder order = getOrderByNumber(orderNumber);
-        if (order.getStatus() != 1 && order.getStatus() != 2) {
-            throw new ServiceException("订单状态不正确，无法退款");
+        // 待发货(1)状态可以退款
+        if (order.getStatus() != 1) {
+            throw new ServiceException("只有待发货状态的订单可以退款");
         }
         order.setStatus(6); // 已退款
         updateById(order);
@@ -215,24 +216,25 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     @Override
     public void confirmReceipt(String orderNumber) {
         ProductOrder order = getOrderByNumber(orderNumber);
-        if (order.getStatus() != 3) {
-            throw new ServiceException("订单状态不正确，无法确认收货");
+        if (order.getStatus() != 2) {
+            throw new ServiceException("只有待收货状态的订单可以确认收货");
         }
-        order.setStatus(4); // 已完成
+        order.setStatus(3); // 待评价
         updateById(order);
     }
 
     @Override
     public boolean deleteOrder(String orderNumber) {
         ProductOrder order = getOrderByNumber(orderNumber);
-        if (order.getStatus() != 4 && order.getStatus() != 5 && order.getStatus() != 6) {
+        // 待评价(3)、已完成(4)、已取消(5)、已退款(6)的订单可以删除
+        if (order.getStatus() != 3 && order.getStatus() != 4 && order.getStatus() != 5 && order.getStatus() != 6) {
             throw new ServiceException("订单状态不正确，无法删除");
         }
         if(order.getUserId() != StpUtil.getLoginIdAsLong()){
             throw new ServiceException("订单不属于当前用户，无法删除");
         }
         removeById(order.getId());
-        
+
         LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(OrderDetail::getOrderNumber, orderNumber);
         orderDetailMapper.delete(wrapper);
@@ -254,7 +256,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         Long userId = StpUtil.getLoginIdAsLong();
         Map<Integer, Long> countMap = new HashMap<>();
 
-        // 初始化所有状态为0
+        // 初始化所有状态为0 (0-6: 待付款、待发货、待收货、待评价、已完成、已取消、已退款)
         for (int i = 0; i <= 6; i++) {
             countMap.put(i, 0L);
         }
@@ -277,7 +279,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     public Map<Integer, Long> getAllOrderStatusCount() {
         Map<Integer, Long> countMap = new HashMap<>();
 
-        // 初始化所有状态为0
+        // 初始化所有状态为0 (0-6: 待付款、待发货、待收货、待评价、已完成、已取消、已退款)
         for (int i = 0; i <= 6; i++) {
             countMap.put(i, 0L);
         }
