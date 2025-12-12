@@ -21,6 +21,7 @@ import {
   Truck,
   ShoppingCart,
   Lock,
+  RefreshCw,
 } from "lucide-vue-next";
 import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 import { Cart, Favorites, Order, Address } from "@/types";
@@ -47,6 +48,7 @@ import {
   deleteOrderApi,
   alipayPayApi,
   getOrderStatusApi,
+  getOrderStatusCountApi,
 } from "@/api/order";
 import { getOrderLogistics } from "@/api/logistics";
 import { emitter } from "@/event/emitter";
@@ -68,6 +70,29 @@ const addresses = ref<Address[]>([]);
 const showAddressForm = ref(false);
 const addressForm = ref<any>({});
 const addressFormRef = ref();
+
+// === 订单状态分类 ===
+const orderStatusTab = ref<number | null>(null); // null表示全部
+const orderStatusCount = ref<Record<number, number>>({
+  0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0
+});
+
+// 订单状态标签配置
+const orderStatusTabs = [
+  { value: null, label: "全部", icon: "Package" },
+  { value: 0, label: "待付款", icon: "Clock" },
+  { value: 1, label: "已付款", icon: "CreditCard" },
+  { value: 2, label: "待发货", icon: "Package" },
+  { value: 3, label: "已发货", icon: "Truck" },
+  { value: 4, label: "已完成", icon: "CheckCircle" },
+  { value: 5, label: "已取消", icon: "X" },
+  { value: 6, label: "已退款", icon: "RefreshCw" },
+];
+
+// 计算全部订单数量
+const totalOrderCount = computed(() => {
+  return Object.values(orderStatusCount.value).reduce((acc, val) => acc + val, 0);
+});
 // 编辑表单数据
 const editForm = ref({
   nickname: "",
@@ -182,6 +207,7 @@ const autoCancelOrder = async (orderNumber: string) => {
     // 延迟刷新订单列表,避免立即刷新导致用户看不到提示
     setTimeout(() => {
       getOrders();
+      getOrderStatusCount();
     }, 2000);
   } catch (error) {
     console.error("自动取消订单失败:", error);
@@ -430,10 +456,15 @@ const toggleOrderExpand = (id: number) => {
 const getOrders = async () => {
   loading.value = true;
   try {
-    const res = await getOrderListApi({
+    const params: any = {
       pageNum: currentPage.value,
       pageSize: pageSize.value,
-    });
+    };
+    // 如果选择了特定状态，添加状态筛选
+    if (orderStatusTab.value !== null) {
+      params.status = orderStatusTab.value;
+    }
+    const res = await getOrderListApi(params);
     orders.value = res.data.records;
     totalOrders.value = res.data.total;
 
@@ -444,6 +475,23 @@ const getOrders = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// 获取各状态订单数量
+const getOrderStatusCount = async () => {
+  try {
+    const res = await getOrderStatusCountApi();
+    orderStatusCount.value = res.data;
+  } catch (error) {
+    console.error("获取订单状态数量失败:", error);
+  }
+};
+
+// 切换订单状态标签
+const handleStatusTabChange = (status: number | null) => {
+  orderStatusTab.value = status;
+  currentPage.value = 1; // 重置页码
+  getOrders();
 };
 
 const handlePageChange = (page: number) => {
@@ -560,6 +608,7 @@ const closePaymentDialog = () => {
   if (payTimer.value) clearInterval(payTimer.value);
   if (pollingTimer.value) clearTimeout(pollingTimer.value);
   getOrders(); // 关闭时刷新列表
+  getOrderStatusCount(); // 刷新状态数量
 };
 
 // 查看物流
@@ -603,6 +652,7 @@ const handleCancel = (order: Order) => {
     await cancelOrderApi(order.orderNumber);
     ElMessage.success("取消成功");
     getOrders();
+    getOrderStatusCount();
   });
 };
 
@@ -615,6 +665,7 @@ const handleRefund = (order: Order) => {
     await refundOrderApi(order.orderNumber);
     ElMessage.success("申请退款成功");
     getOrders();
+    getOrderStatusCount();
   });
 };
 
@@ -627,6 +678,7 @@ const handleConfirm = (order: Order) => {
     await confirmReceiptApi(order.orderNumber);
     ElMessage.success("确认收货成功");
     getOrders();
+    getOrderStatusCount();
   });
 };
 
@@ -639,6 +691,7 @@ const handleDelete = (order: Order) => {
     await deleteOrderApi(order.orderNumber);
     ElMessage.success("删除成功");
     getOrders();
+    getOrderStatusCount();
   });
 };
 
@@ -672,6 +725,7 @@ onMounted(() => {
   getFavorites();
   getAddresses();
   getOrders();
+  getOrderStatusCount();
 
   // 启动订单倒计时定时器
   orderCountdownTimer.value = setInterval(() => {
@@ -843,15 +897,43 @@ onUnmounted(() => {
     <div class="min-h-[400px] animate-fade-in">
       <!-- 复制你原有的 Content 区域代码即可 -->
       <div v-if="activeTab === 'orders'" class="space-y-4">
-        <div v-if="orders.length === 0" class="text-center py-20 text-gray-500">
+        <!-- 订单状态标签 -->
+        <div class="flex flex-wrap gap-2 mb-6 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-xl">
+          <button
+            v-for="tab in orderStatusTabs"
+            :key="tab.value ?? 'all'"
+            @click="handleStatusTabChange(tab.value)"
+            :class="[
+              'relative px-4 py-2 rounded-lg text-sm font-medium transition-all',
+              orderStatusTab === tab.value
+                ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
+                : 'bg-white dark:bg-zinc-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-600 border border-gray-200 dark:border-zinc-600'
+            ]"
+          >
+            <span>{{ tab.label }}</span>
+            <span
+              v-if="tab.value === null ? totalOrderCount > 0 : orderStatusCount[tab.value] > 0"
+              :class="[
+                'ml-1.5 px-1.5 py-0.5 text-xs rounded-full',
+                orderStatusTab === tab.value
+                  ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black'
+                  : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+              ]"
+            >
+              {{ tab.value === null ? totalOrderCount : orderStatusCount[tab.value] }}
+            </span>
+          </button>
+        </div>
+
+        <div v-if="orders.length === 0 && !loading" class="text-center py-20 text-gray-500">
           <Package :size="48" class="mx-auto mb-4 text-gray-300" />
-          <p>暂无订单</p>
+          <p>{{ orderStatusTab === null ? '暂无订单' : '该状态下暂无订单' }}</p>
           <RouterLink to="/shop" class="text-blue-600 hover:underline mt-2 block"
             >去购物</RouterLink
           >
         </div>
         <div v-else>
-          <el-table :data="orders" @expand-change="expandChange" row-key="id">
+          <el-table :data="orders" @expand-change="expandChange" row-key="id" v-loading="loading">
             <el-table-column type="expand">
               <template #default="props">
                 <div class="p-6 bg-gray-50 dark:bg-zinc-800/50 rounded-xl">

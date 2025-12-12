@@ -2,7 +2,9 @@ package com.river.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.river.dto.OrderSubmitDTO;
@@ -241,8 +243,55 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     public IPage<ProductOrder> userSelectPage(ProductOrder productOrder) {
         LambdaQueryWrapper<ProductOrder> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ProductOrder::getUserId, StpUtil.getLoginIdAsLong());
+        // 支持按状态筛选
+        wrapper.eq(productOrder.getStatus() != null, ProductOrder::getStatus, productOrder.getStatus());
         wrapper.orderByDesc(ProductOrder::getOrderTime);
         return page(PageUtil.getPage(), wrapper);
+    }
+
+    @Override
+    public Map<Integer, Long> getOrderStatusCount() {
+        Long userId = StpUtil.getLoginIdAsLong();
+        Map<Integer, Long> countMap = new HashMap<>();
+
+        // 初始化所有状态为0
+        for (int i = 0; i <= 6; i++) {
+            countMap.put(i, 0L);
+        }
+
+        // 查询当前用户所有订单
+        LambdaQueryWrapper<ProductOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductOrder::getUserId, userId);
+        List<ProductOrder> orders = list(wrapper);
+
+        // 统计各状态数量
+        for (ProductOrder order : orders) {
+            Integer status = order.getStatus();
+            countMap.put(status, countMap.getOrDefault(status, 0L) + 1);
+        }
+
+        return countMap;
+    }
+
+    @Override
+    public Map<Integer, Long> getAllOrderStatusCount() {
+        Map<Integer, Long> countMap = new HashMap<>();
+
+        // 初始化所有状态为0
+        for (int i = 0; i <= 6; i++) {
+            countMap.put(i, 0L);
+        }
+
+        // 查询所有订单
+        List<ProductOrder> orders = list();
+
+        // 统计各状态数量
+        for (ProductOrder order : orders) {
+            Integer status = order.getStatus();
+            countMap.put(status, countMap.getOrDefault(status, 0L) + 1);
+        }
+
+        return countMap;
     }
 
     private ProductOrder getOrderByNumber(String orderNumber) {

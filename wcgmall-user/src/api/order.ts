@@ -16,7 +16,12 @@ export const getOrderStatusApi = (orderNumber: string) => {
 
 // 获取订单列表
 export const getOrderListApi = (params: any) => {
-  return request.get("/user/productOrder/page", params);
+  return request.get("/user/productOrder/page", { params });
+};
+
+// 获取各订单状态数量
+export const getOrderStatusCountApi = () => {
+  return request.get("/user/productOrder/statusCount");
 };
 
 // 获取订单详情

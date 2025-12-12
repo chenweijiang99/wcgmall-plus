@@ -1,6 +1,7 @@
 package com.river.controller.order;
 
 import java.util.List;
+import java.util.Map;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.river.annotation.OperationLogger;
@@ -28,6 +29,12 @@ public class OrderController {
     @Operation(summary = "获取订单列表")
     public Result<IPage<ProductOrder>> list(ProductOrder productOrder) {
         return Result.success(orderService.selectPage(productOrder));
+    }
+
+    @GetMapping("/statusCount")
+    @Operation(summary = "获取各订单状态数量")
+    public Result<Map<Integer, Long>> getStatusCount() {
+        return Result.success(orderService.getAllOrderStatusCount());
     }
 
     @GetMapping("/{id}")

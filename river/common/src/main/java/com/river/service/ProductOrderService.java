@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *  服务接口
@@ -70,4 +71,16 @@ public interface ProductOrderService extends IService<ProductOrder> {
     boolean deleteOrder(String orderNumber);
 
     IPage<ProductOrder> userSelectPage(ProductOrder productOrder);
+
+    /**
+     * 获取当前用户各订单状态的数量
+     * @return Map<状态码, 数量>
+     */
+    Map<Integer, Long> getOrderStatusCount();
+
+    /**
+     * 获取所有订单各状态的数量（后台管理用）
+     * @return Map<状态码, 数量>
+     */
+    Map<Integer, Long> getAllOrderStatusCount();
 }

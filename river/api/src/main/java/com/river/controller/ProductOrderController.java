@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController("userProductOrderController")
 @RequestMapping("/user/productOrder")
 @Slf4j
@@ -34,6 +36,12 @@ public class ProductOrderController {
     @GetMapping("/page")
     public Result<IPage<ProductOrder>> list(ProductOrder productOrder) {
         return Result.success(productOrderService.userSelectPage(productOrder));
+    }
+
+    @Operation(summary = "获取各订单状态数量")
+    @GetMapping("/statusCount")
+    public Result<Map<Integer, Long>> getStatusCount() {
+        return Result.success(productOrderService.getOrderStatusCount());
     }
 
     @Operation(summary = "获取订单详情")

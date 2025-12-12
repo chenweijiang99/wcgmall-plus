@@ -12,6 +12,16 @@ export function listOrderApi(params?: any) {
 }
 
 /**
+ * 获取订单状态数量统计
+ */
+export function getOrderStatusCountApi() {
+    return request({
+        url: '/sys/order/statusCount',
+        method: 'get'
+    })
+}
+
+/**
  * 获取信息
  */
 export function detailOrderApi(id: any) {

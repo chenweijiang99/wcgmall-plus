@@ -1,5 +1,26 @@
 <template>
   <div class="app-container">
+    <!-- 订单状态统计卡片 -->
+    <div class="status-cards">
+      <el-card
+        v-for="item in orderStatusTabs"
+        :key="item.value ?? 'all'"
+        :class="['status-card', { active: currentStatusFilter === item.value }]"
+        shadow="hover"
+        @click="handleStatusFilter(item.value)"
+      >
+        <div class="status-card-content">
+          <div class="status-icon" :style="{ backgroundColor: item.color + '20', color: item.color }">
+            <el-icon :size="24"><component :is="item.icon" /></el-icon>
+          </div>
+          <div class="status-info">
+            <div class="status-count">{{ item.value === null ? totalStatusCount : (statusCountMap[item.value] || 0) }}</div>
+            <div class="status-label">{{ item.label }}</div>
+          </div>
+        </div>
+      </el-card>
+    </div>
+
     <!-- 搜索表单 -->
     <div class="search-wrapper">
       <el-form :model="queryParams" ref="queryFormRef" inline>
@@ -11,54 +32,42 @@
             @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <!-- 订单状态 0待付款 1已付款 2待发货 3已发货 4已完成 5已取消 6已退款 -->
-        <el-form-item label="订单状态" prop="status">
-          <el-select v-model="queryParams.status" placeholder="请选择订单状态" clearable>
-            <el-option
-              v-for="item in orderStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="支付方式" prop="payMethod">
+        <el-form-item label="收货人" prop="consignee">
           <el-input
-            v-model="queryParams.payMethod"
-            placeholder="请输入支付方式"
+            v-model="queryParams.consignee"
+            placeholder="请输入收货人姓名"
             clearable
             @keyup.enter="handleQuery"
           />
         </el-form-item>
+        <el-form-item label="支付方式" prop="payMethod">
+          <el-select v-model="queryParams.payMethod" placeholder="请选择" clearable style="width: 120px">
+            <el-option label="支付宝" value="支付宝" />
+            <el-option label="微信" value="微信" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
-          <el-button
-            v-permission="['sys:order']"
-            type="primary"
-            icon="Search"
-            @click="handleQuery"
-            >搜索</el-button
-          >
-          <el-button v-permission="['sys:order']" icon="Refresh" @click="resetQuery"
-            >重置</el-button
-          >
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
+
     <el-card class="box-card">
       <!-- 操作工具栏 -->
       <template #header>
-        <ButtonGroup>
-          <!-- <el-button type="primary" plain icon="Plus" @click="handleAdd">新增 </el-button> -->
-          <el-button
-            type="danger"
-            plain
-            icon="Delete"
-            :disabled="selectedIds.length === 0"
-            @click="handleBatchDelete"
-            >批量删除
-          </el-button>
-        </ButtonGroup>
+        <div class="card-header">
+          <span class="title">订单列表</span>
+          <ButtonGroup>
+            <el-button
+              type="danger"
+              plain
+              icon="Delete"
+              :disabled="selectedIds.length === 0"
+              @click="handleBatchDelete"
+            >批量删除</el-button>
+          </ButtonGroup>
+        </div>
       </template>
 
       <!-- 数据表格 -->
@@ -68,6 +77,7 @@
         @selection-change="handleSelectionChange"
         :row-key="getRowKey"
         @expand-change="handleExpandChange"
+        stripe
       >
         <el-table-column type="expand" width="60">
           <template #default="{ row }">
@@ -125,40 +135,47 @@
           </template>
         </el-table-column>
         <el-table-column type="selection" width="55" align="center" />
-        <!-- <el-table-column label="主键ID" align="center" prop="id" /> -->
-        <el-table-column label="订单编号" align="center" prop="orderNumber" />
-        <el-table-column label="订单状态" align="center" prop="status">
+        <el-table-column label="订单编号" align="center" prop="orderNumber" min-width="180">
           <template #default="scope">
-            {{
-              orderStatusOptions.find((item) => item.value === scope.row.status)?.label ||
-              "-"
-            }}
+            <span class="order-number">{{ scope.row.orderNumber }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="用户ID" align="center" prop="userId" />
-        <el-table-column label="姓名" align="center" prop="consignee" />
-        <el-table-column label="地址" align="center" prop="consigneeAddress" />
-        <el-table-column label="电话" align="center" prop="consigneePhone" />
-        <el-table-column label="邮箱" align="center" prop="email" />
-        <el-table-column label="支付方式" align="center" prop="payMethod" />
-        <el-table-column label="支付状态" align="center" prop="payStatus">
+        <el-table-column label="订单状态" align="center" prop="status" width="100">
           <template #default="scope">
-            {{
-              payStatusOptions.find((item) => item.value === scope.row.payStatus)
-                ?.label || "-"
-            }}
+            <el-tag :type="getStatusTagType(scope.row.status)" effect="plain">
+              {{ getStatusLabel(scope.row.status) }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="订单金额" align="center" prop="amount" />
-        <el-table-column label="下单时间" align="center" prop="orderTime" />
-        <el-table-column label="结账时间" align="center" prop="checkoutTime" />
-        <el-table-column label="创建时间" align="center" prop="createTime" />
-        <el-table-column label="更新时间" align="center" prop="updateTime" />
+        <el-table-column label="收货信息" align="left" min-width="200">
+          <template #default="scope">
+            <div class="receiver-info">
+              <div><strong>{{ scope.row.consignee }}</strong> {{ scope.row.consigneePhone }}</div>
+              <div class="address">{{ scope.row.consigneeAddress }}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="订单金额" align="center" prop="amount" width="100">
+          <template #default="scope">
+            <span class="amount">¥{{ scope.row.amount }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="支付信息" align="center" width="120">
+          <template #default="scope">
+            <div v-if="scope.row.payStatus === 1">
+              <el-tag type="success" size="small">{{ scope.row.payMethod || '已支付' }}</el-tag>
+            </div>
+            <div v-else>
+              <el-tag type="info" size="small">未支付</el-tag>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="下单时间" align="center" prop="createTime" width="170" />
         <el-table-column
           label="操作"
           align="center"
-          class-name="small-padding fixed-width"
-          width="260"
+          fixed="right"
+          width="200"
         >
           <template #default="scope">
             <el-button
@@ -369,11 +386,12 @@ import {
   deleteOrderApi,
   addOrderApi,
   updateOrderApi,
-  getOrderDetailApi
+  getOrderDetailApi,
+  getOrderStatusCountApi
 } from "@/api/order/order";
 import { shipOrderApi, getLogisticsApi } from "@/api/order/logistics";
 import ButtonGroup from "@/components/ButtonGroup/index.vue";
-import { Picture } from '@element-plus/icons-vue'
+import { Picture, List, Clock, CreditCard, Box, Van, CircleCheck, CircleClose, RefreshRight } from '@element-plus/icons-vue'
 
 // 遮罩层
 const loading = ref(false);
@@ -387,25 +405,35 @@ const dataList = ref([]);
 const title = ref("");
 // 是否显示弹出层
 const open = ref(false);
+
+// 当前状态筛选
+const currentStatusFilter = ref<number | null>(null);
+// 状态数量统计
+const statusCountMap = ref<Record<number, number>>({});
+// 总数量
+const totalStatusCount = computed(() => {
+  return Object.values(statusCountMap.value).reduce((acc, val) => acc + val, 0);
+});
+
+// 状态标签配置
+const orderStatusTabs = [
+  { value: null, label: '全部', icon: 'List', color: '#409EFF' },
+  { value: 0, label: '待付款', icon: 'Clock', color: '#E6A23C' },
+  { value: 2, label: '待发货', icon: 'Box', color: '#409EFF' },
+  { value: 3, label: '已发货', icon: 'Van', color: '#67C23A' },
+  { value: 4, label: '已完成', icon: 'CircleCheck', color: '#67C23A' },
+  { value: 5, label: '已取消', icon: 'CircleClose', color: '#909399' },
+  { value: 6, label: '已退款', icon: 'RefreshRight', color: '#F56C6C' },
+];
+
 // 查询参数
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
-  id: undefined,
   orderNumber: undefined,
   status: undefined,
-  userId: undefined,
   consignee: undefined,
-  consigneeAddress: undefined,
-  consigneePhone: undefined,
-  email: undefined,
   payMethod: undefined,
-  payStatus: undefined,
-  amount: undefined,
-  orderTime: undefined,
-  checkoutTime: undefined,
-  createTime: undefined,
-  updateTime: undefined,
 });
 
 // 表单参数
@@ -543,6 +571,52 @@ const getList = async () => {
   loading.value = false;
 };
 
+/** 获取订单状态数量 */
+const getStatusCount = async () => {
+  try {
+    const { data } = await getOrderStatusCountApi();
+    statusCountMap.value = data;
+  } catch (error) {
+    console.error('获取订单状态数量失败:', error);
+  }
+};
+
+/** 状态筛选 */
+const handleStatusFilter = (status: number | null) => {
+  currentStatusFilter.value = status;
+  queryParams.status = status as any;
+  queryParams.pageNum = 1;
+  getList();
+};
+
+/** 获取状态标签类型 */
+const getStatusTagType = (status: number) => {
+  const typeMap: Record<number, string> = {
+    0: 'warning',
+    1: 'success',
+    2: 'primary',
+    3: '',
+    4: 'success',
+    5: 'info',
+    6: 'danger',
+  };
+  return typeMap[status] || 'info';
+};
+
+/** 获取状态标签文字 */
+const getStatusLabel = (status: number) => {
+  const labelMap: Record<number, string> = {
+    0: '待付款',
+    1: '已付款',
+    2: '待发货',
+    3: '已发货',
+    4: '已完成',
+    5: '已取消',
+    6: '已退款',
+  };
+  return labelMap[status] || '未知';
+};
+
 /** 取消按钮 */
 const cancel = () => {
   open.value = false;
@@ -580,6 +654,8 @@ const handleQuery = async () => {
 /** 重置按钮操作 */
 const resetQuery = async () => {
   queryFormRef.value?.resetFields();
+  currentStatusFilter.value = null;
+  queryParams.status = undefined;
   await handleQuery();
 };
 
@@ -624,6 +700,7 @@ const submitForm = async () => {
         }
         open.value = false;
         getList();
+        getStatusCount();
       } catch (error) {}
     }
   });
@@ -647,6 +724,7 @@ const handleBatchDelete = async () => {
       await deleteOrderApi(selectedIds.value);
       ElMessage.success("删除成功");
       getList();
+      getStatusCount();
     } catch (error) {
       ElMessage.error("删除失败");
       console.error("删除失败:", error);
@@ -656,7 +734,7 @@ const handleBatchDelete = async () => {
 
 /** 删除按钮操作 */
 const handleDelete = async (row: any) => {
-  ElMessageBox.confirm('是否确认删除编号为"' + row.id + '"的数据项?', "警告", {
+  ElMessageBox.confirm('是否确认删除编号为"' + row.orderNumber + '"的订单?', "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -665,6 +743,7 @@ const handleDelete = async (row: any) => {
       await deleteOrderApi(row.id);
       ElMessage.success("删除成功");
       getList();
+      getStatusCount();
     } catch (error) {
       ElMessage.error("删除失败");
       console.error("删除失败:", error);
@@ -708,6 +787,7 @@ const submitShipForm = async () => {
         ElMessage.success("发货成功");
         shipDialogOpen.value = false;
         getList();
+        getStatusCount();
       } catch (error: any) {
         ElMessage.error(error.message || "发货失败");
       } finally {
@@ -749,10 +829,104 @@ const getLogisticsStatusType = (status: number) => {
 
 onMounted(() => {
   getList();
+  getStatusCount();
 });
 </script>
 
 <style scoped>
+/* 状态卡片 */
+.status-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.status-card {
+  flex: 1;
+  min-width: 120px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.status-card:hover {
+  transform: translateY(-2px);
+}
+
+.status-card.active {
+  border-color: var(--el-color-primary);
+  box-shadow: 0 2px 12px rgba(64, 158, 255, 0.2);
+}
+
+.status-card :deep(.el-card__body) {
+  padding: 16px;
+}
+
+.status-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-info {
+  flex: 1;
+}
+
+.status-count {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.status-label {
+  font-size: 13px;
+  color: #909399;
+  margin-top: 2px;
+}
+
+/* 卡片头 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header .title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 表格样式 */
+.order-number {
+  font-family: monospace;
+  color: #409EFF;
+}
+
+.receiver-info {
+  text-align: left;
+}
+
+.receiver-info .address {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.amount {
+  font-weight: 600;
+  color: #F56C6C;
+}
+
+/* 订单详情 */
 .order-detail-container {
   padding: 16px;
   background-color: #f8f9fa;

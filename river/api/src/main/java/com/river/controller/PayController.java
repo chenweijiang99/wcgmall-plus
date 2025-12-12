@@ -43,6 +43,7 @@ public class PayController {
 
     @PostMapping("/notify")  // 注意这里必须是POST接口
     @Operation(summary = "支付宝支付回调")
+    //目前使用的是前端轮询的方式，这个回调保留
     public void payNotify(HttpServletRequest request, HttpServletResponse httpServletResponse) throws Exception {
         log.info("支付宝支付回调开始");
         aliPayService.payNotify(request, httpServletResponse);

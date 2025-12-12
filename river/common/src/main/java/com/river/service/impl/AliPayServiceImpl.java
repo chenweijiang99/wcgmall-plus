@@ -63,7 +63,7 @@ public class AliPayServiceImpl implements AliPayService {
                     throw new ServiceException("订单不存在");
                 }
                 order.setPayStatus(1);// 支付状态改为已支付
-                order.setPayStatus(1);// 订单状态改为已支付
+                order.setStatus(2);// 订单状态改为待发货
                 order.setCheckoutTime(LocalDateTime.now());
                 order.setAmount(new BigDecimal(params.get("total_amount")));
                 order.setPayMethod("支付宝");
@@ -123,8 +123,8 @@ public class AliPayServiceImpl implements AliPayService {
             } else if (alipayTradeQueryResponse.get("trade_status") == null) {
                 return paySuccess;
             } else if (alipayTradeQueryResponse.get("trade_status").equals("TRADE_SUCCESS")) {
-                order.setPayStatus(1);
-                order.setStatus(1);
+                order.setPayStatus(1);// 支付状态改为已支付
+                order.setStatus(2);// 订单状态改为待发货
                 order.setCheckoutTime(LocalDateTime.now());
                 order.setAmount(new BigDecimal(String.valueOf(alipayTradeQueryResponse.get("total_amount"))));
                 order.setPayMethod("支付宝");
