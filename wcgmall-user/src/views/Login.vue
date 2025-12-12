@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import router from "@/router";
 import { useUserStore } from "@/stores/modules/user";
+import { useSiteConfigStore } from "@/stores/modules/siteConfig";
 import { ElMessage, ElNotification } from "element-plus";
 import { User, Lock, Mail, ArrowLeft } from "lucide-vue-next";
 import type { FormInstance } from "element-plus";
@@ -26,6 +27,9 @@ type AuthMode = "login" | "register" | "forgot";
 // 当前模式状态
 const authMode = ref<AuthMode>("login");
 const isLoading = ref(false);
+
+// 网站配置
+const siteConfigStore = useSiteConfigStore();
 
 // 倒计时状态
 const countdown = ref(0);
@@ -136,9 +140,10 @@ const socialSettings = ref({
 
 // 标题和描述计算属性
 const pageTitle = computed(() => {
+  const siteName = siteConfigStore.userTitle || 'WCG STORE';
   switch (authMode.value) {
     case "login":
-      return "登录到WCG STORE";
+      return `登录到${siteName}`;
     case "register":
       return "创建账户";
     case "forgot":
@@ -320,6 +325,7 @@ const getThirdLoginConfig = async () => {
 
 onMounted(() => {
   getThirdLoginConfig();
+  siteConfigStore.fetchConfig();
 });
 
 const handleCheckUsername = async (username: string) => {

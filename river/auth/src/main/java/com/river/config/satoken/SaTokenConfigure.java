@@ -19,6 +19,8 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                         "/pay/**",
                         "/api/juhe/**",
                         "/api/social/**",
+                        "/sys/siteConfig/public",   // 网站配置公开接口
+                        "/sys/siteConfig/key/**",   // 网站配置按key获取
                         "/swagger-ui/**",          // knife4j接口文档
                         "/webjars/**",        // knife4j相关资源
                         "/v3/api-docs/**",     // openapi接口文档

@@ -57,4 +57,47 @@ export function deleteSysConfigApi(ids: number[] | number) {
     })
 }
 
+// ==================== 网站配置接口 ====================
+
+/**
+ * 获取公开的网站配置（无需登录）
+ */
+export function getPublicSiteConfigApi() {
+    return request({
+        url: '/sys/siteConfig/public',
+        method: 'get'
+    })
+}
+
+/**
+ * 获取所有网站配置（Map形式）
+ */
+export function getSiteConfigMapApi() {
+    return request({
+        url: '/sys/siteConfig/map',
+        method: 'get'
+    })
+}
+
+/**
+ * 获取网站配置列表
+ */
+export function getSiteConfigListApi() {
+    return request({
+        url: '/sys/siteConfig/list',
+        method: 'get'
+    })
+}
+
+/**
+ * 批量更新网站配置
+ */
+export function updateSiteConfigApi(data: Record<string, string>) {
+    return request({
+        url: '/sys/siteConfig/update',
+        method: 'put',
+        data
+    })
+}
+
 

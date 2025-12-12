@@ -16,7 +16,7 @@
           <div class="logo-wrapper">
             <Logo :size="80" class="floating-logo" :color="logoColor" />
           </div>
-          <h1 class="brand-title">{{ settings.title }}</h1>
+          <h1 class="brand-title">{{ settingsStore.adminTitle }}</h1>
           <p class="brand-description">基于 Vue3 + TypeScript 的后台管理系统</p>
         </div>
       </div>
@@ -292,7 +292,6 @@ import { ElMessage } from "element-plus";
 import { useUserStore } from "@/store/modules/user";
 import { useSettingsStore } from "@/store/modules/settings";
 import Logo from "@/layouts/components/Sidebar/Logo.vue";
-import settings from "@/config/settings";
 import SliderVerify from "./components/SliderVerify.vue";
 import type { FormItemRule } from "element-plus";
 import {
@@ -302,7 +301,7 @@ import {
   registerApi,
   forgotPasswordApi,
 } from "@/api/system/auth";
-import { ref, reactive, computed, onUnmounted } from "vue";
+import { ref, reactive, computed, onUnmounted, onMounted } from "vue";
 
 // 表单类型切换
 const currentTab = ref<string>("login");
@@ -601,6 +600,11 @@ const handleForgot = async () => {
 onUnmounted(() => {
   if (countdownTimer) clearInterval(countdownTimer);
   if (forgotCountdownTimer) clearInterval(forgotCountdownTimer);
+});
+
+// 页面加载时获取网站配置
+onMounted(() => {
+  settingsStore.fetchSiteConfig();
 });
 
 // 添加 logo 颜色计算

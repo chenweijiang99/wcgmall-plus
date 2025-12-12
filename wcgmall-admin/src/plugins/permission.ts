@@ -10,10 +10,20 @@ const whiteList = ['/login'] // 路由白名单
 
 export function setupPermission() {
   router.beforeEach(async (to, from, next) => {
-    const dynamicTitle = useSettingsStore().dynamicTitle
-    if (dynamicTitle && to.meta.title) {
-      document.title = to.meta.title as string
+    const settingsStore = useSettingsStore()
+
+    // 获取网站配置
+    await settingsStore.fetchSiteConfig()
+
+    // 动态设置页面标题
+    const pageTitle = to.meta.title as string
+    const siteTitle = settingsStore.adminTitle
+    if (pageTitle) {
+      document.title = `${pageTitle} - ${siteTitle}`
+    } else {
+      document.title = siteTitle
     }
+
     NProgress.start();
     const hasToken = getToken();
     

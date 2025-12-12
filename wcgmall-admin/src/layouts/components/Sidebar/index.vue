@@ -15,7 +15,7 @@
               ? false
               : settingsStore.sidebarStyle === 'light',
         }"
-        >{{ settings.title }}</span
+        >{{ settingsStore.adminTitle }}</span
       >
     </div>
     <el-scrollbar>
@@ -51,12 +51,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePermissionStore } from "@/store/modules/permission";
 import { useSettingsStore } from "@/store/modules/settings";
 import Logo from "@/layouts/components/Sidebar/Logo.vue";
-import settings from "@/config/settings";
 import { isExternal } from "@/utils/validate";
 import MenuItem from "./MenuItem.vue";
 
@@ -64,6 +63,12 @@ const route = useRoute();
 const permissionStore = usePermissionStore();
 const settingsStore = useSettingsStore();
 const router = useRouter();
+
+// 加载网站配置
+onMounted(() => {
+  settingsStore.fetchSiteConfig();
+});
+
 // 从 props 接收折叠状态
 defineProps({
   isCollapse: {

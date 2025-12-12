@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { RouterLink, useRoute } from 'vue-router';
 import { ShoppingBag, User as UserIcon, Sun, Moon, Menu, X, Heart, Trash2,ShoppingCart } from 'lucide-vue-next';
 import { useUserStore } from "@/stores/modules/user";
+import { useSiteConfigStore } from "@/stores/modules/siteConfig";
 import {toggleTheme,themeStore} from '@/stores/modules/theme';
 import { emitter } from '@/event/emitter';
 import { getCartApi,deleteShoppingCartApi } from '@/api/cart';
@@ -12,11 +13,16 @@ import {Cart,Favorites} from '@/types';
 import router from "@/router";
 import { getToken } from '@/utils/auth';
 const userStore = useUserStore();
+const siteConfigStore = useSiteConfigStore();
 const route = useRoute();
 const isMenuOpen = ref(false);
 const shoppingCart = ref<Cart[]>([]);
 const cartTotal=computed(() => shoppingCart.value.reduce((acc, item) => acc + item.productPrice * item.number, 0));
 const favorites=ref<Favorites[]>([]);
+
+// Logo URL
+const headerLogo = computed(() => siteConfigStore.userHeaderLogo);
+const defaultHeaderLogo = '/src/assets/images/logo-header.jpg';
 
 const isActive = (path: string) => route.path === path ? 'text-black dark:text-white' : 'text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white';
 
@@ -49,6 +55,9 @@ const removeFromFavorites = async (item: Favorites) => {
 };
 
 onMounted(() => {
+  // 获取网站配置
+  siteConfigStore.fetchConfig();
+
   if(getToken()){
         getCart();
         getFavorites();
@@ -76,7 +85,7 @@ onUnmounted(() => {
         <!-- Logo -->
         <RouterLink to="/" class="text-xl font-bold tracking-tight flex items-center gap-2">
           <!-- <div class="w-6 h-6 bg-black dark:bg-white rounded-full"></div> -->
-          <img class="w-20 h-6" src="/src/assets/images/logo-header.jpg"></img>
+          <img class="w-20 h-6" :src="headerLogo || defaultHeaderLogo"></img>
         </RouterLink>
 
         <!-- 导航 -->

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { getPublicSiteConfigApi } from '@/api/system/config'
 
 export interface SettingsState {
   theme: 'light' | 'dark'
@@ -14,6 +15,9 @@ export interface SettingsState {
   showFooter: boolean
   title: string
   sidebarStyle: 'dark' | 'light'
+  // 网站配置
+  siteConfig: Record<string, string>
+  siteConfigLoaded: boolean
 }
 
 export const useSettingsStore = defineStore({
@@ -32,8 +36,17 @@ export const useSettingsStore = defineStore({
     greyMode: false,
     showFooter: true,
     title: '文创购管理系统',
-    sidebarStyle: 'light'
+    sidebarStyle: 'light',
+    siteConfig: {},
+    siteConfigLoaded: false
   }),
+
+  getters: {
+    // 获取后台网站名称
+    adminTitle: (state) => state.siteConfig.site_admin_title || state.title,
+    // 获取后台Logo
+    adminLogo: (state) => state.siteConfig.site_admin_logo || ''
+  },
 
   actions: {
     // 预览设置
@@ -185,6 +198,27 @@ export const useSettingsStore = defineStore({
         }
       }
     },
+
+    // 获取网站配置
+    async fetchSiteConfig() {
+      if (this.siteConfigLoaded) return
+
+      try {
+        const res = await getPublicSiteConfigApi()
+        if (res.code === 200 && res.data) {
+          this.siteConfig = res.data
+          this.siteConfigLoaded = true
+        }
+      } catch (error) {
+        console.error('获取网站配置失败:', error)
+      }
+    },
+
+    // 刷新网站配置（强制重新获取）
+    async refreshSiteConfig() {
+      this.siteConfigLoaded = false
+      await this.fetchSiteConfig()
+    }
 
   }
 }) 

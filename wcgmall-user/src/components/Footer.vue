@@ -1,5 +1,25 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from "vue-router";
+import { computed, onMounted } from "vue";
+import { useSiteConfigStore } from "@/stores/modules/siteConfig";
+
+const siteConfigStore = useSiteConfigStore();
+
+// 从Store获取配置
+const footerLogo = computed(() => siteConfigStore.userFooterLogo);
+const footerDescription = computed(() => siteConfigStore.footerDescription);
+const footerCopyright = computed(() => siteConfigStore.footerCopyright);
+const footerAddress = computed(() => siteConfigStore.footerAddress);
+const footerEmail = computed(() => siteConfigStore.footerEmail);
+const footerIcp = computed(() => siteConfigStore.footerIcp);
+
+// 默认值
+const defaultFooterLogo = '/src/assets/images/logo-footer.jpg';
+const defaultDescription = '"文创购"(英文:WCG,亦称文创购物商城、文创商城),是一个综合性文创购物购物网站。';
+
+onMounted(() => {
+  siteConfigStore.fetchConfig();
+});
 </script>
 <template>
   <footer
@@ -8,10 +28,9 @@ import { RouterLink, useRoute } from "vue-router";
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
-          <img class="text-lg font-bold mb-4" src="/src/assets/images/logo-footer.jpg" />
+          <img class="text-lg font-bold mb-4" :src="footerLogo || defaultFooterLogo" />
           <p class="text-gray-500 text-sm">
-            “文创购”(英文:WCG,亦称文创购物商城、文创商城),是一个综合性文创购物购物网站。
-            “文创购”是长江师范学院计科2301陈韦江毕业设计。提供100%品质保证的商品,7天无理由退货的售后服务,以及购物积分返现等优质服务。
+            {{ footerDescription || defaultDescription }}
           </p>
         </div>
         <div>
@@ -39,17 +58,20 @@ import { RouterLink, useRoute } from "vue-router";
         <div>
           <h4 class="font-semibold mb-4">联系方式</h4>
           <ul class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
-            <li>
+            <li v-if="footerAddress">
             <el-icon><Location /></el-icon>
-            长江师范学院</li>
-            <li><el-icon><Message /></el-icon>1774532899@qq.com</li>
+            {{ footerAddress }}</li>
+            <li v-if="footerEmail"><el-icon><Message /></el-icon>{{ footerEmail }}</li>
           </ul>
         </div>
       </div>
       <div
         class="mt-12 pt-8 border-t border-gray-100 dark:border-zinc-900 text-center text-xs text-gray-400"
       >
-        © {{ new Date().getFullYear() }} WCG Store. All rights reserved.
+        <div>© {{ new Date().getFullYear() }} {{ footerCopyright || 'WCG Store. All rights reserved.' }}</div>
+        <div v-if="footerIcp" class="mt-2">
+          <a href="https://beian.miit.gov.cn/" target="_blank" class="hover:text-gray-600">{{ footerIcp }}</a>
+        </div>
       </div>
     </div>
   </footer>
