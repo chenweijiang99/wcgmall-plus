@@ -272,13 +272,18 @@ const forgotRules = {
 const handleThirdPartyLogin = async (item: SocialConfigItem) => {
   try {
     const res = await getSocialLoginUrlApi(item.socialType);
-    if (res.error) {
-      ElMessage.error(res.error);
+    if (res.code !== 200) {
+      ElMessage.error(res.message || "获取登录链接失败");
+      return;
+    }
+    const data = res.data;
+    if (data.error) {
+      ElMessage.error(data.error);
       return;
     }
     // 跳转到登录URL
-    if (res.loginUrl) {
-      window.open(res.loginUrl, "_self");
+    if (data.loginUrl) {
+      window.open(data.loginUrl, "_self");
     }
   } catch (error) {
     console.error("获取登录链接失败:", error);
@@ -600,7 +605,8 @@ const switchMode = (mode: AuthMode) => {
                   <div
                     class="w-12 h-12 rounded-full border border-gray-200 dark:border-zinc-800 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 transition-transform hover:scale-110 shadow-sm"
                   >
-                    <svg-icon :name="item.icon || item.socialType" :size="30"></svg-icon>
+                    <div class="social-icon" v-if="item.icon" v-html="item.icon"></div>
+                    <span v-else class="text-gray-400 text-xs">{{ item.socialType }}</span>
                   </div>
                 </el-tooltip>
               </div>
@@ -847,5 +853,16 @@ const switchMode = (mode: AuthMode) => {
 <style scoped>
 :deep(.el-input__wrapper) {
   border-radius: 20px;
+}
+.social-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.social-icon :deep(svg) {
+  width: 100%;
+  height: 100%;
 }
 </style>

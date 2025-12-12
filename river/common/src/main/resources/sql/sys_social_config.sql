@@ -20,7 +20,7 @@ CREATE TABLE `sys_social_config` (
   `redirect_url` varchar(500) DEFAULT NULL COMMENT 'OAuth2 回调地址',
   `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '状态(0禁用 1启用)',
   `sort` int(11) DEFAULT 0 COMMENT '排序',
-  `icon` varchar(255) DEFAULT NULL COMMENT '图标',
+  `icon` text DEFAULT NULL COMMENT '图标(存储SVG内容)',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

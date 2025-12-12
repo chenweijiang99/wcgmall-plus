@@ -154,11 +154,23 @@ export function getEnabledSocialConfigApi() {
 }
 
 /**
+ * 第三方登录URL响应
+ */
+export interface SocialLoginUrlResponse {
+  mode: string;
+  type: string;
+  loginUrl?: string;
+  qrCode?: string;
+  cxid?: string;
+  error?: string;
+}
+
+/**
  * 获取第三方登录URL（统一入口）
  * 根据后端配置的登录模式自动选择聚合登录或OAuth2登录
  */
 export function getSocialLoginUrlApi(type: string) {
-  return request.get<any, any>(`/api/social/login/${type}`);
+  return request.get<any, ApiResponse<SocialLoginUrlResponse>>(`/api/social/login/${type}`);
 }
 
 /**

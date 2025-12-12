@@ -54,10 +54,10 @@
         <el-table-column label="排序" align="center" prop="sort" width="70" />
         <el-table-column label="图标" align="center" width="80">
           <template #default="scope">
-            <div class="icon-preview">
-              <svg-icon v-if="scope.row.icon" :name="scope.row.icon" :size="24" />
-              <span v-else class="text-gray">-</span>
+            <div class="icon-preview" v-if="scope.row.icon">
+              <div class="svg-icon-wrapper" v-html="scope.row.icon"></div>
             </div>
+            <span v-else class="text-gray">-</span>
           </template>
         </el-table-column>
         <el-table-column label="登录类型" align="center" prop="socialType" width="100" />
@@ -111,13 +111,36 @@
     </el-card>
 
     <!-- 添加或修改对话框 -->
-    <el-dialog v-model="open" :title="title" width="600px" append-to-body>
+    <el-dialog v-model="open" :title="title" width="650px" append-to-body>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
         <el-form-item label="登录类型" prop="socialType">
           <el-input v-model="form.socialType" placeholder="请输入登录类型标识，如: qq, wechat" :disabled="form.id !== undefined" />
         </el-form-item>
         <el-form-item label="显示名称" prop="socialName">
           <el-input v-model="form.socialName" placeholder="请输入显示名称，如: QQ, 微信" />
+        </el-form-item>
+        <el-form-item label="图标" prop="icon">
+          <div class="icon-edit-wrapper">
+            <div class="icon-edit-preview">
+              <div class="preview-box" v-if="form.icon">
+                <div class="svg-icon-wrapper svg-icon-large" v-html="form.icon"></div>
+              </div>
+              <div class="preview-box preview-empty" v-else>
+                <span>预览</span>
+              </div>
+            </div>
+            <div class="icon-edit-input">
+              <el-input
+                v-model="form.icon"
+                type="textarea"
+                :rows="4"
+                placeholder="请粘贴SVG代码，例如：<svg>...</svg>"
+              />
+              <div class="form-tip">
+                请直接粘贴完整的SVG代码。推荐尺寸：24x24 或 32x32
+              </div>
+            </div>
+          </div>
         </el-form-item>
         <el-form-item label="支持模式" prop="supportMode">
           <el-checkbox v-model="form.supportJuheChecked" label="聚合登录" />
@@ -242,6 +265,7 @@ const reset = () => {
   form.id = undefined;
   form.socialType = undefined;
   form.socialName = undefined;
+  form.icon = undefined;
   form.juheTypeCode = undefined;
   form.supportJuheChecked = true;
   form.supportOauth2Checked = false;
@@ -344,5 +368,50 @@ onMounted(() => {
   font-size: 12px;
   color: #909399;
   margin-top: 5px;
+}
+.icon-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.svg-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.svg-icon-wrapper :deep(svg) {
+  width: 100%;
+  height: 100%;
+}
+.svg-icon-large {
+  width: 40px;
+  height: 40px;
+}
+.icon-edit-wrapper {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+.icon-edit-preview {
+  flex-shrink: 0;
+}
+.preview-box {
+  width: 60px;
+  height: 60px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+}
+.preview-empty {
+  color: #909399;
+  font-size: 12px;
+}
+.icon-edit-input {
+  flex: 1;
 }
 </style>
