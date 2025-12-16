@@ -2,7 +2,6 @@
 import { ref, watch, computed, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { getProductDetailApi, addToWishListApi } from "@/api/product";
-import { selectTreeApi, addCommentsApi } from "@/api/comments";
 import { addShoppingCartApi } from "@/api/cart";
 import { useUserStore } from "@/stores/modules/user";
 import { Product, ProductView } from "@/types";
@@ -10,10 +9,12 @@ import {
   Heart,
   ShoppingBag,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   PackageCheck,
   AlertCircle,
 } from "lucide-vue-next";
-import Comments from "@/components/comments/index.vue";
+import ProductReview from "@/components/ProductReview/index.vue";
 import { ElMessage } from "element-plus";
 import { emitter } from "@/event/emitter";
 
@@ -28,7 +29,7 @@ const store = useUserStore();
 const product = ref<ProductView | undefined>(undefined);
 const activeImage = ref("");
 const loading = ref(true);
-const comments = ref<Comment[]>([]);
+const showDetail = ref(false); // 控制商品详情图展开/折叠
 // === 放大镜相关逻辑 ===
 const isZoomed = ref(false);
 const zoomPosition = reactive({ x: 0, y: 0 });
@@ -290,21 +291,59 @@ const getInventoryStatus = (inventory: number) => {
       class="mb-20 animate-fade-in"
     >
       <h2 class="text-2xl font-bold mb-8 text-center">商品详情</h2>
-      <div
-        class="flex flex-col gap-0 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-zinc-800 bg-white dark:bg-black max-w-4xl mx-auto"
-      >
-        <img
-          v-for="(img, index) in product.descriptionImage"
-          :key="`desc-${index}`"
-          :src="img"
-          class="w-full h-auto object-cover block"
-          alt="Detail"
-          loading="lazy"
-        />
+
+      <!-- 展开/收起按钮 -->
+      <div class="flex justify-center mb-6">
+        <button
+          @click="showDetail = !showDetail"
+          class="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-full text-sm font-medium transition-all"
+        >
+          <component :is="showDetail ? ChevronUp : ChevronDown" :size="20" />
+          {{ showDetail ? '收起详情' : '展开详情' }}
+          <span class="text-gray-500">({{ product.descriptionImage.length }}张图片)</span>
+        </button>
       </div>
+
+      <!-- 详情图片区域 -->
+      <transition name="fade">
+        <div
+          v-show="showDetail"
+          class="flex flex-col gap-0 rounded-3xl overflow-hidden shadow-sm border border-gray-100 dark:border-zinc-800 bg-white dark:bg-black max-w-4xl mx-auto"
+        >
+          <img
+            v-for="(img, index) in product.descriptionImage"
+            :key="`desc-${index}`"
+            :src="img"
+            class="w-full h-auto object-cover block"
+            alt="Detail"
+            loading="lazy"
+          />
+        </div>
+      </transition>
     </div>
 
-     <Comments :module="'product'" />
+    <!-- 商品评价 -->
+    <ProductReview :productId="product.id" />
   </div>
-  
+
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+  max-height: 10000px;
+}
+</style>

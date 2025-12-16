@@ -44,6 +44,16 @@ export const confirmReceiptApi = (orderNumber: string) => {
   return request.post(`/user/productOrder/confirm/${orderNumber}`);
 };
 
+// 部分确认收货（按商品）
+export const confirmReceiptItemsApi = (orderNumber: string, itemIds: number[]) => {
+  return request.post(`/user/productOrder/confirmItems?orderNumber=${orderNumber}`, itemIds);
+};
+
+// 获取订单详情（包含确认状态）
+export const getOrderDetailWithStatusApi = (orderNumber: string) => {
+  return request.get(`/user/productOrder/detailWithStatus/${orderNumber}`);
+};
+
 // 删除订单
 export const deleteOrderApi = (orderNumber: string) => {
   return request.delete(`/user/productOrder/${orderNumber}`);

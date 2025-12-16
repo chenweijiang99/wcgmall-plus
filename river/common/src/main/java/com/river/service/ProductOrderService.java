@@ -65,6 +65,20 @@ public interface ProductOrderService extends IService<ProductOrder> {
     void confirmReceipt(String orderNumber);
 
     /**
+     * 部分确认收货（按商品）
+     * @param orderNumber 订单号
+     * @param itemIds 订单详情ID列表
+     */
+    void confirmReceiptItems(String orderNumber, List<Long> itemIds);
+
+    /**
+     * 获取订单商品及确认状态
+     * @param orderNumber 订单号
+     * @return 订单详情列表（包含确认状态）
+     */
+    List<com.river.vo.OrderDetailVO> getOrderDetailWithStatus(String orderNumber);
+
+    /**
      * 删除订单
      * @param orderNumber 订单号
      */

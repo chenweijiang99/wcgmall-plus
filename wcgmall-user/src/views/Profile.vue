@@ -43,9 +43,11 @@ import {
 import {
   getOrderListApi,
   getOrderDetailApi,
+  getOrderDetailWithStatusApi,
   cancelOrderApi,
   refundOrderApi,
   confirmReceiptApi,
+  confirmReceiptItemsApi,
   deleteOrderApi,
   alipayPayApi,
   getOrderStatusApi,
@@ -53,6 +55,8 @@ import {
 } from "@/api/order";
 import { getOrderLogistics } from "@/api/logistics";
 import { emitter } from "@/event/emitter";
+import ConfirmReceiptDialog from "@/components/ConfirmReceiptDialog.vue";
+import ProductReviewDialog from "@/components/ProductReviewDialog.vue";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -71,20 +75,22 @@ const addresses = ref<Address[]>([]);
 const showAddressForm = ref(false);
 const addressForm = ref<any>({});
 const addressFormRef = ref();
+const orderTableRef = ref();
 
 // === 订单状态分类 ===
 const orderStatusTab = ref<number | null>(null); // null表示全部
 const orderStatusCount = ref<Record<number, number>>({
-  0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0
+  0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0
 });
 
 // 订单状态标签配置 - 用户端只显示常用状态
-// 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
+// 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款 7部分收货
 const orderStatusTabs = [
   { value: null, label: "全部", icon: "Package" },
   { value: 0, label: "待付款", icon: "Clock" },
   { value: 1, label: "待发货", icon: "Package" },
   { value: 2, label: "待收货", icon: "Truck" },
+  { value: 7, label: "部分收货", icon: "Truck" },
   { value: 3, label: "待评价", icon: "MessageSquare" },
 ];
 
@@ -149,6 +155,19 @@ const pollingTimer = ref<any>(null);
 // === 物流相关 ===
 const showLogisticsDialog = ref(false);
 const currentLogistics = ref<any>(null);
+
+// === 确认收货对话框 ===
+const showConfirmReceiptDialog = ref(false);
+const currentConfirmOrderNumber = ref("");
+
+// === 评价对话框 ===
+const showReviewDialog = ref(false);
+const currentReviewOrderNumber = ref("");
+const currentReviewProductInfo = ref<{
+  productId: number;
+  productName: string;
+  productImage: string;
+}>({ productId: 0, productName: "", productImage: "" });
 
 
 const formattedPayTime = computed(() => {
@@ -500,10 +519,10 @@ const handlePageChange = (page: number) => {
 
 const expandChange = async (row: any, expandedRows: any[]) => {
   if (expandedRows.length > 0) {
-    // 展开时获取详情
+    // 展开时获取详情（包含确认状态）
     if (!orderDetailsMap.value[row.orderNumber]) {
       try {
-        const res = await getOrderDetailApi(row.orderNumber);
+        const res = await getOrderDetailWithStatusApi(row.orderNumber);
         orderDetailsMap.value[row.orderNumber] = res.data;
       } catch (error) {
         console.error(error);
@@ -669,16 +688,60 @@ const handleRefund = (order: Order) => {
 };
 
 const handleConfirm = (order: Order) => {
-  ElMessageBox.confirm("确认已收到货物?", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "info",
-  }).then(async () => {
-    await confirmReceiptApi(order.orderNumber);
-    ElMessage.success("确认收货成功");
-    getOrders();
-    getOrderStatusCount();
-  });
+  // 打开确认收货对话框，支持部分确认
+  currentConfirmOrderNumber.value = order.orderNumber;
+  showConfirmReceiptDialog.value = true;
+};
+
+// 确认收货对话框成功回调
+const handleConfirmReceiptSuccess = () => {
+  getOrders();
+  getOrderStatusCount();
+};
+
+// 打开评价对话框
+const handleReview = (order: Order, product: any) => {
+  currentReviewOrderNumber.value = order.orderNumber;
+  currentReviewProductInfo.value = {
+    productId: product.productId,
+    productName: product.productName,
+    productImage: product.productImage,
+  };
+  showReviewDialog.value = true;
+};
+
+// 评价成功回调
+const handleReviewSuccess = async () => {
+  const orderNumber = currentReviewOrderNumber.value;
+
+  // 重新加载该订单的详情以获取最新评价状态
+  if (orderNumber) {
+    try {
+      const res = await getOrderDetailWithStatusApi(orderNumber);
+      orderDetailsMap.value[orderNumber] = res.data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  getOrders();
+  getOrderStatusCount();
+};
+
+// 操作列的去评价按钮 - 展开订单行
+const handleGoToReview = async (order: Order) => {
+  // 展开订单行
+  orderTableRef.value?.toggleRowExpansion(order, true);
+
+  // 加载订单详情（如果还没加载）
+  if (!orderDetailsMap.value[order.orderNumber]) {
+    try {
+      const res = await getOrderDetailWithStatusApi(order.orderNumber);
+      orderDetailsMap.value[order.orderNumber] = res.data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
 };
 
 const handleDelete = (order: Order) => {
@@ -695,7 +758,7 @@ const handleDelete = (order: Order) => {
 };
 
 const getStatusText = (status: number) => {
-  // 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
+  // 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款 7部分收货
   const map: Record<number, string> = {
     0: "待付款",
     1: "待发货",
@@ -704,12 +767,13 @@ const getStatusText = (status: number) => {
     4: "已完成",
     5: "已取消",
     6: "已退款",
+    7: "部分收货",
   };
   return map[status] || "未知状态";
 };
 
 const getStatusTagType = (status: number) => {
-  // 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款
+  // 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款 7部分收货
   const map: Record<number, string> = {
     0: "warning",
     1: "primary",
@@ -718,6 +782,7 @@ const getStatusTagType = (status: number) => {
     4: "success",
     5: "info",
     6: "danger",
+    7: "warning",
   };
   return map[status] || "info";
 };
@@ -934,7 +999,7 @@ onUnmounted(() => {
           >
         </div>
         <div v-else>
-          <el-table :data="orders" @expand-change="expandChange" row-key="id" v-loading="loading">
+          <el-table ref="orderTableRef" :data="orders" @expand-change="expandChange" row-key="id" v-loading="loading">
             <el-table-column type="expand">
               <template #default="props">
                 <div class="p-6 bg-gray-50 dark:bg-zinc-800/50 rounded-xl">
@@ -1009,10 +1074,9 @@ onUnmounted(() => {
                       <div
                         v-for="item in orderDetailsMap[props.row.orderNumber]"
                         :key="item.productId"
-                        class="group relative bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl overflow-hidden hover:shadow-md transition-all cursor-pointer"
-                        @click="router.push(`/product/${item.productId}`)"
+                        class="group relative bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl overflow-hidden hover:shadow-md transition-all"
                       >
-                        <div class="aspect-square relative bg-gray-100 dark:bg-black">
+                        <div class="aspect-square relative bg-gray-100 dark:bg-black cursor-pointer" @click="router.push(`/product/${item.productId}`)">
                           <img
                             :src="item.productImage"
                             class="w-full h-full object-cover"
@@ -1022,14 +1086,47 @@ onUnmounted(() => {
                           >
                             x{{ item.number }}
                           </div>
+                          <!-- 确认状态标签 -->
+                          <div
+                            v-if="item.confirmStatus === 1"
+                            class="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded"
+                          >
+                            已确认收货
+                          </div>
+                          <!-- 已评价标签 -->
+                          <div
+                            v-if="item.reviewStatus === 1"
+                            class="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded"
+                          >
+                            已评价
+                          </div>
                         </div>
                         <div class="p-3">
-                          <h4 class="font-medium text-sm truncate mb-1">
+                          <h4 class="font-medium text-sm truncate mb-1 cursor-pointer" @click="router.push(`/product/${item.productId}`)">
                             {{ item.productName }}
                           </h4>
                           <div class="text-blue-600 font-bold text-sm">
                             ￥{{ item.productPrice }}
                           </div>
+                          <!-- 评价按钮 -->
+                          <el-button
+                            v-if="props.row.status === 3 && item.reviewStatus !== 1"
+                            type="primary"
+                            size="small"
+                            class="w-full mt-2"
+                            @click.stop="handleReview(props.row, item)"
+                          >
+                            去评价
+                          </el-button>
+                          <el-button
+                            v-else-if="props.row.status === 3 && item.reviewStatus === 1"
+                            type="info"
+                            size="small"
+                            class="w-full mt-2"
+                            disabled
+                          >
+                            已评价
+                          </el-button>
                         </div>
                       </div>
                     </div>
@@ -1101,14 +1198,14 @@ onUnmounted(() => {
                   >
 
                   <el-button
-                    v-if="scope.row.status === 2"
+                    v-if="scope.row.status === 2 || scope.row.status === 7"
                     type="success"
                     size="small"
                     @click="handleConfirm(scope.row)"
                     >确认收货</el-button
                   >
                   <el-button
-                    v-if="scope.row.status === 2"
+                    v-if="scope.row.status === 2 || scope.row.status === 7"
                     type="info"
                     plain
                     size="small"
@@ -1120,6 +1217,7 @@ onUnmounted(() => {
                     v-if="scope.row.status === 3"
                     type="primary"
                     size="small"
+                    @click="handleGoToReview(scope.row)"
                     >去评价</el-button
                   >
 
@@ -1486,5 +1584,20 @@ onUnmounted(() => {
         </div>
       </template>
     </el-dialog>
+
+    <!-- 确认收货对话框 -->
+    <ConfirmReceiptDialog
+      v-model:visible="showConfirmReceiptDialog"
+      :orderNumber="currentConfirmOrderNumber"
+      @success="handleConfirmReceiptSuccess"
+    />
+
+    <!-- 评价对话框 -->
+    <ProductReviewDialog
+      v-model:visible="showReviewDialog"
+      :orderNumber="currentReviewOrderNumber"
+      :productInfo="currentReviewProductInfo"
+      @success="handleReviewSuccess"
+    />
   </div>
 </template>

@@ -59,7 +59,7 @@ import type { UploadProps, UploadUserFile, UploadInstance } from 'element-plus'
 import { getToken } from '@/utils/auth'
 import { deleteFileApi } from '@/api/file'
 import request from '@/utils/request'
-import { ref, computed } from 'vue'
+import { ref, computed,watch } from 'vue'
 
 const props = defineProps({
   modelValue: {

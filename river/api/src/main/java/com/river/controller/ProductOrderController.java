@@ -7,12 +7,14 @@ import com.river.entity.ProductOrder;
 import com.river.service.LogisticsService;
 import com.river.service.ProductOrderService;
 import com.river.vo.LogisticsVO;
+import com.river.vo.OrderDetailVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController("userProductOrderController")
@@ -46,7 +48,7 @@ public class ProductOrderController {
 
     @Operation(summary = "获取订单详情")
     @GetMapping("/detail/{orderNumber}")
-    public Result<java.util.List<com.river.vo.OrderDetailVO>> getOrderDetail(@PathVariable String orderNumber) {
+    public Result<List<OrderDetailVO>> getOrderDetail(@PathVariable String orderNumber) {
         return Result.success(productOrderService.getOrderDetail(orderNumber));
     }
 
@@ -69,6 +71,19 @@ public class ProductOrderController {
     public Result<String> confirmReceipt(@PathVariable String orderNumber) {
         productOrderService.confirmReceipt(orderNumber);
         return Result.success("确认收货成功");
+    }
+
+    @Operation(summary = "部分确认收货")
+    @PostMapping("/confirmItems")
+    public Result<String> confirmReceiptItems(@RequestParam String orderNumber, @RequestBody List<Long> itemIds) {
+        productOrderService.confirmReceiptItems(orderNumber, itemIds);
+        return Result.success("确认收货成功");
+    }
+
+    @Operation(summary = "获取订单详情（包含确认状态）")
+    @GetMapping("/detailWithStatus/{orderNumber}")
+    public Result<List<OrderDetailVO>> getOrderDetailWithStatus(@PathVariable String orderNumber) {
+        return Result.success(productOrderService.getOrderDetailWithStatus(orderNumber));
     }
 
     @Operation(summary = "删除订单")

@@ -2,6 +2,7 @@ package com.river.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.river.utils.DateUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +24,7 @@ public class ProductOrder implements Serializable {
     @Schema(description = "订单编号")
     private String orderNumber;
 
-    @Schema(description = "订单状态 0待付款 1已付款 2待发货 3已发货 4已完成 5已取消 6已退款")
+    @Schema(description = "订单状态 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款 7部分收货")
     private Integer status;
 
     @Schema(description = "用户ID")
@@ -51,21 +52,21 @@ public class ProductOrder implements Serializable {
     private BigDecimal amount;
 
     @Schema(description = "下单时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime orderTime;
 
     @Schema(description = "结账时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     private LocalDateTime checkoutTime;
 
     @Schema(description = "创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     @TableField(fill = FieldFill.UPDATE)
     private LocalDateTime updateTime;
 }

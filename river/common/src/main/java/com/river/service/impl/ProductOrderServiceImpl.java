@@ -30,6 +30,7 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     private final ProductMapper productMapper;
     private final OrderDetailMapper orderDetailMapper;
     private final SysUserMapper sysUserMapper;
+    private final ProductReviewMapper productReviewMapper;
 
     /**
      * 查询分页列表
@@ -224,6 +225,77 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     }
 
     @Override
+    public void confirmReceiptItems(String orderNumber, List<Long> itemIds) {
+        ProductOrder order = getOrderByNumber(orderNumber);
+        if (order.getStatus() != 2 && order.getStatus() != 7) {
+            throw new ServiceException("只有待收货或部分收货状态的订单可以确认收货");
+        }
+
+        // 更新指定商品的确认状态
+        for (Long itemId : itemIds) {
+            OrderDetail detail = orderDetailMapper.selectById(itemId);
+            if (detail == null || !detail.getOrderNumber().equals(orderNumber)) {
+                throw new ServiceException("订单详情不存在或不属于该订单");
+            }
+            detail.setConfirmStatus(1); // 已确认
+            detail.setConfirmTime(LocalDateTime.now());
+            orderDetailMapper.updateById(detail);
+        }
+
+        // 检查是否所有商品都已确认
+        LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderDetail::getOrderNumber, orderNumber);
+        List<OrderDetail> allDetails = orderDetailMapper.selectList(wrapper);
+
+        long confirmedCount = allDetails.stream()
+                .filter(d -> d.getConfirmStatus() != null && d.getConfirmStatus() == 1)
+                .count();
+
+        if (confirmedCount == allDetails.size()) {
+            // 全部商品已确认，订单状态变为待评价
+            order.setStatus(3);
+        } else if (confirmedCount > 0) {
+            // 部分商品已确认，订单状态变为部分收货
+            order.setStatus(7);
+        }
+        updateById(order);
+    }
+
+    @Override
+    public List<com.river.vo.OrderDetailVO> getOrderDetailWithStatus(String orderNumber) {
+        LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderDetail::getOrderNumber, orderNumber);
+        List<OrderDetail> orderDetails = orderDetailMapper.selectList(wrapper);
+        Long userId = StpUtil.getLoginIdAsLong();
+
+        return orderDetails.stream().map(detail -> {
+            Product product = productMapper.selectById(detail.getProductId());
+            com.river.vo.OrderDetailVO vo = com.river.vo.OrderDetailVO.builder()
+                    .productId(detail.getProductId())
+                    .productName(product != null ? product.getName() : "未知商品")
+                    .productImage(product != null ? product.getImage() : "")
+                    .productPrice(product != null ? product.getPrice() : BigDecimal.ZERO)
+                    .number(detail.getProductNumber())
+                    .build();
+            // 添加确认状态信息
+            vo.setId(detail.getId());
+            vo.setConfirmStatus(detail.getConfirmStatus());
+            vo.setConfirmTime(detail.getConfirmTime());
+
+            // 检查是否已评价
+            LambdaQueryWrapper<ProductReview> reviewWrapper = new LambdaQueryWrapper<>();
+            reviewWrapper.eq(ProductReview::getOrderNumber, orderNumber)
+                    .eq(ProductReview::getProductId, detail.getProductId())
+                    .eq(ProductReview::getUserId, userId)
+                    .isNull(ProductReview::getParentReviewId);
+            Long reviewCount = productReviewMapper.selectCount(reviewWrapper);
+            vo.setReviewStatus(reviewCount > 0 ? 1 : 0);
+
+            return vo;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
     public boolean deleteOrder(String orderNumber) {
         ProductOrder order = getOrderByNumber(orderNumber);
         // 待评价(3)、已完成(4)、已取消(5)、已退款(6)的订单可以删除
@@ -256,8 +328,8 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
         Long userId = StpUtil.getLoginIdAsLong();
         Map<Integer, Long> countMap = new HashMap<>();
 
-        // 初始化所有状态为0 (0-6: 待付款、待发货、待收货、待评价、已完成、已取消、已退款)
-        for (int i = 0; i <= 6; i++) {
+        // 初始化所有状态为0 (0-7: 待付款、待发货、待收货、待评价、已完成、已取消、已退款、部分收货)
+        for (int i = 0; i <= 7; i++) {
             countMap.put(i, 0L);
         }
 
@@ -279,8 +351,8 @@ public class ProductOrderServiceImpl extends ServiceImpl<ProductOrderMapper, Pro
     public Map<Integer, Long> getAllOrderStatusCount() {
         Map<Integer, Long> countMap = new HashMap<>();
 
-        // 初始化所有状态为0 (0-6: 待付款、待发货、待收货、待评价、已完成、已取消、已退款)
-        for (int i = 0; i <= 6; i++) {
+        // 初始化所有状态为0 (0-7: 待付款、待发货、待收货、待评价、已完成、已取消、已退款、部分收货)
+        for (int i = 0; i <= 7; i++) {
             countMap.put(i, 0L);
         }
 

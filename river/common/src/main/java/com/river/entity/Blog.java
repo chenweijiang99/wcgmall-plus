@@ -2,6 +2,7 @@ package com.river.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.river.utils.DateUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -17,12 +18,12 @@ public class Blog implements Serializable {
     private Long id;
 
     @Schema(description = "创建时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     @TableField(fill = FieldFill.UPDATE)
     private LocalDateTime updateTime;
 
