@@ -1,0 +1,23 @@
+# 基础镜像
+FROM openjdk:17-jdk-alpine
+# 设定时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 拷贝jar包
+COPY river-server.jar /app-wcgmall-plus.jar
+# 入口
+ENTRYPOINT ["java", \
+    "-Xms64m", \
+    "-Xmx256m", \
+    "-Xss256k", \
+    "-XX:MetaspaceSize=64m", \
+    "-XX:MaxMetaspaceSize=128m", \
+    "-XX:+UseG1GC", \
+    "-XX:MaxGCPauseMillis=200", \
+    "-XX:ParallelGCThreads=2", \
+    "-XX:ConcGCThreads=1", \
+    "-Djava.compiler=NONE", \
+    "-XX:+DisableExplicitGC", \
+    "-XX:+HeapDumpOnOutOfMemoryError", \
+    "-XX:HeapDumpPath=/tmp/heapdumps/heapdump.hprof", \
+    "-jar", "/app-wcgmall-plus.jar"]

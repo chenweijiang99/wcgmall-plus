@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  blog-server:
+    build: 
+      context: /app/blog
+      dockerfile: blog-dockerfile
+    container_name: blog-server
+    volumes:
+      - "/app/blog/localFile:/app/blog/localFile"
+    ports:
+      - "8800:8800"
+    networks:
+      - net
+
+  wcgmall-server:
+    build: 
+      context: /app/wcgmall
+      dockerfile: wcgmall-dockerfile
+    container_name: wcgmall-server
+    ports:
+      - "1203:1203"
+    networks:
+      - net
+  wcgmall-plus-server:
+    build: 
+      context: /app/wcgmall-plus
+      dockerfile: wcgmall-plus-dockerfile
+    container_name: wcgmall-plus-server
+    volumes:
+      - "/app/wcgmall-plus/localFile:/app/wcgmall-plus/localFile"
+      - "/app/wcgmall-plus/captcha:/app/wcgmall-plus/captcha"
+    ports:
+      - "8080:8080"
+    networks:
+      - net
+      
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/app/nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "/app/nginx/html:/usr/share/nginx/html"
+      - "/app/nginx/ssl:/usr/share/nginx/ssl"
+      - "/app/blog/localFile:/app/blog/localFile"
+      - "/app/wcgmall-plus/localFile:/app/wcgmall-plus/localFile"
+      - "/app/wcgmall-plus/captcha:/app/wcgmall-plus/captcha"
+    networks:
+      - net
+    depends_on:
+      - blog-server
+      - wcgmall-server
+      - wcgmall-plus-server
+networks:
+  net:
+    name: net
