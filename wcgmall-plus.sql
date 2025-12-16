@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `file_detail` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='文件记录表';
 
--- 正在导出表  wcg_mall_plus.file_detail 的数据：~86 rows (大约)
+-- 正在导出表  wcg_mall_plus.file_detail 的数据：~85 rows (大约)
 INSERT INTO `file_detail` (`id`, `url`, `size`, `filename`, `original_filename`, `base_path`, `path`, `ext`, `content_type`, `platform`, `th_url`, `th_filename`, `th_size`, `th_content_type`, `object_id`, `object_type`, `metadata`, `user_metadata`, `th_metadata`, `th_user_metadata`, `attr`, `file_acl`, `th_file_acl`, `hash_info`, `upload_id`, `upload_status`, `source`, `create_time`) VALUES
 	('040b74b3a9b0364335a75a3b0d752aa5', 'http://127.0.0.1:8080/localFile/20251111/product-detail-image/54_ab89e4d2-268e-4835-8434-881421f729c7.jpg', 48764, '54_ab89e4d2-268e-4835-8434-881421f729c7.jpg', 'ab89e4d2-268e-4835-8434-881421f729c7.jpg', '', '20251111/product-detail-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-detail-image"}', NULL, NULL, '{}', NULL, NULL, 'product-detail-image', '2025-11-11 15:49:08'),
 	('05e4f0a77dbf8a7171c89efeb0c9feed', 'http://127.0.0.1:8080/localFile/20251111/product-description-image/49_8b09ffc5-e1b2-4bd7-8deb-29046e08116a.jpg', 372383, '49_8b09ffc5-e1b2-4bd7-8deb-29046e08116a.jpg', '8b09ffc5-e1b2-4bd7-8deb-29046e08116a.jpg', '', '20251111/product-description-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-description-image"}', NULL, NULL, '{}', NULL, NULL, 'product-description-image', '2025-11-11 14:50:29'),
@@ -156,6 +156,7 @@ INSERT INTO `file_detail` (`id`, `url`, `size`, `filename`, `original_filename`,
 	('39d239d843e25911026dcfb6afc2117e', 'http://127.0.0.1:8080/localFile/20251111/blog-image/45_3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', 282611, '45_3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', '3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', '', '20251111/blog-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"blog-image"}', NULL, NULL, '{}', NULL, NULL, 'blog-image', '2025-11-11 17:15:59'),
 	('3dd842efdd0d5470f27658c6966e5c53', 'http://127.0.0.1:8080/localFile/20251113/blog-image/10_3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', 282611, '10_3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', '3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', '', '20251113/blog-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"blog-image"}', NULL, NULL, '{}', NULL, NULL, 'blog-image', '2025-11-13 16:00:52'),
 	('3e88bce84d2282865f6b5c5716e1d05a', 'http://127.0.0.1:8080/localFile/20251111/product-detail-image/85_69523061-e093-48f9-a708-38512ef28a71.jpg', 36640, '85_69523061-e093-48f9-a708-38512ef28a71.jpg', '69523061-e093-48f9-a708-38512ef28a71.jpg', '', '20251111/product-detail-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-detail-image"}', NULL, NULL, '{}', NULL, NULL, 'product-detail-image', '2025-11-11 15:53:02'),
+	('3ea12b992935e95aa24b766ef17263ba', 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251216/product-review/00_712e7176-e8f4-41d9-aae6-4df781011933.png', 559727, '00_712e7176-e8f4-41d9-aae6-4df781011933.png', '712e7176-e8f4-41d9-aae6-4df781011933.png', 'wcgmall-plus/file/', '20251216/product-review/', 'png', 'image/png', 'ali', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-review"}', NULL, NULL, '{}', NULL, NULL, 'product-review', '2025-12-16 14:40:57'),
 	('3f9ac098ed5fb7eed4106d1e48ddff49', 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251205/product-image/53_avatar.png', 2910, '53_avatar.png', 'avatar.png', 'wcgmall-plus/file/', '20251205/product-image/', 'png', 'image/png', 'ali', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-image"}', NULL, NULL, '{}', NULL, NULL, 'product-image', '2025-12-05 17:01:54'),
 	('417885bcd3e91fc5f852c801f186fb07', 'http://127.0.0.1:8080/localFile/20251111/product-detail-image/31_157a37cc-4138-432e-8685-a840162a2f64.jpg', 76531, '31_157a37cc-4138-432e-8685-a840162a2f64.jpg', '157a37cc-4138-432e-8685-a840162a2f64.jpg', '', '20251111/product-detail-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-detail-image"}', NULL, NULL, '{}', NULL, NULL, 'product-detail-image', '2025-11-11 15:49:08'),
 	('41c3e50ce91e9433a282f9ddf8a25884', 'http://127.0.0.1:8080/localFile/20251112/shopSlider-image/48_0908fab0-a978-4001-93e2-2dba0eb48182.png', 183589, '48_0908fab0-a978-4001-93e2-2dba0eb48182.png', '0908fab0-a978-4001-93e2-2dba0eb48182.png', '', '20251112/shopSlider-image/', 'png', 'image/png', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"shopSlider-image"}', NULL, NULL, '{}', NULL, NULL, 'shopSlider-image', '2025-11-12 10:26:39'),
@@ -192,6 +193,7 @@ INSERT INTO `file_detail` (`id`, `url`, `size`, `filename`, `original_filename`,
 	('8a469d93991642a231b39f4afd266e3c', 'http://127.0.0.1:8080/localFile/20251111/product-detail-image/19_1923099f-e39d-47be-b7a9-5a8c98669b83.jpg', 46424, '19_1923099f-e39d-47be-b7a9-5a8c98669b83.jpg', '1923099f-e39d-47be-b7a9-5a8c98669b83.jpg', '', '20251111/product-detail-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-detail-image"}', NULL, NULL, '{}', NULL, NULL, 'product-detail-image', '2025-11-11 14:46:55'),
 	('8ca35cc5412cc361edd215b36516ee15', 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251205/indexSlider-image/76_avatar.png', 2910, '76_avatar.png', 'avatar.png', 'wcgmall-plus/file/', '20251205/indexSlider-image/', 'png', 'image/png', 'ali', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"indexSlider-image"}', NULL, NULL, '{}', NULL, NULL, 'indexSlider-image', '2025-12-05 17:00:38'),
 	('8cc05abd07849742085ce628a41e9e80', 'http://127.0.0.1:8080/localFile/20251111/product-detail-image/77_122cea7b-7101-4a17-8b01-af9dddefe760.jpg', 97691, '77_122cea7b-7101-4a17-8b01-af9dddefe760.jpg', '122cea7b-7101-4a17-8b01-af9dddefe760.jpg', '', '20251111/product-detail-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-detail-image"}', NULL, NULL, '{}', NULL, NULL, 'product-detail-image', '2025-11-11 14:46:55'),
+	('92127efbf3447a9709a53e6486c15121', 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251216/product-review/70_avatar.png', 2910, '70_avatar.png', 'avatar.png', 'wcgmall-plus/file/', '20251216/product-review/', 'png', 'image/png', 'ali', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-review"}', NULL, NULL, '{}', NULL, NULL, 'product-review', '2025-12-16 14:15:32'),
 	('925bb01f4eb3b0a42eb5bb9b97847763', 'http://127.0.0.1:8080/localFile/20251113/87_avatar.jpg', 1192, '87_avatar.jpg', 'avatar.jpg', '', '20251113/', 'jpg', 'image/png', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":null}', NULL, NULL, '{}', NULL, NULL, NULL, '2025-11-13 17:40:59'),
 	('929d340e63c89590e67ddaf8fb2869ae', 'http://127.0.0.1:8080/localFile/20251111/product-description-image/11_8b09ffc5-e1b2-4bd7-8deb-29046e08116a.jpg', 372383, '11_8b09ffc5-e1b2-4bd7-8deb-29046e08116a.jpg', '8b09ffc5-e1b2-4bd7-8deb-29046e08116a.jpg', '', '20251111/product-description-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"product-description-image"}', NULL, NULL, '{}', NULL, NULL, 'product-description-image', '2025-11-11 15:49:23'),
 	('9400a81ce982308720db0409b9bb1975', 'http://127.0.0.1:8080/localFile/20251113/blog-image/38_3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', 282611, '38_3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', '3db9481a-35b9-4d60-8409-9bb75bd5d190.jpg', '', '20251113/blog-image/', 'jpg', 'image/jpeg', 'local', NULL, NULL, NULL, NULL, NULL, NULL, '{}', '{}', '{}', '{}', '{"source":"blog-image"}', NULL, NULL, '{}', NULL, NULL, 'blog-image', '2025-11-13 16:14:37'),
@@ -346,18 +348,22 @@ CREATE TABLE IF NOT EXISTS `order_detail` (
   `order_number` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '订单编号',
   `product_id` bigint(20) DEFAULT NULL COMMENT '商品ID',
   `product_number` int(11) DEFAULT NULL COMMENT '商品数量',
+  `confirm_status` tinyint(2) DEFAULT '0' COMMENT '商品确认收货状态: 0=未确认, 1=已确认',
+  `confirm_time` datetime DEFAULT NULL COMMENT '商品确认收货时间',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=168 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY (`id`),
+  KEY `idx_confirm_status` (`confirm_status`),
+  KEY `idx_order_product` (`order_number`,`product_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=171 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- 正在导出表  wcg_mall_plus.order_detail 的数据：4 rows
 /*!40000 ALTER TABLE `order_detail` DISABLE KEYS */;
-INSERT INTO `order_detail` (`id`, `order_number`, `product_id`, `product_number`, `create_time`, `update_time`) VALUES
-	(164, '17648159152271853', 69, 1, '2025-12-04 10:38:35', NULL),
-	(165, '17648159444961853', 73, 6, '2025-12-04 10:39:05', NULL),
-	(166, '17648162642691853', 69, 1, '2025-12-04 10:44:24', NULL),
-	(167, '17649042913111853', 64, 1, '2025-12-05 11:11:31', NULL);
+INSERT INTO `order_detail` (`id`, `order_number`, `product_id`, `product_number`, `confirm_status`, `confirm_time`, `create_time`, `update_time`) VALUES
+	(165, '17648159444961853', 73, 6, 0, NULL, '2025-12-04 10:39:05', NULL),
+	(168, '17658656032451853', 67, 1, 1, '2025-12-16 14:15:11', '2025-12-16 14:13:23', '2025-12-16 14:15:11'),
+	(169, '17658656032451853', 66, 1, 0, '2025-12-16 14:15:21', '2025-12-16 14:13:23', '2025-12-16 14:15:21'),
+	(170, '17658658775731853', 67, 1, 0, '2025-12-16 14:19:12', '2025-12-16 14:17:58', '2025-12-16 14:19:12');
 /*!40000 ALTER TABLE `order_detail` ENABLE KEYS */;
 
 -- 导出  表 wcg_mall_plus.order_logistics 结构
@@ -379,12 +385,14 @@ CREATE TABLE IF NOT EXISTS `order_logistics` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_order_number` (`order_number`),
   KEY `idx_waybill_no` (`waybill_no`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COMMENT='订单物流信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COMMENT='订单物流信息表';
 
--- 正在导出表  wcg_mall_plus.order_logistics 的数据：~2 rows (大约)
+-- 正在导出表  wcg_mall_plus.order_logistics 的数据：~4 rows (大约)
 INSERT INTO `order_logistics` (`id`, `order_number`, `waybill_no`, `sf_order_id`, `sender_name`, `sender_phone`, `sender_province`, `sender_city`, `sender_county`, `sender_address`, `status`, `filter_result`, `create_time`, `update_time`) VALUES
 	(1, '17648162642691853', 'SF7444700451594', '17648162642691853', '韋', '18223354992', '重庆市', '重庆市', '两江新区', '柚米社区', 1, 2, '2025-12-05 11:03:05', '2025-12-05 11:03:05'),
-	(2, '17649042913111853', 'SF7444700452003', '17649042913111853', '韋', '13290010299', '重庆市', '重庆市', '重庆市', '两江新区蔡家岗街道柚米社区', 1, 2, '2025-12-05 11:14:28', '2025-12-05 11:14:28');
+	(2, '17649042913111853', 'SF7444700452003', '17649042913111853', '韋', '13290010299', '重庆市', '重庆市', '重庆市', '两江新区蔡家岗街道柚米社区', 1, 2, '2025-12-05 11:14:28', '2025-12-05 11:14:28'),
+	(3, '17658656032451853', 'SF7444700638411', '17658656032451853', '韋', '13290010299', '重庆市', '重庆市', '重庆市', '两江新区蔡家岗街道柚米社区', 1, 2, '2025-12-16 14:14:49', '2025-12-16 14:14:49'),
+	(4, '17658658775731853', 'SF7444700638484', '17658658775731853', '韋', '13290010299', '重庆市', '重庆市', '重庆市', '两江新区蔡家岗街道柚米社区', 1, 2, '2025-12-16 14:18:57', '2025-12-16 14:18:57');
 
 -- 导出  表 wcg_mall_plus.product 结构
 CREATE TABLE IF NOT EXISTS `product` (
@@ -413,8 +421,8 @@ INSERT INTO `product` (`id`, `create_time`, `update_time`, `user_id`, `name`, `c
 	(63, '2025-11-11 15:49:25', '2025-11-11 16:10:03', 1848, '鹿喜人间铜摆件', 16, 8, 1199.00, 9, 'http://127.0.0.1:8080/localFile/20251111/product-image/76_8bee92a6-a306-41aa-ab54-36a970968ce3.jpg', '["http://127.0.0.1:8080/localFile/20251111/product-detail-image/22_8bee92a6-a306-41aa-ab54-36a970968ce3.jpg","http://127.0.0.1:8080/localFile/20251111/product-detail-image/85_69523061-e093-48f9-a708-38512ef28a71.jpg","http://127.0.0.1:8080/localFile/20251111/product-detail-image/24_bbc6bce8-c5ad-4392-8e05-2a049e5451fb.jpg","http://127.0.0.1:8080/localFile/20251111/product-detail-image/30_e7dd3ee9-ee56-4b50-9164-ff76c243711f.jpg","http://127.0.0.1:8080/localFile/20251111/product-detail-image/58_edc07e97-ca92-424e-b9ea-332c553001cb.jpg"]', '鹿喜人间铜摆件是一件精美的装饰品，以鹿为主题，由高品质的铜材料制成。这件摆件可能展现了鹿的优雅形态，寓意着吉祥和幸福。它可能是一件具有艺术价值的雕塑作品，也可能是一件用于家居装饰的精美摆件。鹿喜人间铜摆件可能成为家居或办公室装饰的焦点，展现独特的品味和文化修养。此外，它也可能是一份独特的礼物，展现着对接受者的祝福和美好愿望。这样的铜制摆件可以是一件收藏价值高的艺术品，展现着艺术家的创意和工匠的技艺。', '["http://127.0.0.1:8080/localFile/20251111/product-description-image/36_705c2610-5818-42df-9283-29bf2a084d3c.jpg","http://127.0.0.1:8080/localFile/20251111/product-description-image/17_0931a1ce-1793-45f7-8e43-81f896c97eab.jpg","http://127.0.0.1:8080/localFile/20251111/product-description-image/10_b7d6de5f-7f11-4732-bc25-b18069c5ccf6.jpg","http://127.0.0.1:8080/localFile/20251111/product-description-image/31_dd0437b4-72c8-40d7-aa99-48c1b755f25e.jpg"]', NULL, 1),
 	(64, '2024-03-17 13:45:55', '2025-05-08 08:55:00', 1848, '乾隆八骏之腾雾', 16, 8, 3999.00, 6, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/e272e1d4-a535-430a-8226-575d9b6c7eb4.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/4efa5db9-5ea3-40b7-b1d2-9327c498eb34.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/de631679-779d-47f8-92ce-ee9e884a4512.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/037bb28c-a430-4e0e-9b97-076497a6699e.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d2cd6c74-2b64-422b-8029-7cdc08c1e1f5.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/f70362b0-6d0f-4b4e-8cf2-bc80d1a5803d.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d17bb62e-30f3-4d3d-9b7b-d7f15bf373ab.jpg"]', '乾隆八骏之腾雾摆件是一件富有历史和文化价值的装饰品，以乾隆皇帝最喜爱的八骏为主题，由高品质的材料制成。这件摆件可能具有复杂的工艺和精湛的雕刻，展现了中国传统艺术的精髓。腾雾摆件可能是一件具有艺术价值的摆件，也可能是一件用于家居装饰的精美艺术品。它可能成为家居或办公室装饰的焦点，展现独特的品味和文化修养。此外，它也可能是一份独特的礼物，展现着对接受者的祝福和美好愿望。这样的摆件可以成为一件收藏价值高的艺术品，展现着艺术家的创意和工匠的技艺。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/93752b55-6125-41a8-860a-b7f5ada2a528.jpg"]', '限定', 1),
 	(65, '2024-03-17 13:47:13', '2025-05-08 09:20:00', 1848, '云起龙腾铜摆件', 16, 8, 9999.00, 2, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/86b9e63e-76a7-4431-8dd0-63f4006430f7.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/8411a7eb-91cd-4e8d-9017-21d196109efd.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/161a2153-920a-4e21-a1b6-f135b9ad0356.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/36618daf-9e00-4c4d-8c70-0a7bd9f8bcb8.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/2a8f1e45-4d88-46c3-b564-27ea6c4386f5.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/6229a394-194b-4c51-b154-721f62c1e32b.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/5185bb5d-9730-49fa-bff1-4dd440a0e9cd.jpg"]', '云起龙腾铜摆件是一种富有中国传统文化和神话元素的装饰品。通常以龙为主题，象征着权力、尊贵和吉祥。这样的铜制摆件可能展现了神龙腾飞的场景，具有较高的艺术价值和装饰性。它可能被用作家居装饰，也可能成为办公室或商业场所的装饰品，展现着东方文化的魅力。云起龙腾铜摆件可能被视为一种独特的礼物，传达着对接收者的祝福和美好愿望。这样的摆件还可能成为收藏者青睐的艺术品，展现着匠人的工艺和艺术家的创意。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d46bf8c7-55c6-4c42-855b-2f98c2a77821.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/223059ca-514a-4a7a-b2a1-074b715b1616.jpg"]', '限量发售', 1),
-	(66, '2024-03-17 13:48:44', '2025-03-09 14:35:20', 1848, '宫蚕图卷笔记本系列', 17, 8, 99.00, 1001, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/e7150df0-af17-46b9-895d-d9856da8174a.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d8890e31-a2a6-4f2c-9dc0-ef7ed5beb251.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/df66b558-4d8e-40da-b2a8-f8546562831e.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/e75b5001-3309-421b-99ab-ca7c4637337b.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/dbef222f-2769-46fc-8684-c6523d99bd41.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/32715945-3149-4abd-b673-2fe39f3e8312.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/65d4f6f1-8ed2-456f-8a30-d0b4cb81d15e.jpg"]', '宫蚕图卷笔记本系列是一款以中国传统文化为主题的笔记本产品。它可能以宫廷蚕丝织物图案为设计灵感，采用精美的印刷工艺和高品质的材料制作而成。这个系列的笔记本可能具有古典美感，展现了中国传统文化的魅力，也可能是一种融合了现代设计元素的产品。宫蚕图卷笔记本系列可能被设计成不同尺寸和风格，以满足不同用户的需求。它可能成为书写、绘画或记录生活的工具，同时也可以作为一份独特的礼物，体现对接受者的美好祝愿。这个系列的笔记本可能因其独特的设计和高品质而备受欢迎，成为收藏者钟爱的文化艺术品。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/820487d5-6866-495f-80f9-d7415116d569.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/1cd9767f-2226-45e3-a168-d82532b96aa2.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/8e45bb4f-277e-4f28-8f58-0b20dd75c960.jpg"]', '', 1),
-	(67, '2024-03-17 13:50:08', '2024-03-17 13:50:08', 1848, '兰亭雅集系列', 17, 8, 199.00, 999, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d0653273-6196-4d5b-a6b7-29b9e0cbf634.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/8c8d6e42-6add-4d39-93a2-edb61fd1b019.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/b44bfcfb-17f0-43d3-ab80-57d00417a2b2.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/8796e9df-501c-440b-8f7a-e66ddf5677de.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/c86c68be-513a-4887-bf96-708f8b6590cf.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/b3197438-54c8-4fcb-b4fa-b812b58a667c.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/79ccc080-e22e-4d6d-98ba-9b32140a9324.jpg"]', '兰亭雅集系列是一种以兰亭集序为题材的文化创意产品系列。兰亭集序是中国古代书法家王羲之的代表作之一，也是中国书法史上的经典之作。这个系列可能包括书法作品的复制品、文化衍生品、文具用品等。兰亭雅集系列可能以兰亭集序的书法艺术为设计灵感，产品可能包括笔墨纸砚、书法作品、文具、装饰品等，展现了中国传统文化的魅力。这个系列的产品可能因其独特的设计和高品质而备受欢迎，成为收藏者钟爱的文化艺术品。兰亭雅集系列可能通过创意设计和精湛工艺，将中国传统文化与现代生活巧妙结合，展现了对中国传统文化的传承和创新。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/f9fac986-98b3-4dd7-b9c6-c7895dd15e11.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/3d93e9e4-b4a6-4e35-89aa-80951d71c4dc.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/91abc6bd-74f7-4928-9d4c-b300b8ae6718.jpg"]', '', 1),
+	(66, '2024-03-17 13:48:44', '2025-03-09 14:35:20', 1848, '宫蚕图卷笔记本系列', 17, 8, 99.00, 1000, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/e7150df0-af17-46b9-895d-d9856da8174a.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d8890e31-a2a6-4f2c-9dc0-ef7ed5beb251.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/df66b558-4d8e-40da-b2a8-f8546562831e.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/e75b5001-3309-421b-99ab-ca7c4637337b.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/dbef222f-2769-46fc-8684-c6523d99bd41.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/32715945-3149-4abd-b673-2fe39f3e8312.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/65d4f6f1-8ed2-456f-8a30-d0b4cb81d15e.jpg"]', '宫蚕图卷笔记本系列是一款以中国传统文化为主题的笔记本产品。它可能以宫廷蚕丝织物图案为设计灵感，采用精美的印刷工艺和高品质的材料制作而成。这个系列的笔记本可能具有古典美感，展现了中国传统文化的魅力，也可能是一种融合了现代设计元素的产品。宫蚕图卷笔记本系列可能被设计成不同尺寸和风格，以满足不同用户的需求。它可能成为书写、绘画或记录生活的工具，同时也可以作为一份独特的礼物，体现对接受者的美好祝愿。这个系列的笔记本可能因其独特的设计和高品质而备受欢迎，成为收藏者钟爱的文化艺术品。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/820487d5-6866-495f-80f9-d7415116d569.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/1cd9767f-2226-45e3-a168-d82532b96aa2.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/8e45bb4f-277e-4f28-8f58-0b20dd75c960.jpg"]', '', 1),
+	(67, '2024-03-17 13:50:08', '2024-03-17 13:50:08', 1848, '兰亭雅集系列', 17, 8, 199.00, 997, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d0653273-6196-4d5b-a6b7-29b9e0cbf634.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/8c8d6e42-6add-4d39-93a2-edb61fd1b019.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/b44bfcfb-17f0-43d3-ab80-57d00417a2b2.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/8796e9df-501c-440b-8f7a-e66ddf5677de.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/c86c68be-513a-4887-bf96-708f8b6590cf.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/b3197438-54c8-4fcb-b4fa-b812b58a667c.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/79ccc080-e22e-4d6d-98ba-9b32140a9324.jpg"]', '兰亭雅集系列是一种以兰亭集序为题材的文化创意产品系列。兰亭集序是中国古代书法家王羲之的代表作之一，也是中国书法史上的经典之作。这个系列可能包括书法作品的复制品、文化衍生品、文具用品等。兰亭雅集系列可能以兰亭集序的书法艺术为设计灵感，产品可能包括笔墨纸砚、书法作品、文具、装饰品等，展现了中国传统文化的魅力。这个系列的产品可能因其独特的设计和高品质而备受欢迎，成为收藏者钟爱的文化艺术品。兰亭雅集系列可能通过创意设计和精湛工艺，将中国传统文化与现代生活巧妙结合，展现了对中国传统文化的传承和创新。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/f9fac986-98b3-4dd7-b9c6-c7895dd15e11.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/3d93e9e4-b4a6-4e35-89aa-80951d71c4dc.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/91abc6bd-74f7-4928-9d4c-b300b8ae6718.jpg"]', '', 1),
 	(68, '2024-03-17 13:51:35', '2025-05-02 15:30:00', 1848, '寻觅笔记本', 17, 8, 120.00, 1998, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/55e73207-2f07-4589-a85e-30b6db74440a.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/0c2e2c2b-8745-4ff2-806d-ba963a1887b4.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/64d6b1d7-417d-4ceb-9a06-7480d7d1aef2.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/eff7ed8c-a4af-4690-b304-bff1f60be7d8.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/4a014eaa-ccd1-49bf-b763-cd8cd13c8fab.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/675cf733-7a51-46e9-bd9b-28aaf90984e6.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/4f93a4d7-9fbc-438f-93c7-06094bf38fbf.jpg"]', '寻觅笔记本是一种专为记录和规划生活的高品质笔记本。这款笔记本可能具有精美的设计，提供便捷的书写和记录体验。寻觅笔记本可能包括各种规格和风格，适合不同的使用场景，例如日常笔记、旅行记录、绘画创作等。它可能采用优质的纸张和耐用的封面材料，确保书写质感和长久保存。此外，寻觅笔记本可能包括便捷的书签设计、内部格栅或其他功能，以满足用户的各种需求。无论是作为个人使用还是送礼佳品，寻觅笔记本可能成为生活中不可或缺的伙伴，帮助记录生活点滴、激发创造灵感。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/81f977b5-c3b6-4e3c-8261-99e0c30d6fc0.jpg"]', '热销', 1),
 	(69, '2024-03-17 13:53:10', '2024-03-17 13:53:10', 1848, '富贵吉祥葫芦瓶', 15, 8, 3988.00, 98, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/baab1a64-a625-4b3d-8bb9-33ab6d17e0c9.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/593f35a2-0a86-410a-886d-21922dd07ae9.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d2469980-e89b-4a6a-89ef-7f290570bdaf.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/53fa7c88-44e2-40d7-8a9d-eea441b45aaf.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/1d9c44fb-445b-4b0b-b988-40f4bc49d937.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/867a1993-ea39-443b-bf99-e798ba15196f.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/b0bb4f39-75b9-473f-b72b-ea6cc541c9f2.jpg"]', '富贵吉祥葫芦瓶是一种具有象征意义的装饰品，融合了中国传统文化中的“富贵”和“吉祥”元素。葫芦在中国文化中被视为吉祥、福气和长寿的象征，而“富贵”则代表着繁荣、财富和好运。这样的葫芦瓶可能采用精美的工艺制作而成，可能具有华丽的外观和精湛的细节雕刻。它可能被用作家居装饰，摆放在家中或办公室，以带来吉祥和繁荣的象征意义。富贵吉祥葫芦瓶可能也是一种受欢迎的礼品，传达对接受者的美好祝愿。这样的装饰品可能因其独特的设计和象征意义而备受青睐，成为收藏者钟爱的文化艺术品。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/82f39386-12ef-451c-b5b6-a4e0fe1729e8.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/896d5131-6d6e-4316-94f5-fba5c431c86b.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/b33b79d7-fa97-4791-9625-16692b7efcb2.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/05ca7ccf-28fa-4586-9bfc-61dfbbfc5526.jpg"]', '', 1),
 	(70, '2024-03-17 13:54:33', '2024-03-17 13:54:33', 1848, '霓裳羽衣茶盘', 15, 8, 4998.00, 99, 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/d87bb7ea-17a6-46f0-a17b-da1764818a3b.jpg', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/af76ef43-8fac-4ae2-bdcd-3547a89ec75b.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/f120420b-267b-45a6-92cd-6cc1841a425c.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/47dd44f4-4cce-4f0c-9129-cc59cd3a3426.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/e76b0930-7b53-47d8-9071-031a7e8ec61c.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/302c1bf9-a077-470c-bc22-f87bd8a3d871.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/b5cc1e4f-b102-41e1-9daa-459ccc86f948.jpg"]', '霓裳羽衣茶盘可能是一种精美的茶盘，其设计可能灵感来源于中国传统的文化和艺术。茶盘可能以中国古代传说中的神话故事"霓裳羽衣"为题材，这个故事中描述了仙女穿着美丽的羽衣的情景。这款茶盘可能采用精湛的工艺制成，可能具有华丽的外观和精细的雕刻，展现了中国传统文化的独特魅力。霓裳羽衣茶盘可能被设计为一个优雅的茶具陈设品，用于沏茶、品茶或展示。它可能成为茶道爱好者和收藏家们喜爱的艺术品，也可能作为一份独特的礼物，传达对接受者的美好祝愿。这样的茶盘可能因其独特的设计和高品质而备受欢迎，成为收藏者钟爱的文化艺术品。', '["https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/a1abf5ca-7cde-49df-9f1f-2659e082088e.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/a8405bcc-5112-44c7-858b-7b7e1f70a046.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/7419cc59-7ac9-4ed2-a8ac-7947c545a6ba.jpg","https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/1821f917-af27-414b-ab06-d81c80407e3f.jpg"]', '', 1),
@@ -475,7 +483,7 @@ INSERT INTO `product_category` (`id`, `create_time`, `update_time`, `user_id`, `
 CREATE TABLE IF NOT EXISTS `product_order` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `order_number` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '订单编号',
-  `status` int(11) DEFAULT NULL COMMENT '订单状态 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款',
+  `status` int(11) DEFAULT NULL COMMENT '订单状态 0待付款 1待发货 2待收货 3待评价 4已完成 5已取消 6已退款 7部分收货',
   `user_id` bigint(20) DEFAULT NULL COMMENT '用户ID',
   `consignee` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '收货人姓名',
   `consignee_address` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT '收货地址',
@@ -489,15 +497,49 @@ CREATE TABLE IF NOT EXISTS `product_order` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=260 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=262 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- 正在导出表  wcg_mall_plus.product_order 的数据：3 rows
+-- 正在导出表  wcg_mall_plus.product_order 的数据：2 rows
 /*!40000 ALTER TABLE `product_order` DISABLE KEYS */;
 INSERT INTO `product_order` (`id`, `order_number`, `status`, `user_id`, `consignee`, `consignee_address`, `consignee_phone`, `email`, `pay_method`, `pay_status`, `amount`, `order_time`, `checkout_time`, `create_time`, `update_time`) VALUES
-	(256, '17648159152271853', 5, 1853, '韋', '重庆市涪陵区白涛街道', '18223354992', 'hn8m6yiit9s@gmail.pm', NULL, 0, 3988.00, '2025-12-04 10:38:35', NULL, '2025-12-04 10:38:35', '2025-12-04 10:43:36'),
-	(258, '17648162642691853', 2, 1853, '韋', '重庆市涪陵区白涛街道', '18223354992', 'hn8m6yiit9s@gmail.pm', '支付宝', 1, 3988.00, '2025-12-04 10:44:24', '2025-12-04 10:45:35', '2025-12-04 10:44:24', '2025-12-05 11:03:05'),
-	(259, '17649042913111853', 3, 1853, '韋', '重庆市涪陵区白涛街道', '18223354992', 'hn8m6yiit9s@gmail.pm', '支付宝', 1, 3999.00, '2025-12-05 11:11:31', '2025-12-05 11:12:09', '2025-12-05 11:11:31', '2025-12-05 11:14:28');
+	(260, '17658656032451853', 3, 1853, '韋', '重庆市涪陵区白涛街道', '18223354992', 'hn8m6yiit9s@gmail.pm', '支付宝', 1, 298.00, '2025-12-16 14:13:23', '2025-12-16 14:13:50', '2025-12-16 14:13:23', '2025-12-16 14:14:49'),
+	(261, '17658658775731853', 4, 1853, '韋', '重庆市涪陵区白涛街道', '18223354992', 'hn8m6yiit9s@gmail.pm', '支付宝', 1, 199.00, '2025-12-16 14:17:58', '2025-12-16 14:18:32', '2025-12-16 14:17:58', '2025-12-16 14:18:57');
 /*!40000 ALTER TABLE `product_order` ENABLE KEYS */;
+
+-- 导出  表 wcg_mall_plus.product_review 结构
+CREATE TABLE IF NOT EXISTS `product_review` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '评价ID',
+  `order_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '订单编号',
+  `product_id` bigint(20) NOT NULL COMMENT '商品ID',
+  `user_id` bigint(20) NOT NULL COMMENT '评价用户ID',
+  `product_score` tinyint(1) NOT NULL COMMENT '商品评分 1-5分',
+  `logistics_score` tinyint(1) NOT NULL COMMENT '物流评分 1-5分',
+  `merchant_score` tinyint(1) NOT NULL COMMENT '商家评分 1-5分',
+  `content` text COLLATE utf8mb4_unicode_ci COMMENT '评价内容(Markdown格式)',
+  `images` text COLLATE utf8mb4_unicode_ci COMMENT '评价图片URL，多个用逗号隔开',
+  `parent_review_id` bigint(20) DEFAULT NULL COMMENT '父评价ID(回复时使用)',
+  `root_review_id` bigint(20) DEFAULT NULL COMMENT '根评价ID(树形结构)',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `is_admin` tinyint(1) DEFAULT '0' COMMENT '是否管理员回复: 0-用户, 1-管理员',
+  `admin_id` bigint(20) DEFAULT NULL COMMENT '管理员ID(当is_admin=1时)',
+  PRIMARY KEY (`id`),
+  KEY `idx_order_number` (`order_number`),
+  KEY `idx_product_id` (`product_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_root_review_id` (`root_review_id`),
+  KEY `idx_product_review_is_admin` (`is_admin`),
+  KEY `idx_product_review_product_id` (`product_id`),
+  KEY `idx_product_review_create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品评价表';
+
+-- 正在导出表  wcg_mall_plus.product_review 的数据：~5 rows (大约)
+INSERT INTO `product_review` (`id`, `order_number`, `product_id`, `user_id`, `product_score`, `logistics_score`, `merchant_score`, `content`, `images`, `parent_review_id`, `root_review_id`, `create_time`, `update_time`, `is_admin`, `admin_id`) VALUES
+	(1, '17649042913111853', 64, 1853, 2, 2, 2, '垃圾😀😀😀', '', NULL, 1, '2025-12-16 14:01:47', '2025-12-16 14:01:47', 0, NULL),
+	(2, '17648162642691853', 69, 1853, 5, 5, 5, '可以', '', NULL, 2, '2025-12-16 14:05:07', '2025-12-16 14:05:07', 0, NULL),
+	(4, '17658656032451853', 66, 1853, 5, 5, 5, '可以', 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251216/product-review/70_avatar.png', NULL, 4, '2025-12-16 14:15:38', '2025-12-16 15:26:27', 0, NULL),
+	(8, '17658658775731853', 67, 1853, 5, 5, 5, '还不错', 'https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251216/product-review/00_712e7176-e8f4-41d9-aae6-4df781011933.png', NULL, 8, '2025-12-16 14:41:03', '2025-12-16 14:41:03', 0, NULL),
+	(9, '17658658775731853', 67, 1848, 0, 0, 0, '感谢', '', 8, 8, '2025-12-16 15:11:23', '2025-12-16 15:11:23', 1, 1848);
 
 -- 导出  表 wcg_mall_plus.shopping_cart 结构
 CREATE TABLE IF NOT EXISTS `shopping_cart` (
@@ -508,7 +550,7 @@ CREATE TABLE IF NOT EXISTS `shopping_cart` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=251 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=254 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- 正在导出表  wcg_mall_plus.shopping_cart 的数据：5 rows
 /*!40000 ALTER TABLE `shopping_cart` DISABLE KEYS */;
@@ -703,9 +745,9 @@ CREATE TABLE IF NOT EXISTS `sys_menu` (
   `perm` varchar(255) DEFAULT NULL COMMENT '权限标识',
   `is_external` int(11) DEFAULT '0' COMMENT '是否外链 0:否  1:是',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=200 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='权限资源表 ';
+) ENGINE=InnoDB AUTO_INCREMENT=203 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='权限资源表 ';
 
--- 正在导出表  wcg_mall_plus.sys_menu 的数据：~112 rows (大约)
+-- 正在导出表  wcg_mall_plus.sys_menu 的数据：~110 rows (大约)
 INSERT INTO `sys_menu` (`id`, `parent_id`, `path`, `component`, `title`, `sort`, `icon`, `type`, `create_time`, `update_time`, `redirect`, `name`, `hidden`, `perm`, `is_external`) VALUES
 	(1, '0', '/system', 'Layout', '系统管理', 6, 'Setting', 'CATALOG', '2019-03-28 18:51:08', '2021-12-17 15:26:06', '/system/user', '', 0, NULL, 0),
 	(2, '1', 'role', '/system/role/index', '角色管理', 2, 'Avatar', 'MENU', '2019-03-30 14:00:03', '2021-11-16 15:40:42', '', '', 0, NULL, 0),
@@ -792,7 +834,7 @@ INSERT INTO `sys_menu` (`id`, `parent_id`, `path`, `component`, `title`, `sort`,
 	(163, '143', '', '', '编辑博客', 3, '', 'BUTTON', '2025-11-11 17:02:30', NULL, '', '', 1, 'sys:blog:update', 0),
 	(164, '143', '', '', '删除博客', 4, '', 'BUTTON', '2025-11-11 17:02:48', NULL, '', '', 1, 'sys:blog:delete', 0),
 	(165, '143', '', '', '发布博客', 5, '', 'BUTTON', '2025-11-11 17:27:17', NULL, '', '', 1, 'sys:blog:status', 0),
-	(166, '0', '/comments', 'Layout', '评论管理', 3, 'ChatDotSquare', 'CATALOG', '2025-11-12 09:31:53', '2025-11-12 09:32:08', '', '', 0, '', 0),
+	(166, '0', '/comments', 'Layout', '评价管理', 3, 'ChatDotSquare', 'CATALOG', '2025-11-12 09:31:53', '2025-11-12 09:32:08', '', '', 0, '', 0),
 	(167, '166', 'comments', '/comments/index', '评论管理', 1, 'ChatDotSquare', 'MENU', '2025-11-12 09:31:53', '2025-11-12 09:34:08', '', '', 0, '', 0),
 	(168, '167', '', '', '评论列表', 1, '', 'BUTTON', '2025-11-12 09:31:53', '2025-11-12 09:34:35', '', '', 1, 'sys:comments', 0),
 	(169, '167', '', '', '新增评论', 2, '', 'BUTTON', '2025-11-12 09:31:53', NULL, '', '', 1, 'sys:comments:add', 0),
@@ -824,7 +866,10 @@ INSERT INTO `sys_menu` (`id`, `parent_id`, `path`, `component`, `title`, `sort`,
 	(195, '101', '', '', '修改', 3, '', 'BUTTON', '2025-12-11 17:24:23', '2025-12-11 17:24:23', '', '', 1, 'sys:socialConfig:update', 0),
 	(196, '101', '', '', '删除', 4, '', 'BUTTON', '2025-12-11 17:24:23', '2025-12-11 17:24:23', '', '', 1, 'sys:socialConfig:delete', 0),
 	(198, '1', 'site', '/system/siteConfig/index', '网站配置', 1, 'Cloudy', 'MENU', '2024-11-18 09:21:10', '2024-11-18 12:23:55', '', '', 0, '', 0),
-	(199, '198', '', '', '修改网站配置', 1, '', 'BUTTON', '2025-12-12 10:27:06', NULL, '', '', 1, 'sys:siteConfig:update', 0);
+	(199, '198', '', '', '修改网站配置', 1, '', 'BUTTON', '2025-12-12 10:27:06', NULL, '', '', 1, 'sys:siteConfig:update', 0),
+	(200, '166', 'review', '/review/index', '商品评价管理', 2, 'Camera', 'MENU', '2025-11-12 09:31:53', '2025-11-12 09:32:08', '', '', 0, '', 0),
+	(201, '200', '', '', '管理员回复评价', 1, '', 'BUTTON', '2025-12-16 15:08:07', NULL, '', '', 1, 'sys:review:reply', 0),
+	(202, '200', '', '', '删除评价', 2, '', 'BUTTON', '2025-11-12 09:31:53', '2025-11-12 09:32:08', '', '', 1, 'sys:review:delete', 0);
 
 -- 导出  表 wcg_mall_plus.sys_operate_log 结构
 CREATE TABLE IF NOT EXISTS `sys_operate_log` (
@@ -841,7 +886,7 @@ CREATE TABLE IF NOT EXISTS `sys_operate_log` (
   `class_path` varchar(255) DEFAULT NULL COMMENT '类地址',
   `method_name` varchar(255) DEFAULT NULL COMMENT '方法名',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2675 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=2685 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 -- 正在导出表  wcg_mall_plus.sys_operate_log 的数据：~308 rows (大约)
 INSERT INTO `sys_operate_log` (`id`, `username`, `request_url`, `type`, `operation_name`, `ip`, `source`, `spend_time`, `create_time`, `params_json`, `class_path`, `method_name`) VALUES
@@ -1169,7 +1214,17 @@ INSERT INTO `sys_operate_log` (`id`, `username`, `request_url`, `type`, `operati
 	(2671, 'admin', '/sys/siteConfig/update', 'PUT', '修改网站配置', '127.0.0.1', '内网IP|内网IP', 12, '2025-12-12 13:37:04', '{"configs":{"site_admin_logo":"https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251212/site/40_favicon.jpg","site_admin_title":"WCG管理系统","site_user_header_logo":"https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251212/site/97_logo-header.jpg","site_user_footer_logo":"https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251212/site/80_logo-footer.jpg","site_user_title":"WCG Store","site_footer_description":"\\"文创购\\"(英文:WCG,亦称文创购物商城、文创商城),是一个综合性文创购物购物网站。\\"文创购\\"是长江师范学院计科2301陈韦江毕业设计。提供100%品质保证的商品,7天无理由退货的售后服务,以及购物积分返现等优质服务。","site_footer_copyright":"WCG Store. All rights reserved.","site_footer_address":"长江师范学院","site_footer_email":"1774532899@qq.com","site_footer_icp":""}}', 'com.river.controller.system.SysSiteConfigController', 'batchUpdate'),
 	(2672, 'admin', '/sys/siteConfig/update', 'PUT', '修改网站配置', '127.0.0.1', '内网IP|内网IP', 12, '2025-12-12 13:37:43', '{"configs":{"site_admin_logo":"https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251212/site/40_favicon.jpg","site_admin_title":"WCG管理系统","site_user_header_logo":"https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251212/site/97_logo-header.jpg","site_user_footer_logo":"https://web-framework-cwj.oss-cn-chengdu.aliyuncs.com/wcgmall-plus/file/20251212/site/80_logo-footer.jpg","site_user_title":"WCG Store","site_footer_description":"\\"文创购\\"(英文:WCG,亦称文创购物商城、文创商城),是一个综合性文创购物购物网站。\\"文创购\\"是长江师范学院计科2301陈韦江毕业设计。提供100%品质保证的商品,7天无理由退货的售后服务,以及购物积分返现等优质服务。","site_footer_copyright":"WCG Store. All rights reserved.","site_footer_address":"长江师范学院","site_footer_email":"1774532899@qq.com","site_footer_icp":"渝ICP备2025049830号"}}', 'com.river.controller.system.SysSiteConfigController', 'batchUpdate'),
 	(2673, 'admin', '/sys/socialConfig/settings', 'PUT', '更新第三方登录全局设置', '127.0.0.1', '内网IP|内网IP', 28, '2025-12-12 13:42:22', '{"settings":{"enabled":false,"loginMode":"juhe"}}', 'com.river.controller.system.SysSocialConfigController', 'updateSettings'),
-	(2674, 'admin', '/sys/socialConfig/settings', 'PUT', '更新第三方登录全局设置', '127.0.0.1', '内网IP|内网IP', 12, '2025-12-12 13:42:30', '{"settings":{"enabled":true,"loginMode":"juhe"}}', 'com.river.controller.system.SysSocialConfigController', 'updateSettings');
+	(2674, 'admin', '/sys/socialConfig/settings', 'PUT', '更新第三方登录全局设置', '127.0.0.1', '内网IP|内网IP', 12, '2025-12-12 13:42:30', '{"settings":{"enabled":true,"loginMode":"juhe"}}', 'com.river.controller.system.SysSocialConfigController', 'updateSettings'),
+	(2675, 'admin', '/sys/logistics/ship', 'POST', '发货 - 调用顺丰下单接口', '127.0.0.1', '内网IP|内网IP', 545, '2025-12-16 14:14:48', '{"dto":{"orderNumber":"17658656032451853","senderName":"韋","senderPhone":"13290010299","senderProvince":"重庆市","senderCity":"重庆市","senderCounty":"重庆市","senderAddress":"两江新区蔡家岗街道柚米社区"}}', 'com.river.controller.order.LogisticsController', 'shipOrder'),
+	(2676, 'admin', '/sys/logistics/ship', 'POST', '发货 - 调用顺丰下单接口', '127.0.0.1', '内网IP|内网IP', 618, '2025-12-16 14:18:56', '{"dto":{"orderNumber":"17658658775731853","senderName":"韋","senderPhone":"13290010299","senderProvince":"重庆市","senderCity":"重庆市","senderCounty":"重庆市","senderAddress":"两江新区蔡家岗街道柚米社区"}}', 'com.river.controller.order.LogisticsController', 'shipOrder'),
+	(2677, 'admin', '/sys/menu', 'PUT', '修改菜单', '127.0.0.1', '内网IP|内网IP', 105, '2025-12-16 15:05:47', '{"menu":{"id":166,"parentId":0,"path":"/comments","component":"Layout","title":"评价管理","sort":3,"icon":"ChatDotSquare","type":"CATALOG","redirect":"","name":"","hidden":0,"isExternal":0,"perm":"","createTime":1762911113000,"updateTime":1762911128000,"children":[{"id":167,"parentId":166,"path":"comments","component":"/comments/index","title":"评论管理","sort":1,"icon":"ChatDotSquare","type":"MENU","redirect":"","name":"","hidden":0,"isExternal":0,"perm":"","createTime":1762911113000,"updateTime":1762911248000,"children":[{"id":168,"parentId":167,"path":"","component":"","title":"评论列表","sort":1,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments","createTime":1762911113000,"updateTime":1762911275000},{"id":169,"parentId":167,"path":"","component":"","title":"新增评论","sort":2,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments:add","createTime":1762911113000},{"id":170,"parentId":167,"path":"","component":"","title":"编辑评论","sort":3,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments:update","createTime":1762911113000},{"id":171,"parentId":167,"path":"","component":"","title":"删除评论","sort":4,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments:delete","createTime":1762911113000}]}]}}', 'com.river.controller.system.SysMenuController', 'updateMenu'),
+	(2678, 'admin', '/sys/menu', 'POST', '添加菜单', '127.0.0.1', '内网IP|内网IP', 11, '2025-12-16 15:06:52', '{"menu":{"id":200,"parentId":166,"path":"review","component":"/review/index","title":"商品评价管理","sort":2,"icon":"Camera","type":"MENU","redirect":"","name":"","hidden":0,"isExternal":0,"perm":"","createTime":1762911113000,"updateTime":1762911128000,"children":[{"id":167,"parentId":166,"path":"comments","component":"/comments/index","title":"评论管理","sort":1,"icon":"ChatDotSquare","type":"MENU","redirect":"","name":"","hidden":0,"isExternal":0,"perm":"","createTime":1762911113000,"updateTime":1762911248000,"children":[{"id":168,"parentId":167,"path":"","component":"","title":"评论列表","sort":1,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments","createTime":1762911113000,"updateTime":1762911275000},{"id":169,"parentId":167,"path":"","component":"","title":"新增评论","sort":2,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments:add","createTime":1762911113000},{"id":170,"parentId":167,"path":"","component":"","title":"编辑评论","sort":3,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments:update","createTime":1762911113000},{"id":171,"parentId":167,"path":"","component":"","title":"删除评论","sort":4,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:comments:delete","createTime":1762911113000}]}]}}', 'com.river.controller.system.SysMenuController', 'addMenu'),
+	(2679, 'admin', '/sys/menu', 'POST', '添加菜单', '127.0.0.1', '内网IP|内网IP', 3, '2025-12-16 15:08:06', '{"menu":{"id":201,"parentId":200,"path":"","component":"","title":"管理员回复评价","sort":1,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:review:reply","createTime":1765868886769}}', 'com.river.controller.system.SysMenuController', 'addMenu'),
+	(2680, 'admin', '/sys/menu', 'POST', '添加菜单', '127.0.0.1', '内网IP|内网IP', 11, '2025-12-16 15:08:35', '{"menu":{"id":202,"parentId":200,"path":"","component":"","title":"删除评价","sort":2,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:review:delete","createTime":1762911113000,"updateTime":1762911128000,"children":[{"id":201,"parentId":200,"path":"","component":"","title":"管理员回复评价","sort":1,"icon":"","type":"BUTTON","redirect":"","name":"","hidden":1,"isExternal":0,"perm":"sys:review:reply","createTime":1765868887000}]}}', 'com.river.controller.system.SysMenuController', 'addMenu'),
+	(2681, 'admin', '/sys/role/menus/1', 'PUT', '修改角色权限', '127.0.0.1', '内网IP|内网IP', 21, '2025-12-16 15:08:46', '{"id":1,"menuIds":[175,176,180,181,182,183,177,184,185,186,142,143,161,162,163,164,165,166,167,168,169,170,171,200,201,202,144,145,146,147,148,149,160,178,179,150,151,152,153,154,155,156,157,158,159,172,173,174,187,188,189,190,1,14,39,27,28,29,52,198,199,2,3,8,40,41,43,9,10,53,11,12,44,136,137,138,139,140,13,48,51,49,50,32,33,55,56,128,129,130,131,101,193,194,195,196,54,191,4,16,17,95,94,18,60,62,65,59,58,61,192,19,63,66,64,67,104,105,30,31]}', 'com.river.controller.system.SysRoleController', 'updateRoleMenus'),
+	(2682, 'admin', '/sys/review/reply', 'POST', '回复评价', '127.0.0.1', '内网IP|内网IP', 101, '2025-12-16 15:11:22', '{"params":{"parentReviewId":8,"content":"感谢"}}', 'com.river.controller.review.ProductReviewController', 'reply'),
+	(2683, 'admin', '/sys/review/reply', 'POST', '回复评价', '127.0.0.1', '内网IP|内网IP', 8, '2025-12-16 15:23:26', '{"params":{"parentReviewId":8,"content":"感谢"}}', 'com.river.controller.review.ProductReviewController', 'reply'),
+	(2684, 'admin', '/sys/review/delete/10', 'DELETE', '删除评价', '127.0.0.1', '内网IP|内网IP', 7, '2025-12-16 15:25:38', '{"id":10}', 'com.river.controller.review.ProductReviewController', 'delete');
 
 -- 导出  表 wcg_mall_plus.sys_role 结构
 CREATE TABLE IF NOT EXISTS `sys_role` (
@@ -1195,7 +1250,7 @@ CREATE TABLE IF NOT EXISTS `sys_role_menu` (
   `menu_id` int(11) DEFAULT NULL COMMENT '菜单ID',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `role_id` (`role_id`,`menu_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1463 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='角色-权限资源关联表 ';
+) ENGINE=InnoDB AUTO_INCREMENT=1583 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='角色-权限资源关联表 ';
 
 -- 正在导出表  wcg_mall_plus.sys_role_menu 的数据：~248 rows (大约)
 INSERT INTO `sys_role_menu` (`id`, `role_id`, `menu_id`) VALUES
@@ -1330,123 +1385,126 @@ INSERT INTO `sys_role_menu` (`id`, `role_id`, `menu_id`) VALUES
 	(1228, 14, 105),
 	(1229, 14, 30),
 	(1230, 14, 31),
-	(1346, 1, 175),
-	(1347, 1, 176),
-	(1348, 1, 180),
-	(1349, 1, 181),
-	(1350, 1, 182),
-	(1351, 1, 183),
-	(1352, 1, 177),
-	(1353, 1, 184),
-	(1354, 1, 185),
-	(1355, 1, 186),
-	(1356, 1, 142),
-	(1357, 1, 143),
-	(1358, 1, 161),
-	(1359, 1, 162),
-	(1360, 1, 163),
-	(1361, 1, 164),
-	(1362, 1, 165),
-	(1363, 1, 166),
-	(1364, 1, 167),
-	(1365, 1, 168),
-	(1366, 1, 169),
-	(1367, 1, 170),
-	(1368, 1, 171),
-	(1369, 1, 144),
-	(1370, 1, 145),
-	(1371, 1, 146),
-	(1372, 1, 147),
-	(1373, 1, 148),
-	(1374, 1, 149),
-	(1375, 1, 160),
-	(1376, 1, 178),
-	(1377, 1, 179),
-	(1378, 1, 150),
-	(1379, 1, 151),
-	(1380, 1, 152),
-	(1381, 1, 153),
-	(1382, 1, 154),
-	(1383, 1, 155),
-	(1384, 1, 156),
-	(1385, 1, 157),
-	(1386, 1, 158),
-	(1387, 1, 159),
-	(1388, 1, 172),
-	(1389, 1, 173),
-	(1390, 1, 174),
-	(1391, 1, 187),
-	(1392, 1, 188),
-	(1393, 1, 189),
-	(1394, 1, 190),
-	(1395, 1, 1),
-	(1396, 1, 14),
-	(1397, 1, 39),
-	(1398, 1, 27),
-	(1399, 1, 28),
-	(1400, 1, 29),
-	(1401, 1, 52),
-	(1402, 1, 198),
-	(1403, 1, 199),
-	(1404, 1, 2),
-	(1405, 1, 3),
-	(1406, 1, 8),
-	(1407, 1, 40),
-	(1408, 1, 41),
-	(1409, 1, 43),
-	(1410, 1, 9),
-	(1411, 1, 10),
-	(1412, 1, 53),
-	(1413, 1, 11),
-	(1414, 1, 12),
-	(1415, 1, 44),
-	(1416, 1, 136),
-	(1417, 1, 137),
-	(1418, 1, 138),
-	(1419, 1, 139),
-	(1420, 1, 140),
-	(1421, 1, 13),
-	(1422, 1, 48),
-	(1423, 1, 51),
-	(1424, 1, 49),
-	(1425, 1, 50),
-	(1426, 1, 32),
-	(1427, 1, 33),
-	(1428, 1, 55),
-	(1429, 1, 56),
-	(1430, 1, 128),
-	(1431, 1, 129),
-	(1432, 1, 130),
-	(1433, 1, 131),
-	(1434, 1, 101),
-	(1435, 1, 193),
-	(1436, 1, 194),
-	(1437, 1, 195),
-	(1438, 1, 196),
-	(1439, 1, 54),
-	(1440, 1, 191),
-	(1441, 1, 4),
-	(1442, 1, 16),
-	(1443, 1, 17),
-	(1444, 1, 95),
-	(1445, 1, 94),
-	(1446, 1, 18),
-	(1447, 1, 60),
-	(1448, 1, 62),
-	(1449, 1, 65),
-	(1450, 1, 59),
-	(1451, 1, 58),
-	(1452, 1, 61),
-	(1453, 1, 192),
-	(1454, 1, 19),
-	(1455, 1, 63),
-	(1456, 1, 66),
-	(1457, 1, 64),
-	(1458, 1, 67),
-	(1459, 1, 104),
-	(1460, 1, 105),
-	(1461, 1, 30),
-	(1462, 1, 31);
+	(1463, 1, 175),
+	(1464, 1, 176),
+	(1465, 1, 180),
+	(1466, 1, 181),
+	(1467, 1, 182),
+	(1468, 1, 183),
+	(1469, 1, 177),
+	(1470, 1, 184),
+	(1471, 1, 185),
+	(1472, 1, 186),
+	(1473, 1, 142),
+	(1474, 1, 143),
+	(1475, 1, 161),
+	(1476, 1, 162),
+	(1477, 1, 163),
+	(1478, 1, 164),
+	(1479, 1, 165),
+	(1480, 1, 166),
+	(1481, 1, 167),
+	(1482, 1, 168),
+	(1483, 1, 169),
+	(1484, 1, 170),
+	(1485, 1, 171),
+	(1486, 1, 200),
+	(1487, 1, 201),
+	(1488, 1, 202),
+	(1489, 1, 144),
+	(1490, 1, 145),
+	(1491, 1, 146),
+	(1492, 1, 147),
+	(1493, 1, 148),
+	(1494, 1, 149),
+	(1495, 1, 160),
+	(1496, 1, 178),
+	(1497, 1, 179),
+	(1498, 1, 150),
+	(1499, 1, 151),
+	(1500, 1, 152),
+	(1501, 1, 153),
+	(1502, 1, 154),
+	(1503, 1, 155),
+	(1504, 1, 156),
+	(1505, 1, 157),
+	(1506, 1, 158),
+	(1507, 1, 159),
+	(1508, 1, 172),
+	(1509, 1, 173),
+	(1510, 1, 174),
+	(1511, 1, 187),
+	(1512, 1, 188),
+	(1513, 1, 189),
+	(1514, 1, 190),
+	(1515, 1, 1),
+	(1516, 1, 14),
+	(1517, 1, 39),
+	(1518, 1, 27),
+	(1519, 1, 28),
+	(1520, 1, 29),
+	(1521, 1, 52),
+	(1522, 1, 198),
+	(1523, 1, 199),
+	(1524, 1, 2),
+	(1525, 1, 3),
+	(1526, 1, 8),
+	(1527, 1, 40),
+	(1528, 1, 41),
+	(1529, 1, 43),
+	(1530, 1, 9),
+	(1531, 1, 10),
+	(1532, 1, 53),
+	(1533, 1, 11),
+	(1534, 1, 12),
+	(1535, 1, 44),
+	(1536, 1, 136),
+	(1537, 1, 137),
+	(1538, 1, 138),
+	(1539, 1, 139),
+	(1540, 1, 140),
+	(1541, 1, 13),
+	(1542, 1, 48),
+	(1543, 1, 51),
+	(1544, 1, 49),
+	(1545, 1, 50),
+	(1546, 1, 32),
+	(1547, 1, 33),
+	(1548, 1, 55),
+	(1549, 1, 56),
+	(1550, 1, 128),
+	(1551, 1, 129),
+	(1552, 1, 130),
+	(1553, 1, 131),
+	(1554, 1, 101),
+	(1555, 1, 193),
+	(1556, 1, 194),
+	(1557, 1, 195),
+	(1558, 1, 196),
+	(1559, 1, 54),
+	(1560, 1, 191),
+	(1561, 1, 4),
+	(1562, 1, 16),
+	(1563, 1, 17),
+	(1564, 1, 95),
+	(1565, 1, 94),
+	(1566, 1, 18),
+	(1567, 1, 60),
+	(1568, 1, 62),
+	(1569, 1, 65),
+	(1570, 1, 59),
+	(1571, 1, 58),
+	(1572, 1, 61),
+	(1573, 1, 192),
+	(1574, 1, 19),
+	(1575, 1, 63),
+	(1576, 1, 66),
+	(1577, 1, 64),
+	(1578, 1, 67),
+	(1579, 1, 104),
+	(1580, 1, 105),
+	(1581, 1, 30),
+	(1582, 1, 31);
 
 -- 导出  表 wcg_mall_plus.sys_site_config 结构
 CREATE TABLE IF NOT EXISTS `sys_site_config` (
@@ -1540,9 +1598,9 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
 
 -- 正在导出表  wcg_mall_plus.sys_user 的数据：~8 rows (大约)
 INSERT INTO `sys_user` (`id`, `username`, `password`, `create_time`, `update_time`, `status`, `ip`, `ip_location`, `os`, `last_login_time`, `browser`, `nickname`, `avatar`, `mobile`, `email`, `sex`, `login_type`, `signature`) VALUES
-	(1848, 'admin', '$2a$10$w8y/nKvgc0uD.6uzjAQQTuDokFicBAqGdjAjJEMtBjUm3UZ2TJlaq', '2025-12-03 14:50:39', '2025-11-28 14:56:48', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-12-12 14:45:12', 'Chrome', 'admin', 'http://127.0.0.1:8080/localFile/20251128/avatar/47_avatar.png', '18223354992', '1774532899@qq.com', 1, 'email', NULL),
+	(1848, 'admin', '$2a$10$w8y/nKvgc0uD.6uzjAQQTuDokFicBAqGdjAjJEMtBjUm3UZ2TJlaq', '2025-12-03 14:50:39', '2025-11-28 14:56:48', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-12-16 15:22:55', 'Chrome', 'admin', 'http://127.0.0.1:8080/localFile/20251128/avatar/47_avatar.png', '18223354992', '1774532899@qq.com', 1, 'email', NULL),
 	(1852, 'test', '$2a$10$jPRcrn7GnCy/5anKL6oa7OIYdbrToMjEN.DFbwjL85cjnh90S9GQe', '2025-12-02 14:50:39', '2025-10-31 17:52:05', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-12-05 16:37:49', 'Chrome', 'test', 'https://api.dicebear.com/6.x/pixel-art/svg?seed=Raccoon', '', '', 0, 'email', NULL),
-	(1853, 'cwj', '$2a$10$P1OOA6UcK/JdQz0HaxoZ..o0APA6cJIHBjx9afsSQcN7pll/Ae8l2', '2025-12-03 14:50:39', '2025-11-28 16:21:38', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-12-12 17:36:58', 'Chrome', 'cwj', 'https://api.dicebear.com/9.x/pixel-art/svg?seed=Bunny', '18223354992', 'hn8m6yiit9s@gmail.pm', 1, 'email', '友商是傻逼'),
+	(1853, 'cwj', '$2a$10$P1OOA6UcK/JdQz0HaxoZ..o0APA6cJIHBjx9afsSQcN7pll/Ae8l2', '2025-12-03 14:50:39', '2025-11-28 16:21:38', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-12-16 15:11:35', 'Chrome', 'cwj', 'https://api.dicebear.com/9.x/pixel-art/svg?seed=Bunny', '18223354992', 'hn8m6yiit9s@gmail.pm', 1, 'email', '友商是傻逼'),
 	(1854, '111', '$2a$10$ggJ0Xg2j2CXYHnLo2fSiOeRp0K82FxK5kT2sKAaSOd6t3ablVbmXq', '2025-12-01 14:50:39', '2025-11-19 13:41:50', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-11-19 13:42:05', 'Chrome', '111', 'https://api.dicebear.com/9.x/pixel-art/svg?seed=Dog', NULL, 'rjh5zftv0_z@gmail.pm', NULL, 'email', NULL),
 	(1855, 'zhangsan', '$2a$10$m5F79Uo65Nj0X2BKHngfAeH.Cus/rtkGGljaO46H.GIcAEbNtawoe', '2025-12-04 11:32:25', '2025-12-04 11:32:24', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-12-04 11:32:37', 'Chrome', '张三', 'https://api.dicebear.com/9.x/pixel-art/svg?seed=Puppy', NULL, 'fwyfluwd3js@gmail.pm', NULL, 'email', NULL),
 	(1856, '116800592', 'e0d374ec-6259-47dc-881c-d4601c89a4c7', '2025-12-04 14:03:58', '2025-12-04 14:03:57', 1, '127.0.0.1', '内网IP|内网IP', 'Windows', '2025-12-04 14:03:58', 'Chrome', 'River', 'https://avatars.githubusercontent.com/u/116800592?v=4', NULL, NULL, NULL, 'github', NULL),
