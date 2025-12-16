@@ -674,7 +674,7 @@ CREATE TABLE IF NOT EXISTS `sys_job` (
   PRIMARY KEY (`job_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='定时任务调度表';
 
--- 正在导出表  wcg_mall_plus.sys_job 的数据：~3 rows (大约)
+-- 正在导出表  wcg_mall_plus.sys_job 的数据：~3 rows (大约)111
 INSERT INTO `sys_job` (`job_id`, `job_name`, `job_group`, `invoke_target`, `cron_expression`, `misfire_policy`, `concurrent`, `status`, `create_time`, `update_time`, `remark`) VALUES
 	(1, '系统默认（无参）', 'DEFAULT', 'task.runNoParams', '* * * * * ? *', '3', '1', '1', '2024-11-17 12:39:45', '2024-11-18 17:26:59', ''),
 	(2, '系统默认（有参）', 'DEFAULT', 'task.runParams(\'river\')', '0/15 * * * * ?', '3', '1', '1', '2024-11-17 12:39:45', '2024-11-17 12:39:45', ''),
