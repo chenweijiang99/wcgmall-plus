@@ -50,7 +50,7 @@ public interface ProductReviewService extends IService<ProductReview> {
     /**
      * 后台分页查询评价列表
      */
-    IPage<ProductReviewVO> adminSelectPage(ProductReview query, Integer pageNum, Integer pageSize);
+    IPage<ProductReviewVO> adminSelectPage(ProductReview query, Integer pageNum, Integer pageSize, Integer scoreType);
 
     /**
      * 管理员回复评价

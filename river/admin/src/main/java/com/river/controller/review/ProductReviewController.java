@@ -34,8 +34,9 @@ public class ProductReviewController {
     public Result<IPage<ProductReviewVO>> list(
             ProductReview query,
             @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(productReviewService.adminSelectPage(query, pageNum, pageSize));
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) Integer scoreType) {
+        return Result.success(productReviewService.adminSelectPage(query, pageNum, pageSize, scoreType));
     }
 
     @GetMapping("/{id}")

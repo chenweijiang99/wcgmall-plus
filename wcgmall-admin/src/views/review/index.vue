@@ -11,7 +11,16 @@
             @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="评分" prop="productScore">
+        <el-form-item label="评分类型" prop="scoreType">
+          <el-select v-model="queryParams.scoreType" placeholder="请选择" clearable style="width: 120px">
+            <el-option label="全部" :value="0" />
+            <el-option label="好评" :value="1" />
+            <el-option label="中评" :value="2" />
+            <el-option label="差评" :value="3" />
+            <el-option label="有图" :value="4" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="具体评分" prop="productScore">
           <el-select v-model="queryParams.productScore" placeholder="请选择" clearable style="width: 120px">
             <el-option label="1星" :value="1" />
             <el-option label="2星" :value="2" />
@@ -31,6 +40,14 @@
       <template #header>
         <div class="card-header">
           <span class="title">评价列表</span>
+          <el-button
+            type="danger"
+            icon="Delete"
+            :disabled="selectedIds.length === 0"
+            @click="handleBatchDelete"
+          >
+            批量删除 {{ selectedIds.length > 0 ? `(${selectedIds.length})` : '' }}
+          </el-button>
         </div>
       </template>
 
@@ -41,7 +58,9 @@
         @expand-change="handleExpandChange"
         :row-key="getRowKey"
         stripe
+        @selection-change="handleSelectionChange"
       >
+        <el-table-column type="selection" width="55" />
         <el-table-column type="expand" width="60">
           <template #default="{ row }">
             <div class="review-detail-container">
@@ -198,7 +217,7 @@
 
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from "element-plus";
-import { listReviewApi, replyReviewApi, deleteReviewApi } from "@/api/review/review";
+import { listReviewApi, replyReviewApi, deleteReviewApi, deleteBatchReviewApi } from "@/api/review/review";
 
 const loading = ref(false);
 const total = ref(0);
@@ -209,6 +228,7 @@ const queryParams = reactive({
   pageSize: 10,
   productId: undefined,
   productScore: undefined,
+  scoreType: undefined,
 });
 
 const queryFormRef = ref();
@@ -216,6 +236,9 @@ const queryFormRef = ref();
 // 回复相关
 const replyContent = ref<Record<number, string>>({});
 const replyLoading = ref<Record<number, boolean>>({});
+
+// 批量选择
+const selectedIds = ref<number[]>([]);
 
 const getRowKey = (row: any) => row.id;
 
@@ -328,6 +351,37 @@ const handleDeleteReply = (reply: any) => {
       getList();
     } catch (error) {
       ElMessage.error("删除失败");
+    }
+  });
+};
+
+/** 选择变化 */
+const handleSelectionChange = (selection: any[]) => {
+  selectedIds.value = selection.map(item => item.id);
+};
+
+/** 批量删除 */
+const handleBatchDelete = () => {
+  if (selectedIds.value.length === 0) {
+    ElMessage.warning("请选择要删除的评价");
+    return;
+  }
+  ElMessageBox.confirm(
+    `确定删除选中的 ${selectedIds.value.length} 条评价及其所有回复？`,
+    "警告",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }
+  ).then(async () => {
+    try {
+      await deleteBatchReviewApi(selectedIds.value);
+      ElMessage.success("批量删除成功");
+      selectedIds.value = [];
+      getList();
+    } catch (error) {
+      ElMessage.error("批量删除失败");
     }
   });
 };

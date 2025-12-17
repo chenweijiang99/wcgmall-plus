@@ -46,7 +46,7 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
         Long userId = StpUtil.getLoginIdAsLong();
 
         // 敏感词过滤
-        if (dto.getContent() != null && SensitiveWordFilter.containsSensitiveWord(dto.getContent())) {
+        if (dto.getContent() != null &&     SensitiveWordFilter.containsSensitiveWord(dto.getContent())) {
             List<String> sensitiveWords = SensitiveWordFilter.getSensitiveWords(dto.getContent());
             throw new ServiceException("评价内容包含敏感词：" + String.join("、", sensitiveWords));
         }
@@ -300,12 +300,13 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
     // ========== 后台管理方法实现 ==========
 
     @Override
-    public IPage<ProductReviewVO> adminSelectPage(ProductReview query, Integer pageNum, Integer pageSize) {
+    public IPage<ProductReviewVO> adminSelectPage(ProductReview query, Integer pageNum, Integer pageSize, Integer scoreType) {
         Page<ProductReview> page = new Page<>(pageNum, pageSize);
 
         LambdaQueryWrapper<ProductReview> wrapper = new LambdaQueryWrapper<>();
         // 只查询根评价
         wrapper.isNull(ProductReview::getParentReviewId);
+
         // 条件查询
         if (query.getProductId() != null) {
             wrapper.eq(ProductReview::getProductId, query.getProductId());
@@ -316,6 +317,26 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
         if (query.getProductScore() != null) {
             wrapper.eq(ProductReview::getProductScore, query.getProductScore());
         }
+
+        // 评分类型筛选
+        if (scoreType != null && scoreType != 0) {
+            switch (scoreType) {
+                case 1: // 好评
+                    wrapper.in(ProductReview::getProductScore, 4, 5);
+                    break;
+                case 2: // 中评
+                    wrapper.eq(ProductReview::getProductScore, 3);
+                    break;
+                case 3: // 差评
+                    wrapper.in(ProductReview::getProductScore, 1, 2);
+                    break;
+                case 4: // 有图
+                    wrapper.isNotNull(ProductReview::getImages)
+                            .ne(ProductReview::getImages, "");
+                    break;
+            }
+        }
+
         wrapper.orderByDesc(ProductReview::getCreateTime);
 
         IPage<ProductReview> reviewPage = page(page, wrapper);

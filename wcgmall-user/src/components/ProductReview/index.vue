@@ -445,10 +445,21 @@ onMounted(() => {
     background: #f8f9fa;
     border-radius: 12px;
 
+    @media (max-width: 640px) {
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
     .stats-summary {
       display: flex;
       gap: 40px;
       margin-bottom: 20px;
+
+      @media (max-width: 640px) {
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
 
       .good-rate {
         display: flex;
@@ -459,14 +470,29 @@ onMounted(() => {
         border-radius: 8px;
         color: #fff;
 
+        @media (max-width: 640px) {
+          flex-direction: row;
+          justify-content: center;
+          gap: 10px;
+          padding: 10px 15px;
+        }
+
         .rate-value {
           font-size: 32px;
           font-weight: bold;
+
+          @media (max-width: 640px) {
+            font-size: 24px;
+          }
         }
 
         .rate-label {
           font-size: 14px;
           opacity: 0.9;
+
+          @media (max-width: 640px) {
+            font-size: 12px;
+          }
         }
       }
 
@@ -475,11 +501,20 @@ onMounted(() => {
         flex-direction: column;
         gap: 8px;
 
+        @media (max-width: 640px) {
+          gap: 6px;
+        }
+
         .avg-item {
           display: flex;
           align-items: center;
           gap: 10px;
           font-size: 14px;
+
+          @media (max-width: 640px) {
+            gap: 6px;
+            font-size: 12px;
+          }
 
           .score-num {
             color: #ff6b6b;
@@ -494,6 +529,10 @@ onMounted(() => {
       gap: 12px;
       flex-wrap: wrap;
 
+      @media (max-width: 640px) {
+        gap: 8px;
+      }
+
       .filter-tab {
         padding: 8px 16px;
         background: #fff;
@@ -502,6 +541,11 @@ onMounted(() => {
         cursor: pointer;
         font-size: 14px;
         transition: all 0.2s;
+
+        @media (max-width: 640px) {
+          padding: 6px 12px;
+          font-size: 12px;
+        }
 
         &:hover {
           border-color: #409eff;
@@ -564,11 +608,19 @@ onMounted(() => {
         margin-left: 70px;
         padding: 15px 0;
         border-bottom: none;
+
+        @media (max-width: 640px) {
+          margin-left: 40px;
+        }
       }
 
       .review-main {
         display: flex;
         gap: 15px;
+
+        @media (max-width: 640px) {
+          gap: 10px;
+        }
       }
 
       .user-avatar {
@@ -576,6 +628,11 @@ onMounted(() => {
         height: 50px;
         border-radius: 50%;
         flex-shrink: 0;
+
+        @media (max-width: 640px) {
+          width: 40px;
+          height: 40px;
+        }
       }
 
       .review-content {
@@ -586,6 +643,7 @@ onMounted(() => {
           display: flex;
           align-items: center;
           gap: 10px;
+          flex-wrap: wrap;
 
           .username {
             font-weight: bold;
@@ -598,6 +656,12 @@ onMounted(() => {
           .review-time {
             color: #999;
             font-size: 13px;
+
+            @media (max-width: 640px) {
+              font-size: 12px;
+              width: 100%;
+              margin-top: 4px;
+            }
           }
         }
 
@@ -606,6 +670,12 @@ onMounted(() => {
           gap: 20px;
           margin-bottom: 10px;
           font-size: 14px;
+          flex-wrap: wrap;
+
+          @media (max-width: 640px) {
+            gap: 10px;
+            font-size: 12px;
+          }
 
           span {
             display: flex;
@@ -663,8 +733,15 @@ onMounted(() => {
           font-size: 13px;
           color: #666;
 
+          @media (max-width: 640px) {
+            gap: 15px;
+            font-size: 12px;
+          }
+
           .action-btn {
             cursor: pointer;
+            white-space: nowrap;
+
             &:hover {
               color: #409eff;
             }
@@ -677,9 +754,17 @@ onMounted(() => {
           background: #f9f9f9;
           border-radius: 4px;
 
+          @media (max-width: 640px) {
+            padding: 8px;
+          }
+
           .reply-actions {
             margin-top: 10px;
             text-align: right;
+
+            @media (max-width: 640px) {
+              margin-top: 8px;
+            }
           }
         }
       }
@@ -694,6 +779,11 @@ onMounted(() => {
         border-left: 3px solid #f56c6c;
         padding-left: 12px;
         margin-left: 55px;
+
+        @media (max-width: 640px) {
+          margin-left: 35px;
+          padding-left: 8px;
+        }
       }
     }
   }
