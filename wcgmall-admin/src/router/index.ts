@@ -49,7 +49,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
       },
     ],
-  }
+  },
 ];
 
 /**

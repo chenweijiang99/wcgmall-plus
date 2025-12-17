@@ -20,6 +20,11 @@
             <artifactId>common</artifactId>
             <version>${package.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>chat</artifactId>
+            <version>${package.version}</version>
+        </dependency>
         <!--JustAuth第三方登录模块-->
         <dependency>
             <groupId>me.zhyd.oauth</groupId>

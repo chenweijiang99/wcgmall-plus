@@ -48,5 +48,10 @@
             <artifactId>generator</artifactId>
             <version>${package.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.river</groupId>
+            <artifactId>chat</artifactId>
+            <version>${package.version}</version>
+        </dependency>
     </dependencies>
 </project>

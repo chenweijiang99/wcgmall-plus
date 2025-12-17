@@ -23,6 +23,7 @@
         <module>auth</module>
         <module>quartz</module>
         <module>generator</module>
+        <module>chat</module>
     </modules>
 
     <properties>

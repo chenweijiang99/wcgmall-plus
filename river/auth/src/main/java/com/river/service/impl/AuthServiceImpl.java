@@ -23,6 +23,7 @@ import com.river.mapper.SysMenuMapper;
 import com.river.mapper.SysRoleMapper;
 import com.river.mapper.SysUserMapper;
 import com.river.service.AuthService;
+import com.river.service.ChatDefaultRoomService;
 import com.river.service.SysSocialConfigService;
 import com.river.entity.SysSocialConfig;
 import com.river.utils.*;
@@ -68,6 +69,7 @@ public class AuthServiceImpl implements AuthService {
     private final WeiboConfigProperties weiboConfigProperties;
     private final FrontConfigProperties frontConfigProperties;
     private final SysSocialConfigService sysSocialConfigService;
+    private final ChatDefaultRoomService chatDefaultRoomService;
 
 
     @Override
@@ -162,6 +164,13 @@ public class AuthServiceImpl implements AuthService {
         //添加用户角色信息
         insertRole(sysUser);
 
+        //加入默认群聊
+        try {
+            chatDefaultRoomService.joinDefaultRoom(sysUser.getId(), 1);
+        } catch (Exception e) {
+            log.warn("用户加入默认群聊失败: {}", e.getMessage());
+        }
+
         redisUtil.delete(RedisConstants.CAPTCHA_CODE_KEY + dto.getEmail());
         return true;
     }
@@ -226,6 +235,12 @@ public class AuthServiceImpl implements AuthService {
             sysUserMapper.insert(user);
             //添加角色信息
             insertRole(user);
+            //加入默认群聊
+            try {
+                chatDefaultRoomService.joinDefaultRoom(user.getId(), 1);
+            } catch (Exception e) {
+                log.warn("用户加入默认群聊失败: {}", e.getMessage());
+            }
         }
 
         StpUtil.login(user.getId());

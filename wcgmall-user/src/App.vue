@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Navbar from "@/components/Navbar.vue";
 import Footer from "@/components/Footer.vue";
+import ChatDialog from "@/components/ChatDialog.vue";
 import { useRoute } from "vue-router";
 import { computed, onMounted } from "vue";
 import { ElMessage } from "element-plus";
@@ -61,6 +62,7 @@ onMounted(() => {
     </main>
     <Footer v-if="!isAuthPage" />
     <el-backtop :right="100" :bottom="100" />
+    <ChatDialog />
   </div>
 </template>
 
