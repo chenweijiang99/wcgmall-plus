@@ -1,5 +1,7 @@
 package com.river.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.river.utils.DateUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -76,8 +78,10 @@ public class ProductReviewVO {
     private List<ProductReviewVO> children;
 
     @Schema(description = "创建时间")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     private LocalDateTime createTime;
 
     @Schema(description = "更新时间")
+    @JsonFormat(pattern = DateUtil.YYYY_MM_DD_HH_MM_SS, timezone = "GMT+8")
     private LocalDateTime updateTime;
 }

@@ -8,11 +8,13 @@ import com.river.common.Result;
 import com.river.entity.ProductReview;
 import com.river.service.ProductReviewService;
 import com.river.vo.ProductReviewVO;
+import com.river.vo.ReviewStatisticsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,17 +30,26 @@ public class ProductReviewController {
 
     @GetMapping("/list")
     @Operation(summary = "获取评价列表")
+    @SaCheckPermission("sys:review:list")
     public Result<IPage<ProductReviewVO>> list(
             ProductReview query,
             @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(productReviewService.adminSelectPage(query, pageNum, pageSize));
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) Integer scoreType) {
+        return Result.success(productReviewService.adminSelectPage(query, pageNum, pageSize, scoreType));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "获取评价详情")
+    @SaCheckPermission("sys:review:list")
     public Result<ProductReviewVO> getDetail(@PathVariable Long id) {
         return Result.success(productReviewService.getReviewDetail(id));
+    }
+
+    @GetMapping("/statistics/{productId}")
+    @Operation(summary = "获取商品评价统计")
+    public Result<ReviewStatisticsVO> getStatistics(@PathVariable Long productId) {
+        return Result.success(productReviewService.getReviewStatistics(productId));
     }
 
     @PostMapping("/reply")
@@ -58,5 +69,13 @@ public class ProductReviewController {
     @SaCheckPermission("sys:review:delete")
     public Result<Boolean> delete(@PathVariable Long id) {
         return Result.success(productReviewService.adminDeleteReview(id));
+    }
+
+    @DeleteMapping("/deleteBatch")
+    @Operation(summary = "批量删除评价")
+    @OperationLogger("批量删除评价")
+    @SaCheckPermission("sys:review:delete")
+    public Result<Boolean> deleteBatch(@RequestBody List<Long> ids) {
+        return Result.success(productReviewService.adminDeleteBatch(ids));
     }
 }

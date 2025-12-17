@@ -22,6 +22,16 @@ export function getReviewDetailApi(id: number) {
 }
 
 /**
+ * 获取商品评价统计
+ */
+export function getReviewStatisticsApi(productId: number) {
+    return request({
+        url: '/sys/review/statistics/' + productId,
+        method: 'get'
+    })
+}
+
+/**
  * 管理员回复评价
  */
 export function replyReviewApi(data: { parentReviewId: number; content: string }) {
@@ -39,5 +49,16 @@ export function deleteReviewApi(id: number) {
     return request({
         url: '/sys/review/delete/' + id,
         method: 'delete'
+    })
+}
+
+/**
+ * 批量删除评价
+ */
+export function deleteBatchReviewApi(ids: number[]) {
+    return request({
+        url: '/sys/review/deleteBatch',
+        method: 'delete',
+        data: ids
     })
 }

@@ -63,6 +63,7 @@ const router = useRouter();
 const isEditing = ref(false);
 const activeTab = ref<"orders" | "favorites" | "addresses">("orders");
 const expandedOrder = ref<number | null>(null);
+const mobileExpandedOrder = ref<number | null>(null); // 移动端展开的订单
 const shoppingCart = ref<Cart[]>([]);
 const favorites = ref<Favorites[]>([]);
 const orders = ref<Order[]>([]);
@@ -469,6 +470,24 @@ const handleUpdatePassword = async () => {
 
 const toggleOrderExpand = (id: number) => {
   expandedOrder.value = expandedOrder.value === id ? null : id;
+};
+
+// 移动端展开订单详情
+const handleMobileOrderExpand = async (order: Order) => {
+  if (mobileExpandedOrder.value === order.id) {
+    mobileExpandedOrder.value = null;
+  } else {
+    mobileExpandedOrder.value = order.id;
+    // 加载订单详情
+    if (!orderDetailsMap.value[order.orderNumber]) {
+      try {
+        const res = await getOrderDetailWithStatusApi(order.orderNumber);
+        orderDetailsMap.value[order.orderNumber] = res.data;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }
 };
 
 const getOrders = async () => {
@@ -901,21 +920,23 @@ onUnmounted(() => {
             个性签名：{{ userStore.user.signature || "无" }}
           </p>
 
-          <div class="flex gap-4 justify-center md:justify-start mt-4">
-            <el-button round @click="startEditing">
-              <Edit2 :size="16" class="mr-2" /> 编辑信息
+          <div class="flex flex-wrap gap-2 sm:gap-4 justify-center md:justify-start mt-4">
+            <el-button round size="small" class="!text-xs sm:!text-sm" @click="startEditing">
+              <Edit2 :size="14" class="mr-1 sm:mr-2" /> 编辑信息
             </el-button>
             <el-button
               v-if="userStore.user.loginType === 'email'"
               round
+              size="small"
+              class="!text-xs sm:!text-sm"
               type="warning"
               plain
               @click="openPasswordDialog"
             >
-              <Lock :size="16" class="mr-2" /> 修改密码
+              <Lock :size="14" class="mr-1 sm:mr-2" /> 修改密码
             </el-button>
-            <el-button round type="danger" plain @click="handleLogout">
-              <LogOut :size="16" class="mr-2" /> 退出登录
+            <el-button round size="small" class="!text-xs sm:!text-sm" type="danger" plain @click="handleLogout">
+              <LogOut :size="14" class="mr-1 sm:mr-2" /> 退出登录
             </el-button>
           </div>
         </div>
@@ -999,7 +1020,75 @@ onUnmounted(() => {
           >
         </div>
         <div v-else>
-          <el-table ref="orderTableRef" :data="orders" @expand-change="expandChange" row-key="id" v-loading="loading">
+          <!-- 移动端订单卡片视图 -->
+          <div class="block sm:hidden space-y-4">
+            <div
+              v-for="order in orders"
+              :key="order.id"
+              class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl overflow-hidden"
+            >
+              <!-- 订单头部 -->
+              <div class="p-4 border-b border-gray-100 dark:border-zinc-800">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-xs text-gray-500 font-mono">{{ order.orderNumber }}</span>
+                  <el-tag :type="getStatusTagType(order.status)" size="small">{{ getStatusText(order.status) }}</el-tag>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-xs text-gray-400">{{ order.createTime }}</span>
+                  <span class="font-bold text-blue-600">￥{{ order.amount }}</span>
+                </div>
+              </div>
+
+              <!-- 订单商品预览 -->
+              <div class="p-4" @click="handleMobileOrderExpand(order)">
+                <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                  <Package :size="14" />
+                  <span>点击查看商品详情</span>
+                  <ChevronDown :size="14" :class="{ 'rotate-180': mobileExpandedOrder === order.id }" class="ml-auto transition-transform" />
+                </div>
+              </div>
+
+              <!-- 展开的商品详情 -->
+              <div v-if="mobileExpandedOrder === order.id && orderDetailsMap[order.orderNumber]" class="px-4 pb-4">
+                <div class="grid grid-cols-3 gap-2">
+                  <div
+                    v-for="item in orderDetailsMap[order.orderNumber]"
+                    :key="item.productId"
+                    class="relative"
+                  >
+                    <img :src="item.productImage" class="w-full aspect-square object-cover rounded-lg" />
+                    <span class="absolute bottom-1 right-1 bg-black/60 text-white text-xs px-1 rounded">x{{ item.number }}</span>
+                    <!-- 评价按钮 -->
+                    <el-button
+                      v-if="order.status === 3 && item.reviewStatus !== 1"
+                      type="primary"
+                      size="small"
+                      class="w-full mt-1 !text-xs"
+                      @click.stop="handleReview(order, item)"
+                    >评价</el-button>
+                    <el-tag v-else-if="order.status === 3 && item.reviewStatus === 1" type="info" size="small" class="w-full mt-1 text-center">已评价</el-tag>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 操作按钮 -->
+              <div class="p-4 pt-0 flex flex-wrap gap-2">
+                <el-button v-if="order.status === 0" type="primary" size="small" @click="handlePay(order)">去支付</el-button>
+                <span v-if="order.status === 0 && orderCountdowns[order.orderNumber] > 0" class="text-red-600 font-mono text-xs font-bold self-center">
+                  {{ formatTime(orderCountdowns[order.orderNumber]) }}
+                </span>
+                <el-button v-if="order.status === 0" type="danger" plain size="small" @click="handleCancel(order)">取消</el-button>
+                <el-button v-if="order.status === 1" type="warning" plain size="small" @click="handleRefund(order)">退款</el-button>
+                <el-button v-if="order.status === 2 || order.status === 7" type="success" size="small" @click="handleConfirm(order)">确认收货</el-button>
+                <el-button v-if="order.status === 2 || order.status === 7" type="info" plain size="small" @click="handleViewLogistics(order)">物流</el-button>
+                <el-button v-if="order.status === 3" type="primary" size="small" @click="handleMobileOrderExpand(order)">去评价</el-button>
+                <el-button v-if="[3, 4, 5, 6].includes(order.status)" type="danger" link size="small" @click="handleDelete(order)">删除</el-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PC端表格视图 -->
+          <el-table ref="orderTableRef" :data="orders" @expand-change="expandChange" row-key="id" v-loading="loading" class="hidden sm:block">
             <el-table-column type="expand">
               <template #default="props">
                 <div class="p-6 bg-gray-50 dark:bg-zinc-800/50 rounded-xl">

@@ -22,10 +22,15 @@ import com.river.vo.ProductReviewVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.river.vo.ReviewStatisticsVO;
+
+import com.river.utils.SensitiveWordFilter;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +44,12 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
     @Override
     public boolean addReview(ProductReviewDTO dto) {
         Long userId = StpUtil.getLoginIdAsLong();
+
+        // 敏感词过滤
+        if (dto.getContent() != null &&     SensitiveWordFilter.containsSensitiveWord(dto.getContent())) {
+            List<String> sensitiveWords = SensitiveWordFilter.getSensitiveWords(dto.getContent());
+            throw new ServiceException("评价内容包含敏感词：" + String.join("、", sensitiveWords));
+        }
 
         // 检查是否已评价（仅对根评价检查，回复不限制）
         if (dto.getParentReviewId() == null) {
@@ -154,7 +165,8 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
     @Override
     public Long selectReviewCount(Long productId) {
         LambdaQueryWrapper<ProductReview> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ProductReview::getProductId, productId);
+        wrapper.eq(ProductReview::getProductId, productId)
+                .isNull(ProductReview::getParentReviewId);  // 只统计根评价，不统计回复
         return count(wrapper);
     }
 
@@ -288,12 +300,13 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
     // ========== 后台管理方法实现 ==========
 
     @Override
-    public IPage<ProductReviewVO> adminSelectPage(ProductReview query, Integer pageNum, Integer pageSize) {
+    public IPage<ProductReviewVO> adminSelectPage(ProductReview query, Integer pageNum, Integer pageSize, Integer scoreType) {
         Page<ProductReview> page = new Page<>(pageNum, pageSize);
 
         LambdaQueryWrapper<ProductReview> wrapper = new LambdaQueryWrapper<>();
         // 只查询根评价
         wrapper.isNull(ProductReview::getParentReviewId);
+
         // 条件查询
         if (query.getProductId() != null) {
             wrapper.eq(ProductReview::getProductId, query.getProductId());
@@ -304,6 +317,26 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
         if (query.getProductScore() != null) {
             wrapper.eq(ProductReview::getProductScore, query.getProductScore());
         }
+
+        // 评分类型筛选
+        if (scoreType != null && scoreType != 0) {
+            switch (scoreType) {
+                case 1: // 好评
+                    wrapper.in(ProductReview::getProductScore, 4, 5);
+                    break;
+                case 2: // 中评
+                    wrapper.eq(ProductReview::getProductScore, 3);
+                    break;
+                case 3: // 差评
+                    wrapper.in(ProductReview::getProductScore, 1, 2);
+                    break;
+                case 4: // 有图
+                    wrapper.isNotNull(ProductReview::getImages)
+                            .ne(ProductReview::getImages, "");
+                    break;
+            }
+        }
+
         wrapper.orderByDesc(ProductReview::getCreateTime);
 
         IPage<ProductReview> reviewPage = page(page, wrapper);
@@ -384,5 +417,240 @@ public class ProductReviewServiceImpl extends ServiceImpl<ProductReviewMapper, P
         }
 
         return vo;
+    }
+
+    @Override
+    public boolean adminDeleteBatch(List<Long> ids) {
+        for (Long id : ids) {
+            adminDeleteReview(id);
+        }
+        return true;
+    }
+
+    // ========== 评价统计方法实现 ==========
+
+    @Override
+    public ReviewStatisticsVO getReviewStatistics(Long productId) {
+        LambdaQueryWrapper<ProductReview> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductReview::getProductId, productId)
+                .isNull(ProductReview::getParentReviewId);  // 只统计根评价
+
+        List<ProductReview> reviews = list(wrapper);
+
+        long totalCount = reviews.size();
+        if (totalCount == 0) {
+            return ReviewStatisticsVO.builder()
+                    .totalCount(0L)
+                    .goodCount(0L)
+                    .mediumCount(0L)
+                    .badCount(0L)
+                    .goodRate(BigDecimal.ZERO)
+                    .avgProductScore(BigDecimal.ZERO)
+                    .avgLogisticsScore(BigDecimal.ZERO)
+                    .avgMerchantScore(BigDecimal.ZERO)
+                    .star1Count(0L)
+                    .star2Count(0L)
+                    .star3Count(0L)
+                    .star4Count(0L)
+                    .star5Count(0L)
+                    .withImageCount(0L)
+                    .build();
+        }
+
+        // 统计各星级数量
+        long star1 = reviews.stream().filter(r -> r.getProductScore() != null && r.getProductScore() == 1).count();
+        long star2 = reviews.stream().filter(r -> r.getProductScore() != null && r.getProductScore() == 2).count();
+        long star3 = reviews.stream().filter(r -> r.getProductScore() != null && r.getProductScore() == 3).count();
+        long star4 = reviews.stream().filter(r -> r.getProductScore() != null && r.getProductScore() == 4).count();
+        long star5 = reviews.stream().filter(r -> r.getProductScore() != null && r.getProductScore() == 5).count();
+
+        long goodCount = star4 + star5;
+        long mediumCount = star3;
+        long badCount = star1 + star2;
+
+        // 计算好评率
+        BigDecimal goodRate = BigDecimal.valueOf(goodCount)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(BigDecimal.valueOf(totalCount), 1, RoundingMode.HALF_UP);
+
+        // 计算平均分
+        double avgProduct = reviews.stream()
+                .filter(r -> r.getProductScore() != null)
+                .mapToInt(ProductReview::getProductScore)
+                .average().orElse(0);
+        double avgLogistics = reviews.stream()
+                .filter(r -> r.getLogisticsScore() != null)
+                .mapToInt(ProductReview::getLogisticsScore)
+                .average().orElse(0);
+        double avgMerchant = reviews.stream()
+                .filter(r -> r.getMerchantScore() != null)
+                .mapToInt(ProductReview::getMerchantScore)
+                .average().orElse(0);
+
+        // 有图评价数
+        long withImageCount = reviews.stream()
+                .filter(r -> r.getImages() != null && !r.getImages().isEmpty())
+                .count();
+
+        return ReviewStatisticsVO.builder()
+                .totalCount(totalCount)
+                .goodCount(goodCount)
+                .mediumCount(mediumCount)
+                .badCount(badCount)
+                .goodRate(goodRate)
+                .avgProductScore(BigDecimal.valueOf(avgProduct).setScale(1, RoundingMode.HALF_UP))
+                .avgLogisticsScore(BigDecimal.valueOf(avgLogistics).setScale(1, RoundingMode.HALF_UP))
+                .avgMerchantScore(BigDecimal.valueOf(avgMerchant).setScale(1, RoundingMode.HALF_UP))
+                .star1Count(star1)
+                .star2Count(star2)
+                .star3Count(star3)
+                .star4Count(star4)
+                .star5Count(star5)
+                .withImageCount(withImageCount)
+                .build();
+    }
+
+    @Override
+    public IPage<ProductReviewVO> selectReviewByScore(Long productId, Integer scoreType, Integer pageNum, Integer pageSize) {
+        Page<ProductReview> page = new Page<>(pageNum, pageSize);
+
+        LambdaQueryWrapper<ProductReview> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductReview::getProductId, productId)
+                .isNull(ProductReview::getParentReviewId);
+
+        // scoreType: 0-全部, 1-好评(4-5), 2-中评(3), 3-差评(1-2), 4-有图
+        if (scoreType != null) {
+            switch (scoreType) {
+                case 1: // 好评
+                    wrapper.in(ProductReview::getProductScore, 4, 5);
+                    break;
+                case 2: // 中评
+                    wrapper.eq(ProductReview::getProductScore, 3);
+                    break;
+                case 3: // 差评
+                    wrapper.in(ProductReview::getProductScore, 1, 2);
+                    break;
+                case 4: // 有图
+                    wrapper.isNotNull(ProductReview::getImages)
+                            .ne(ProductReview::getImages, "");
+                    break;
+            }
+        }
+
+        wrapper.orderByDesc(ProductReview::getCreateTime);
+        IPage<ProductReview> reviewPage = page(page, wrapper);
+
+        // 批量转换
+        List<ProductReviewVO> voList = batchConvertToVO(reviewPage.getRecords());
+
+        // 加载子评价
+        for (ProductReviewVO vo : voList) {
+            List<ProductReviewVO> children = selectChildrenByRootId(vo.getId());
+            vo.setChildren(children);
+        }
+
+        Page<ProductReviewVO> voPage = new Page<>(pageNum, pageSize);
+        voPage.setRecords(voList);
+        voPage.setTotal(reviewPage.getTotal());
+        return voPage;
+    }
+
+    /**
+     * 批量转换为VO（优化N+1查询）
+     */
+    private List<ProductReviewVO> batchConvertToVO(List<ProductReview> reviews) {
+        if (reviews == null || reviews.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 收集所有需要查询的ID
+        Set<Long> userIds = new HashSet<>();
+        Set<Long> productIds = new HashSet<>();
+        Set<Long> parentReviewIds = new HashSet<>();
+
+        for (ProductReview review : reviews) {
+            if (review.getUserId() != null) userIds.add(review.getUserId());
+            if (review.getProductId() != null) productIds.add(review.getProductId());
+            if (review.getParentReviewId() != null) parentReviewIds.add(review.getParentReviewId());
+            if (review.getAdminId() != null) userIds.add(review.getAdminId());
+        }
+
+        // 批量查询用户
+        Map<Long, SysUser> userMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<SysUser> users = sysUserMapper.selectBatchIds(userIds);
+            userMap = users.stream().collect(Collectors.toMap(SysUser::getId, Function.identity(), (a, b) -> a));
+        }
+
+        // 批量查询商品
+        Map<Long, Product> productMap = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            List<Product> products = productMapper.selectBatchIds(productIds);
+            productMap = products.stream().collect(Collectors.toMap(Product::getId, Function.identity(), (a, b) -> a));
+        }
+
+        // 批量查询父评价
+        Map<Long, ProductReview> parentReviewMap = new HashMap<>();
+        if (!parentReviewIds.isEmpty()) {
+            List<ProductReview> parentReviews = listByIds(parentReviewIds);
+            parentReviewMap = parentReviews.stream().collect(Collectors.toMap(ProductReview::getId, Function.identity(), (a, b) -> a));
+        }
+
+        // 转换
+        final Map<Long, SysUser> finalUserMap = userMap;
+        final Map<Long, Product> finalProductMap = productMap;
+        final Map<Long, ProductReview> finalParentReviewMap = parentReviewMap;
+
+        return reviews.stream().map(review -> {
+            SysUser user = finalUserMap.get(review.getUserId());
+            Product product = finalProductMap.get(review.getProductId());
+
+            // 处理图片URL列表
+            List<String> imageList = new ArrayList<>();
+            if (review.getImages() != null && !review.getImages().isEmpty()) {
+                imageList = Arrays.asList(review.getImages().split(","));
+            }
+
+            // 获取父评价用户名
+            String parentUsername = null;
+            if (review.getParentReviewId() != null) {
+                ProductReview parent = finalParentReviewMap.get(review.getParentReviewId());
+                if (parent != null) {
+                    SysUser parentUser = finalUserMap.get(parent.getUserId());
+                    parentUsername = parentUser != null ? parentUser.getUsername() : "";
+                }
+            }
+
+            // 获取管理员名称
+            String adminName = null;
+            if (review.getIsAdmin() != null && review.getIsAdmin() == 1 && review.getAdminId() != null) {
+                SysUser admin = finalUserMap.get(review.getAdminId());
+                adminName = admin != null ? admin.getUsername() : "管理员";
+            }
+
+            return ProductReviewVO.builder()
+                    .id(review.getId())
+                    .orderNumber(review.getOrderNumber())
+                    .productId(review.getProductId())
+                    .productName(product != null ? product.getName() : "")
+                    .productImage(product != null ? product.getImage() : "")
+                    .userId(review.getUserId())
+                    .username(user != null ? user.getUsername() : "")
+                    .userAvatar(user != null ? user.getAvatar() : "")
+                    .productScore(review.getProductScore())
+                    .logisticsScore(review.getLogisticsScore())
+                    .merchantScore(review.getMerchantScore())
+                    .content(review.getContent())
+                    .imageList(imageList)
+                    .parentReviewId(review.getParentReviewId())
+                    .parentUsername(parentUsername)
+                    .rootReviewId(review.getRootReviewId())
+                    .isAdmin(review.getIsAdmin())
+                    .adminId(review.getAdminId())
+                    .adminName(adminName)
+                    .createTime(review.getCreateTime())
+                    .updateTime(review.getUpdateTime())
+                    .build();
+        }).collect(Collectors.toList());
     }
 }

@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="dialogVisible" title="评价商品" width="900px" @close="handleClose">
+  <el-dialog v-model="dialogVisible" title="评价商品" width="90%" :style="{ maxWidth: '900px' }" @close="handleClose">
     <div class="review-dialog">
       <!-- 商品信息 -->
       <div class="product-info">
@@ -175,6 +175,12 @@ const handleClose = () => {
     border-radius: 8px;
     margin-bottom: 20px;
 
+    @media (max-width: 640px) {
+      gap: 10px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
     .product-detail {
       flex: 1;
 
@@ -182,11 +188,20 @@ const handleClose = () => {
         font-size: 16px;
         font-weight: bold;
         margin-bottom: 8px;
+
+        @media (max-width: 640px) {
+          font-size: 14px;
+          margin-bottom: 5px;
+        }
       }
 
       .order-number {
         font-size: 14px;
         color: #666;
+
+        @media (max-width: 640px) {
+          font-size: 12px;
+        }
       }
     }
   }
@@ -197,10 +212,20 @@ const handleClose = () => {
     background: #fafafa;
     border-radius: 8px;
 
+    @media (max-width: 640px) {
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
     .score-item {
       display: flex;
       align-items: center;
       margin-bottom: 15px;
+      flex-wrap: wrap;
+
+      @media (max-width: 640px) {
+        margin-bottom: 10px;
+      }
 
       &:last-child {
         margin-bottom: 0;
@@ -209,12 +234,22 @@ const handleClose = () => {
       .score-label {
         width: 100px;
         font-weight: 500;
+
+        @media (max-width: 640px) {
+          width: 80px;
+          font-size: 13px;
+        }
       }
 
       .score-text {
         margin-left: 15px;
         color: #f59e0b;
         font-weight: 500;
+
+        @media (max-width: 640px) {
+          margin-left: 10px;
+          font-size: 12px;
+        }
       }
     }
   }
@@ -225,10 +260,20 @@ const handleClose = () => {
     background: #fafafa;
     border-radius: 8px;
 
+    @media (max-width: 640px) {
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
     .upload-label {
       margin-bottom: 10px;
       font-size: 14px;
       color: #666;
+
+      @media (max-width: 640px) {
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
     }
   }
 }
