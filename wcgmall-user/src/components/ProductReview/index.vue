@@ -4,6 +4,57 @@
       <h3>商品评价 ({{ reviewCount }})</h3>
     </div>
 
+    <!-- 评价统计 -->
+    <div v-if="statistics && statistics.totalCount > 0" class="review-statistics">
+      <div class="stats-summary">
+        <div class="good-rate">
+          <span class="rate-value">{{ statistics.goodRate }}%</span>
+          <span class="rate-label">好评率</span>
+        </div>
+        <div class="avg-scores">
+          <div class="avg-item">
+            <span>商品评分</span>
+            <el-rate v-model="statistics.avgProductScore" disabled :max="5" size="small" />
+            <span class="score-num">{{ statistics.avgProductScore }}</span>
+          </div>
+          <div class="avg-item">
+            <span>物流评分</span>
+            <el-rate v-model="statistics.avgLogisticsScore" disabled :max="5" size="small" />
+            <span class="score-num">{{ statistics.avgLogisticsScore }}</span>
+          </div>
+          <div class="avg-item">
+            <span>商家评分</span>
+            <el-rate v-model="statistics.avgMerchantScore" disabled :max="5" size="small" />
+            <span class="score-num">{{ statistics.avgMerchantScore }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 筛选标签 -->
+      <div class="filter-tabs">
+        <span
+          :class="['filter-tab', { active: currentFilter === 0 }]"
+          @click="handleFilter(0)"
+        >全部({{ statistics.totalCount }})</span>
+        <span
+          :class="['filter-tab', { active: currentFilter === 1 }]"
+          @click="handleFilter(1)"
+        >好评({{ statistics.goodCount }})</span>
+        <span
+          :class="['filter-tab', { active: currentFilter === 2 }]"
+          @click="handleFilter(2)"
+        >中评({{ statistics.mediumCount }})</span>
+        <span
+          :class="['filter-tab', { active: currentFilter === 3 }]"
+          @click="handleFilter(3)"
+        >差评({{ statistics.badCount }})</span>
+        <span
+          :class="['filter-tab', { active: currentFilter === 4 }]"
+          @click="handleFilter(4)"
+        >有图({{ statistics.withImageCount }})</span>
+      </div>
+    </div>
+
     <!-- 评价表单 -->
     <div v-if="showReviewForm" class="review-form">
       <div class="score-section">
@@ -170,8 +221,11 @@ import {
   getProductReviewTreeApi,
   getProductReviewCountApi,
   deleteProductReviewApi,
+  getReviewStatisticsApi,
+  getReviewByScoreApi,
   type ProductReviewDTO,
-  type ProductReviewVO
+  type ProductReviewVO,
+  type ReviewStatisticsVO
 } from '@/api/productReview';
 import { useUserStore } from '@/stores/modules/user';
 
@@ -191,6 +245,8 @@ const reviewList = ref<ProductReviewVO[]>([]);
 const pageNum = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+const statistics = ref<ReviewStatisticsVO | null>(null);
+const currentFilter = ref(0); // 0-全部, 1-好评, 2-中评, 3-差评, 4-有图
 
 const form = reactive<ProductReviewDTO>({
   orderNumber: props.orderNumber || '',
@@ -236,11 +292,31 @@ const insert = (generator: any) => {
   mdRef.value?.insert(generator);
 };
 
+// 加载评价统计
+const loadStatistics = async () => {
+  try {
+    const res = await getReviewStatisticsApi(props.productId);
+    if (res.code === 200) {
+      statistics.value = res.data;
+    }
+  } catch (error) {
+    console.error('加载评价统计失败:', error);
+  }
+};
+
+// 筛选评价
+const handleFilter = (filterType: number) => {
+  currentFilter.value = filterType;
+  pageNum.value = 1;
+  loadReviews();
+};
+
 // 加载评价列表
 const loadReviews = async () => {
   try {
-    const res = await getProductReviewTreeApi({
+    const res = await getReviewByScoreApi({
       productId: props.productId,
+      scoreType: currentFilter.value || undefined,
       pageNum: pageNum.value,
       pageSize: pageSize.value
     });
@@ -345,6 +421,7 @@ const deleteReview = (id: number) => {
 };
 
 onMounted(() => {
+  loadStatistics();
   loadReviews();
 });
 </script>
@@ -358,6 +435,85 @@ onMounted(() => {
     h3 {
       font-size: 24px;
       font-weight: bold;
+    }
+  }
+
+  // 评价统计样式
+  .review-statistics {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+
+    .stats-summary {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 20px;
+
+      .good-rate {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border-radius: 8px;
+        color: #fff;
+
+        .rate-value {
+          font-size: 32px;
+          font-weight: bold;
+        }
+
+        .rate-label {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+      }
+
+      .avg-scores {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .avg-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+
+          .score-num {
+            color: #ff6b6b;
+            font-weight: bold;
+          }
+        }
+      }
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      .filter-tab {
+        padding: 8px 16px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+
+        &:hover {
+          border-color: #409eff;
+          color: #409eff;
+        }
+
+        &.active {
+          background: #409eff;
+          border-color: #409eff;
+          color: #fff;
+        }
+      }
     }
   }
 
@@ -562,6 +718,29 @@ onMounted(() => {
 // 暗黑模式适配 - 需要在 scoped 外部定义
 :global(.dark) {
   .product-review {
+    .review-statistics {
+      background: #18181b;
+
+      .filter-tabs {
+        .filter-tab {
+          background: #27272a;
+          border-color: #3f3f46;
+          color: #e4e4e7;
+
+          &:hover {
+            border-color: #409eff;
+            color: #409eff;
+          }
+
+          &.active {
+            background: #409eff;
+            border-color: #409eff;
+            color: #fff;
+          }
+        }
+      }
+    }
+
     .review-list {
       .review-item {
         border-bottom-color: #3f3f46;

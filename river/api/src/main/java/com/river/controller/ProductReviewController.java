@@ -6,6 +6,7 @@ import com.river.common.Result;
 import com.river.dto.ProductReviewDTO;
 import com.river.service.ProductReviewService;
 import com.river.vo.ProductReviewVO;
+import com.river.vo.ReviewStatisticsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,22 @@ public class ProductReviewController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         return Result.success(productReviewService.selectReviewTree(productId, pageNum, pageSize));
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "按评分筛选评价列表")
+    public Result<IPage<ProductReviewVO>> selectReviewByScore(
+            @RequestParam Long productId,
+            @RequestParam(required = false) Integer scoreType,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        return Result.success(productReviewService.selectReviewByScore(productId, scoreType, pageNum, pageSize));
+    }
+
+    @GetMapping("/statistics/{productId}")
+    @Operation(summary = "获取商品评价统计")
+    public Result<ReviewStatisticsVO> getStatistics(@PathVariable Long productId) {
+        return Result.success(productReviewService.getReviewStatistics(productId));
     }
 
     @GetMapping("/count/{productId}")

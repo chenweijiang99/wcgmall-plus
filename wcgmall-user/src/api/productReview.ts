@@ -60,3 +60,31 @@ export function deleteProductReviewApi(id: number) {
 export function getPendingReviewProductsApi() {
   return request.get<any, ApiResponse<ProductReviewVO[]>>('/user/productReview/pending');
 }
+
+// 评价统计VO
+export interface ReviewStatisticsVO {
+  totalCount: number
+  goodCount: number
+  mediumCount: number
+  badCount: number
+  goodRate: number
+  avgProductScore: number
+  avgLogisticsScore: number
+  avgMerchantScore: number
+  star1Count: number
+  star2Count: number
+  star3Count: number
+  star4Count: number
+  star5Count: number
+  withImageCount: number
+}
+
+// 获取商品评价统计
+export function getReviewStatisticsApi(productId: number) {
+  return request.get<any, ApiResponse<ReviewStatisticsVO>>(`/user/productReview/statistics/${productId}`);
+}
+
+// 按评分筛选评价列表
+export function getReviewByScoreApi(params: { productId: number, scoreType?: number, pageNum: number, pageSize: number }) {
+  return request.get<any, ApiResponse<{ records: ProductReviewVO[], total: number }>>('/user/productReview/list', { params });
+}

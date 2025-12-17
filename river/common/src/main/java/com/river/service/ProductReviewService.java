@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.river.dto.ProductReviewDTO;
 import com.river.entity.ProductReview;
 import com.river.vo.ProductReviewVO;
+import com.river.vo.ReviewStatisticsVO;
 
 import java.util.List;
 
@@ -62,7 +63,24 @@ public interface ProductReviewService extends IService<ProductReview> {
     boolean adminDeleteReview(Long id);
 
     /**
+     * 批量删除评价(管理员权限)
+     */
+    boolean adminDeleteBatch(List<Long> ids);
+
+    /**
      * 获取评价详情(包含所有回复)
      */
     ProductReviewVO getReviewDetail(Long id);
+
+    // ========== 评价统计方法 ==========
+
+    /**
+     * 获取商品评价统计
+     */
+    ReviewStatisticsVO getReviewStatistics(Long productId);
+
+    /**
+     * 按评分筛选评价
+     */
+    IPage<ProductReviewVO> selectReviewByScore(Long productId, Integer scoreType, Integer pageNum, Integer pageSize);
 }
