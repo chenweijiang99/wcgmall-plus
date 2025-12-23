@@ -12,10 +12,12 @@ WCG Mall Plus 是一个基于 Spring Boot 3.x 和 Vue 3.x 的全栈文创商城�
 
 - 🎨 **文创特色**：集成博客系统，支持文创内容营销
 - 🚀 **现代化技术栈**：Spring Boot 3.x + Vue 3.x + Element Plus
-- 📱 **响应式设计**：支持PC端和移动端访问
+- 📱 **响应式设计**：支持PC端和移动端访问（仅限用户端）
 - 🔐 **安全认证**：基于Sa-Token的完整权限管理系统
 - 📊 **数据可视化**：集成ECharts实现数据统计和分析
 - 🤖 **AI集成**：接入豆包推理AI，支持智能摘要生成
+- 📦 **多云存储**：支持多种云存储平台，如阿里云、腾讯云、七牛云、MinIO
+- 💳 **其他功能**： 集成支付宝沙盒支付，支持顺丰api，支持邮件服务。
 
 ### 1.2 在线地址
 
@@ -45,13 +47,14 @@ WCG Mall Plus 是一个基于 Spring Boot 3.x 和 Vue 3.x 的全栈文创商城�
 项目采用多模块Maven架构，模块划分清晰：
 
 ```
-river/                              # 后端根项目
-├── common/                         # 公共模块
-│   ├── pom.xml                    # 核心依赖管理
-│   └── src/main/java/com/river/   # 公共类、工具、配置
-├── admin/                         # 管理后台API模块
+river/                            # 后端根项目
+├── common/                       # 公共模块
+│   ├── pom.xml                   # 核心依赖管理
+│   └── src/main/java/com/river/  # 公共类、工具、配置
+├── admin/                        # 管理后台API模块
 ├── api/                          # 用户端API模块
 ├── auth/                         # 认证授权模块
+├── chat/                         # 实时聊天模块
 ├── file/                         # 文件管理模块
 ├── quartz/                       # 定时任务模块
 ├── generator/                    # 代码生成器

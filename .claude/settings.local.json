@@ -3,7 +3,10 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(grep:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(dir:*)",
+      "Bash(del:*)",
+      "Bash(echo:*)"
     ]
   }
 }

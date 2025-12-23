@@ -7,6 +7,7 @@ import { ElMessage } from "element-plus";
 import { setToken } from "./utils/auth";
 import router from "./router";
 import { useUserStore } from "@/stores/modules/user";
+import { emitter } from "@/event/emitter";
 const userStore = useUserStore();
 const route = useRoute();
 // 在登录页隐藏导航栏和页脚
@@ -35,6 +36,8 @@ const handleThirdPartyLogin = () => {
   if (token) {
     setToken(token);
     userStore.getUserInfo();
+    // 触发导航栏数据刷新（购物车、收藏夹）
+    emitter.emit("refresh");
     ElMessage.success("登录成功");
     // 清除URL参数，避免刷新页面时重复处理
     window.history.replaceState({}, document.title, "/");

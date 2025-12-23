@@ -34,17 +34,19 @@ service.interceptors.response.use(
     const res = response.data
     if (res.code !== 200) {
       ElMessage.error(res.message || '请求错误')
-      if (res.code === 401) {
-        ElMessageBox.confirm("当前页面已失效，请重新登录", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        })
-        .then(() => {
-          const userStore = useUserStore()
+      // if (res.code === 401) {
+      //   ElMessageBox.confirm("当前页面已失效，请重新登录", "提示", {
+      //     confirmButtonText: "确定",
+      //     cancelButtonText: "取消",
+      //     type: "warning",
+      //   })
+      //   .then(() => {
+      //     const userStore = useUserStore()
+      //     userStore.logout()
+      //   })
+      // }
+       const userStore = useUserStore()
           userStore.logout()
-        })
-      }
       return Promise.reject(new Error(res.message || '请求错误'))
     }
     

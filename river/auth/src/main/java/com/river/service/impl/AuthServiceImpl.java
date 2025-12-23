@@ -162,6 +162,7 @@ public class AuthServiceImpl implements AuthService {
         //添加用户角色信息
         insertRole(sysUser);
 
+
         redisUtil.delete(RedisConstants.CAPTCHA_CODE_KEY + dto.getEmail());
         return true;
     }

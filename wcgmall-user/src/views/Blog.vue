@@ -24,6 +24,7 @@ import {
   Pencil,
   Trash2,
   EyeOff,
+  Eye,
   AlertCircle,
 } from "lucide-vue-next";
 import { ElMessage, ElMessageBox, UploadRequestOptions } from "element-plus";
@@ -66,6 +67,7 @@ const dialogTitle = computed(() => (form.id ? "编辑博客" : "写博客"));
 // 校验规则
 const rules = reactive({
   title: [{ required: true, message: "请输入博客标题", trigger: "blur" }],
+  author: [{ required: true, message: "请输入作者名称", trigger: "blur" }],
   image: [{ required: true, message: "请上传封面图", trigger: "change" }],
   contentMd: [{ required: true, message: "请输入文章内容", trigger: "blur" }],
 });
@@ -303,6 +305,30 @@ const handleTakeDown = async (blog: Blog) => {
     .catch(() => {});
 };
 
+// 上架博客
+const handlePublish = async (blog: Blog) => {
+  ElMessageBox.confirm("确定要上架这篇博客吗？上架后其他用户将可以查看。", "上架确认", {
+    confirmButtonText: "上架",
+    cancelButtonText: "取消",
+    type: "success",
+  })
+    .then(async () => {
+      try {
+        // 调用更新接口，将状态改为 1 (上架/已发布)
+        await updateBlogApi({
+          id: blog.id,
+          status: 1,
+        });
+        ElMessage.success("已上架");
+        hasMore.value = true;
+        fetchBlogs(true);
+      } catch (error) {
+        console.error(error);
+      }
+    })
+    .catch(() => {});
+};
+
 // 图片/视频上传逻辑
 const handleCoverUpload = async (options: UploadRequestOptions) => {
   try {
@@ -363,7 +389,7 @@ const submitBlog = async () => {
           ElMessage.success("修改成功");
         } else {
           await addBlogApi(form);
-          ElMessage.success("发布成功，请等待管理员审核");
+          ElMessage.success("发布成功");
         }
         showDialog.value = false;
         hasMore.value = true;
@@ -379,13 +405,13 @@ const submitBlog = async () => {
 
 // 获取博客状态样式和文本
 const getStatusBadge = (status: number) => {
-  // 1=已发布, 0=已下架/审核中
+  // 1=已发布/已上架, 0=已下架/草稿
   if (status === 1) {
-    return { text: "已发布", class: "bg-green-50 text-green-600 border-green-100" };
+    return { text: "已上架", class: "bg-green-50 text-green-600 border-green-100" };
   } else {
     return {
-      text: "审核中/已下架",
-      class: "bg-orange-50 text-orange-600 border-orange-100",
+      text: "已下架",
+      class: "bg-gray-50 text-gray-600 border-gray-100",
     };
   }
 };
@@ -545,6 +571,16 @@ onUnmounted(() => {
               <Pencil :size="16" />
             </button>
 
+            <!-- 上架 (仅当状态为 0-已下架 时显示) -->
+            <button
+              v-if="blog.status === 0"
+              @click.prevent.stop="handlePublish(blog)"
+              class="p-2.5 bg-white text-green-600 rounded-full shadow-md hover:bg-green-600 hover:text-white transition-colors"
+              title="上架"
+            >
+              <Eye :size="16" />
+            </button>
+
             <!-- 下架 (仅当状态为 1-已发布 时显示) -->
             <button
               v-if="blog.status === 1"
@@ -638,13 +674,27 @@ onUnmounted(() => {
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-          <el-form-item label="标题" prop="title">
+          <el-row :gutter="20">
+            <el-col :span="16">
+              <el-form-item label="博客标题" prop="title">
+                <el-input
+                  v-model="form.title"
+                  placeholder="请输入引人注目的标题"
+                  size="large"
+                />
+              </el-form-item>
+              <el-form-item label="作者" prop="author">
+                <el-input v-model="form.author" placeholder="请输入作者名" size="large" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <!-- <el-form-item label="标题" prop="title">
             <el-input
               v-model="form.title"
               placeholder="请输入引人注目的标题"
               size="large"
             />
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="封面图" prop="image">
             <el-upload
               class="w-full"
