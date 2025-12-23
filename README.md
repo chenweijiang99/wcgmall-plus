@@ -26,6 +26,7 @@ WCG Mall Plus 是一个基于 Spring Boot 3.x 和 Vue 3.x 的全栈文创商城�
 - **用户端**: https://wcgmall-plus-web.wcgmallcwj.online/
 - **管理端**: https://wcgmall-plus-admin.wcgmallcwj.online/
 - **测试账户**: test / 123456
+- **支付宝支付账户**: oworsb4854@sandbox.com / 111111
 
 ## 二、后端技术架构
 
