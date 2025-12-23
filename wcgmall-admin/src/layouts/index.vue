@@ -45,8 +45,7 @@
   <!-- 水印组件 -->
   <Watermark />
 
-  <!-- 聊天对话框 -->
-  <ChatDialog />
+
 </template>
 
 <script setup lang="ts">
@@ -57,7 +56,7 @@ import Sidebar from "./components/Sidebar/index.vue";
 import LockScreen from "@/components/LockScreen/index.vue";
 import Watermark from "@/components/Watermark/index.vue";
 import Footer from "@/components/Footer/index.vue";
-import ChatDialog from "@/components/ChatDialog/index.vue";
+
 
 import { useSettingsStore, usePermissionStore } from "@/store";
 import { useTagsViewStore } from "@/store/modules/tagsView";
