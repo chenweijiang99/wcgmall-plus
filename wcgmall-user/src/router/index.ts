@@ -6,7 +6,6 @@ import Cart from '@/views/Cart.vue';
 import Checkout from '@/views/Checkout.vue';
 import Blog from '@/views/Blog.vue';
 import BlogDetail from '@/views/BlogDetail.vue';
-import CreateBlog from '@/views/CreateBlog.vue';
 import Profile from '@/views/Profile.vue';
 import Login from '@/views/Login.vue';
 import PayClose from '@/views/PayClose.vue';
@@ -21,7 +20,6 @@ const routes: RouteRecordRaw[] = [
   { path: '/checkout', component: Checkout, meta: { title: '结算' } },
   { path: '/blog', component: Blog, meta: { title: '博客' } },
   { path: '/blog/:id', component: BlogDetail, meta: { title: '博客详情' } },
-  { path: '/create-blog', component: CreateBlog, meta: { title: '发布博客' } },
   { path: '/profile', component: Profile, meta: { title: '个人中心' } },
   { path: '/login',name: 'Login', component: Login, meta: { hideLayout: true, title: '登录' }  },
   { path: '/payClose',name: 'PayClose', component: PayClose, meta: { hideLayout: true, title: '支付' }  },

@@ -62,13 +62,16 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
         blog.setUserId(StpUtil.getLoginIdAsLong());
         baseMapper.insert(blog);
 
-        ThreadUtil.execAsync(() -> {
-            String res = aiUtil.send(blog.getContent() + "请提供一段简短的介绍描述该文章的内容");
-            if (StringUtils.isNotBlank(res)) {
-                blog.setAiDescribe(res);
-                baseMapper.updateById(blog);
-            }
-        });
+        if(!blog.getContent().isEmpty() &&  blog.getContent().length() > 100) {
+            ThreadUtil.execAsync(() -> {
+                String res = aiUtil.send(blog.getContent() + "请提供一段简短的介绍描述该文章的内容");
+                if (StringUtils.isNotBlank(res)) {
+                    blog.setAiDescribe(res);
+                    baseMapper.updateById(blog);
+                }
+            });
+        }
+
         return true;
     }
 
@@ -77,6 +80,16 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
      */
     @Override
     public boolean update(Blog blog) {
+//        if(!blog.getContent().isEmpty() && blog.getContent().length() > 100 && !blog.getContent().equals(getById(blog.getId()).getContent())) {
+//            ThreadUtil.execAsync(() -> {
+//                String res = aiUtil.send(blog.getContent() + "请提供一段简短的介绍描述该文章的内容");
+//                if (StringUtils.isNotBlank(res)) {
+//                    blog.setAiDescribe(res);
+//                    baseMapper.updateById(blog);
+//                }
+//            });
+//        }
+
         return updateById(blog);
     }
 
