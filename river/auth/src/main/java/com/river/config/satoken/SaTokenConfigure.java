@@ -3,6 +3,7 @@ package com.river.config.satoken;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.stp.StpUtil;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -30,5 +31,20 @@ public class SaTokenConfigure implements WebMvcConfigurer {
                         "/localFile/**",
                         "/ws/**"              // WebSocket连接
                 );
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**") // 对所有请求路径生效
+                // 允许你的前端来源（精准授权，解决跨域问题，替换为你的实际前端地址，不要用*）
+                .allowedOrigins("http://117.72.179.87:86","http://117.72.179.87:87","*")
+                // 允许的HTTP请求方法（GET/POST等，覆盖常见场景）
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                // 允许携带自定义请求头（如Token、Content-Type等）
+                .allowedHeaders("*")
+                // 允许携带Cookie、Session等认证信息（如需登录状态保持，必须开启）
+                .allowCredentials(true)
+                // 预检请求（OPTIONS）的缓存时间，3600秒内无需重复发送预检请求，提升性能
+                .maxAge(3600);
     }
 }
