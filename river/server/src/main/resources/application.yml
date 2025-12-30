@@ -6,9 +6,9 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-
-  profiles:
-    active: prod
+  # 环境配置,注意：需要自己添加application-dev.yml和application-prod.yml文件
+  # profiles:
+  #   active: dev
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -21,8 +21,8 @@ spring:
     redis:
       host: localhost
       port: 6379
-
-#Sa-Token 配置 (文档: https://sa-token.cc)
+#==============================Sa-Token 配置======================================
+# (文档: https://sa-token.cc)
 sa-token:
   # token 名称（同时也是 cookie 名称）
   token-name: Authorization
@@ -49,7 +49,7 @@ mybatis-plus:
     cache-enabled: false
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-#knife4j配置
+#==============================knife4j配置=======================================
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -73,17 +73,20 @@ springdoc:
       packages-to-scan: com.river.controller
 
 
-#邮件配置
+#==============================邮件配置=======================================
 mail:
   smtp:
     host: # 请填写你的SMTP服务器地址
     port: # 请填写你的SMTP服务器端口
     email: # 请填写你的SMTP服务器邮箱
     password: # 请填写你的SMTP服务器密码
-#验证码配置
+#==============================验证码配置=======================================
 captcha:
+  # 验证码图片获取方式 local: 本地，remote: 远程
   place: remote
+  # 本地验证码图片保存路径
   local-path: D:/river-files/captcha/
+  # 远程验证码图片获取地址
   remote-path: https://v2.api-m.com/api/wallpaper?return=302
   allow-deviation: 5
   expire: 60
@@ -92,7 +95,7 @@ captcha:
   block-height: 55
   block-width: 65
   block-radius: 9
-#随机头像配置
+#==============================随机头像配置=======================================
 random-avatar:
   avatar-list:
     - https://api.dicebear.com/9.x/pixel-art/svg?seed=Raccoon
@@ -104,13 +107,15 @@ random-avatar:
     - https://api.dicebear.com/9.x/pixel-art/svg?seed=Cat
 
 #==============================豆包推理AI配置=======================================
+#如果需要ai推理，自行到https://console.volcengine.com/ 开通，目前免费
 ai:
   # API Key
   apiKey:
   baseUrl:
   # 推理接入点ID
   model:
-#第三方登录配置信息
+#==============================第三方登录配置信息=======================================
+#请自行百度如何申请id和secret，此处可以不配置，可以在后台中配置
 qq:
   app-id:
   app-secret:
@@ -130,40 +135,43 @@ github:
   app-secret:
   redirect-url:
 
-# 支付宝沙盒配置
+#==============================支付宝沙盒配置=======================================
+# 访问支付宝沙盒平台https://opendocs.alipay.com/common/02kkv7?pathHash=9a45a6d6 申请
 alipay:
   app-id:
   private-key:
   alipay-public-key:
-  #notify-url的地址必须为外网可以访问的地址
-  #  notify-url: http://29ffe1a1.r19.cpolar.top/pay/notify
+  #notify-url的地址必须为外网可以访问的地址，目前前端会轮询，可以不设置
+  # notify-url: 
   #支付宝前端回跳地址（支付完成后展示页面）
-  return-url:
+  return-url: http://localhost:3001/payClose
   charset: utf-8
   sign-type: RSA2
   #支付宝网关
   gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
   format: json
 #==============================聚合登录配置信息===================================
+#访问https://www.apihz.cn/ 注册账号，获取id和key
 juhe:
   id:
   key:
-  login-url:
-  check-login-url:
-  return-url:
+  login-url: https://cn.apihz.cn/api/user/jhdl.php
+  check-login-url: https://cn.apihz.cn/api/user/jhdlq.php
+  return-url: http://localhost:8080/api/juhe/checkLogin/
 #前端访问地址
 front:
-  url:
+  url: http://localhost:3001/
 
-#快递配置
+#==============================顺丰快递配置=======================================
+#访问顺丰开放平台https://open.sf-express.com/ 申请顾客编码和校验码
 sf-express:
 # 顾客编码
   partnerId:
 # 校验码
   checkWord:
 #  接口地址
-  url:
+  url: https://sfapi-sbox.sf-express.com/std/service
 #  下单接口服务代码
-  createOrderServiceCode:
+  createOrderServiceCode: EXP_RECE_CREATE_ORDER
 #  路由查询接口服务代码
-  searchRoutesServiceCode:
+  searchRoutesServiceCode: EXP_RECE_SEARCH_ROUTES
