@@ -134,15 +134,18 @@ public class JuHeServiceImpl implements JuHeService {
             return;
         }
         redisUtil.delete(userUid);
-        SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, juHeCheckLoginResponse.getSocial_uid()));
+        // 获取用户ip信息
+        String ipAddress = IpUtil.getIp();
+        String ipSource = IpUtil.getIp2region(ipAddress);
+        SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, juHeCheckLoginResponse.getOpenid()));
         if (ObjectUtils.isEmpty(user)) {
             user = SysUser.builder()
-                    .username(juHeCheckLoginResponse.getSocial_uid())
+                    .username(juHeCheckLoginResponse.getOpenid())
                     .password(UUID.randomUUID().toString())
                     .loginType(juHeCheckLoginResponse.getType())
                     .lastLoginTime(LocalDateTime.now())
-                    .ipLocation(juHeCheckLoginResponse.getLocation())
-                    .ip(juHeCheckLoginResponse.getIp())
+                    .ipLocation(ipAddress)
+                    .ip(ipSource)
                     .status(Constants.YES)
                     .nickname(juHeCheckLoginResponse.getNickname())
                     .avatar(juHeCheckLoginResponse.getFaceimg())
@@ -156,8 +159,8 @@ public class JuHeServiceImpl implements JuHeService {
             insertRole(user);
         }else {
             user.setLastLoginTime(LocalDateTime.now());
-            user.setIpLocation(juHeCheckLoginResponse.getLocation());
-            user.setIp(juHeCheckLoginResponse.getIp());
+            user.setIpLocation(ipAddress);
+            user.setIp(ipSource);
             userMapper.updateById(user);
         }
 
