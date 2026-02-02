@@ -87,7 +87,7 @@ captcha:
   # 本地验证码图片保存路径
   local-path: D:/river-files/captcha/
   # 远程验证码图片获取地址
-  remote-path: https://v2.api-m.com/api/wallpaper?return=302
+  remote-path: https://v2.xxapi.cn/api/wallpaper?return=302
   allow-deviation: 5
   expire: 60
   canvas-width: 320
