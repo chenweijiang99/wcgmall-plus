@@ -7,8 +7,8 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
   # 环境配置,注意：需要自己添加application-dev.yml和application-prod.yml文件
-  # profiles:
-  #   active: dev
+  profiles:
+    active: dev
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8

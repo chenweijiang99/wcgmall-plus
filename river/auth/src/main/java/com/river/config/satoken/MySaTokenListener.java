@@ -10,6 +10,7 @@ import com.river.utils.IpUtil;
 import com.river.utils.RedisUtil;
 import com.river.utils.UserAgentUtil;
 import com.river.vo.user.OnlineUserVo;
+import eu.bitwalker.useragentutils.UserAgent;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -41,12 +42,12 @@ public class MySaTokenListener implements SaTokenListener {
         String ip = IpUtil.getIp();
         SysUser user = userMapper.selectById((Long) loginId);
         // 更新登录信息
-        String userAgent = request.getHeader("User-Agent");
+        UserAgent userAgent = IpUtil.getUserAgent(request);
         user.setLastLoginTime(LocalDateTime.now());
         user.setIp(ip);
         user.setIpLocation(IpUtil.getIp2region(ip));
-        user.setOs(UserAgentUtil.getOs(userAgent));
-        user.setBrowser(UserAgentUtil.getBrowser(userAgent));
+        user.setOs(userAgent.getOperatingSystem().getName());
+        user.setBrowser(userAgent.getBrowser().getName());
         userMapper.updateById(user);
 
         OnlineUserVo onlineUserVo = new OnlineUserVo();

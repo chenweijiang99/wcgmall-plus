@@ -23,6 +23,7 @@ import com.river.mapper.SysMenuMapper;
 import com.river.mapper.SysRoleMapper;
 import com.river.mapper.SysUserMapper;
 import com.river.service.AuthService;
+import com.river.service.SysLoginLogService;
 import com.river.service.SysSocialConfigService;
 import com.river.entity.SysSocialConfig;
 import com.river.utils.*;
@@ -68,6 +69,7 @@ public class AuthServiceImpl implements AuthService {
     private final WeiboConfigProperties weiboConfigProperties;
     private final FrontConfigProperties frontConfigProperties;
     private final SysSocialConfigService sysSocialConfigService;
+    private final SysLoginLogService sysLoginLogService;
 
 
     @Override
@@ -86,7 +88,19 @@ public class AuthServiceImpl implements AuthService {
         }
 
         //校验是否能够登录
-        validateLogin(loginDTO, user);
+        try {
+            validateLogin(loginDTO, user);
+        } catch (ServiceException e) {
+            // 记录登录失败日志
+            sysLoginLogService.recordLoginLog(
+                    user != null ? user.getId() : null,
+                    loginDTO.getUsername(),
+                    1,
+                    Constants.EMAIL,
+                    e.getMessage()
+            );
+            throw e;
+        }
 
         // 执行登录
         StpUtil.login(user.getId());
@@ -96,6 +110,16 @@ public class AuthServiceImpl implements AuthService {
         loginUserInfo.setToken(tokenValue);
 
         StpUtil.getSession().set(Constants.CURRENT_USER, loginUserInfo);
+
+        // 记录登录成功日志
+        sysLoginLogService.recordLoginLog(
+                user.getId(),
+                user.getUsername(),
+                0,
+                user.getLoginType() != null ? user.getLoginType() : Constants.EMAIL,
+                "登录成功"
+        );
+
         return loginUserInfo;
     }
 
@@ -230,6 +254,16 @@ public class AuthServiceImpl implements AuthService {
         }
 
         StpUtil.login(user.getId());
+
+        // 记录第三方登录成功日志
+        sysLoginLogService.recordLoginLog(
+                user.getId(),
+                user.getUsername(),
+                0,
+                source,
+                source + "登录成功"
+        );
+
         httpServletResponse.sendRedirect(frontConfigProperties.getUrl() + "?token=" + StpUtil.getTokenValue());
     }
 
