@@ -34,4 +34,20 @@ export function clearCacheApi() {
     url: '/monitor/cache',
     method: 'delete'
   })
-} 
+}
+
+// 获取缓存详情
+export function getCacheValueApi(key: string) {
+  return request({
+    url: `/monitor/cache/value/${key}`,
+    method: 'get'
+  })
+}
+
+// 删除单个缓存键
+export function deleteCacheKeyApi(key: string) {
+  return request({
+    url: `/monitor/cache/${key}`,
+    method: 'delete'
+  })
+}

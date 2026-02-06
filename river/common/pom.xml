@@ -84,10 +84,10 @@
             <artifactId>sa-token-redis-template</artifactId>
             <version>1.44.0</version>
         </dependency>
-        <!-- Sa-Token 整合 Fastjson -->
+        <!-- Sa-Token 整合 Jackson（使用 Jackson 替代 Fastjson） -->
         <dependency>
             <groupId>cn.dev33</groupId>
-            <artifactId>sa-token-fastjson</artifactId>
+            <artifactId>sa-token-jackson</artifactId>
             <version>1.44.0</version>
         </dependency>
         <!-- 提供 Redis 连接池 -->

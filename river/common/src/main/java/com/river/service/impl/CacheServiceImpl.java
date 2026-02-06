@@ -115,6 +115,38 @@ public class CacheServiceImpl implements CacheService {
         }
     }
 
+    @Override
+    public Object getCacheValue(String key) {
+        try {
+            // 尝试直接获取值
+            return redisTemplate.opsForValue().get(key);
+        } catch (Exception e) {
+            // 如果反序列化失败，尝试获取原始字节并转换为字符串
+            try {
+                byte[] rawValue = redisTemplate.execute((RedisCallback<byte[]>) connection ->
+                    connection.stringCommands().get(key.getBytes())
+                );
+                if (rawValue != null) {
+                    // 尝试转换为UTF-8字符串
+                    String strValue = new String(rawValue, "UTF-8");
+                    // 如果包含不可打印字符，返回提示信息
+                    if (strValue.chars().anyMatch(c -> c < 32 && c != 9 && c != 10 && c != 13)) {
+                        return "[二进制数据，无法直接显示。数据长度: " + rawValue.length + " 字节]";
+                    }
+                    return strValue;
+                }
+            } catch (Exception ex) {
+                return "[无法读取缓存内容: " + ex.getMessage() + "]";
+            }
+            return "[缓存值为空或无法解析]";
+        }
+    }
+
+    @Override
+    public void deleteKey(String key) {
+        redisTemplate.delete(key);
+    }
+
     private Long getKeySize(String key) {
         try {
             return redisTemplate.execute((RedisCallback<Long>) connection ->

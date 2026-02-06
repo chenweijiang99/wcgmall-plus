@@ -24,4 +24,14 @@ public interface CacheService {
      * 清空缓存
      */
     void clearCache();
+
+    /**
+     * 获取缓存详情
+     */
+    Object getCacheValue(String key);
+
+    /**
+     * 删除单个缓存键
+     */
+    void deleteKey(String key);
 } 

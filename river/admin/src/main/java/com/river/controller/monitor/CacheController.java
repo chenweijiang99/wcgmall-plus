@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +47,21 @@ public class CacheController {
     @SaCheckPermission("monitor:cache")
     public Result<Void> clearCache() {
         cacheService.clearCache();
+        return Result.success();
+    }
+
+    @Operation(summary = "获取缓存详情")
+    @GetMapping("/value/{key}")
+    public Result<Object> getCacheValue(@PathVariable String key) {
+        return Result.success(cacheService.getCacheValue(key));
+    }
+
+    @Operation(summary = "删除单个缓存键")
+    @DeleteMapping("/{key}")
+    @OperationLogger("删除缓存键")
+    @SaCheckPermission("monitor:cache")
+    public Result<Void> deleteKey(@PathVariable String key) {
+        cacheService.deleteKey(key);
         return Result.success();
     }
 }
