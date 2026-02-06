@@ -20,6 +20,7 @@ import com.river.mapper.SysDictMapper;
 import com.river.mapper.SysRoleMapper;
 import com.river.mapper.SysUserMapper;
 import com.river.service.JuHeService;
+import com.river.service.SysLoginLogService;
 import com.river.utils.IpUtil;
 import com.river.utils.RedisUtil;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,7 +48,7 @@ public class JuHeServiceImpl implements JuHeService {
     private final JuHeLoginConfigProperties juHeLoginConfigProperties;
     private final FrontConfigProperties frontProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
+    private final SysLoginLogService sysLoginLogService;
     private static final String LOGIN_EXPIRED_MESSAGE = "登录过期";
     private static final String LOGIN_FAILED_PREFIX = "登录失败，";
     private static final String REDIRECT_LOGIN_URL_FORMAT = "%slogin?code=400&message=%s";
@@ -165,6 +166,13 @@ public class JuHeServiceImpl implements JuHeService {
         }
 
         StpUtil.login(user.getId());
+        sysLoginLogService.recordLoginLog(
+                user.getId(),
+                user.getUsername(),
+                0,
+                user.getLoginType() != null ? user.getLoginType() : juHeCheckLoginResponse.getType(),
+                "登录成功"
+        );
         log.info("聚合登录验证成功，重定向到前端首页，token：{}", StpUtil.getTokenValue());
         httpServletResponse.sendRedirect(String.format(REDIRECT_HOME_URL_FORMAT, frontProperties.getUrl(), StpUtil.getTokenValue()));
     }
