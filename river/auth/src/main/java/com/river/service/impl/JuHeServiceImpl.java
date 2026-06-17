@@ -170,7 +170,7 @@ public class JuHeServiceImpl implements JuHeService {
                 user.getId(),
                 user.getUsername(),
                 0,
-                user.getLoginType() != null ? user.getLoginType() : juHeCheckLoginResponse.getType(),
+                user.getLoginType() != null ? user.getLoginType() : getLoginType(Integer.parseInt(juHeCheckLoginResponse.getType())),
                 "登录成功"
         );
         log.info("聚合登录验证成功，重定向到前端首页，token：{}", StpUtil.getTokenValue());
